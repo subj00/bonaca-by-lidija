@@ -1,0 +1,28 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import { getPath, navigationItems, type RouteKey } from '@/i18n/routes';
+
+interface Props {
+  locale: Locale;
+  currentRoute: RouteKey;
+}
+
+const { locale, currentRoute } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<nav class="navigation" aria-label={t('nav.label')}>
+  <ul class="navigation__list" role="list">
+    {navigationItems.map((routeKey) => (
+      <li>
+        <a
+          href={getPath(routeKey, locale)}
+          aria-current={routeKey === currentRoute ? 'page' : undefined}
+        >
+          {t(`nav.${routeKey}`)}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

@@ -1,0 +1,31 @@
+---
+import { languageNames, languageTags, locales, type Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import { getPath, type RouteKey } from '@/i18n/routes';
+
+interface Props {
+  locale: Locale;
+  currentRoute: RouteKey;
+}
+
+const { locale, currentRoute } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<nav class="language-switcher" aria-label={t('languageSwitcher.label')}>
+  <ul class="language-switcher__list" role="list">
+    {locales.map((item) => (
+      <li>
+        <a
+          href={getPath(currentRoute, item)}
+          hreflang={languageTags[item]}
+          lang={languageTags[item]}
+          aria-label={languageNames[item]}
+          aria-current={item === locale ? 'true' : undefined}
+        >
+          {item.toUpperCase()}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

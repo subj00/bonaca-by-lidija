@@ -1,0 +1,25 @@
+---
+import { site } from '@/config/site';
+import type { Locale } from '@/i18n/config';
+import { getPath, type RouteKey } from '@/i18n/routes';
+import LanguageSwitcher from '@/components/navigation/LanguageSwitcher.astro';
+import MobileMenu from '@/components/navigation/MobileMenu.astro';
+import Navigation from '@/components/navigation/Navigation.astro';
+
+interface Props {
+  locale: Locale;
+  currentRoute: RouteKey;
+}
+
+const { locale, currentRoute } = Astro.props;
+---
+
+<header class="site-header">
+  <!-- Replaced with the logo once brand assets are added. -->
+  <a class="site-header__brand" href={getPath('home', locale)}>{site.name}</a>
+
+  <MobileMenu locale={locale}>
+    <Navigation locale={locale} currentRoute={currentRoute} />
+    <LanguageSwitcher locale={locale} currentRoute={currentRoute} />
+  </MobileMenu>
+</header>

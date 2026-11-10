@@ -1,0 +1,8 @@
+/*
+ * Global base styles.
+ * Keep this file minimal; component styles live in their Astro components.
+ */
+
+html {
+  scroll-behavior: smooth;
+}

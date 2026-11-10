@@ -1,0 +1,25 @@
+/*
+ * Design tokens — single source of truth for design values.
+ * Components consume tokens via var(); never hardcode raw values.
+ */
+
+:root {
+  /* Bonaca Brand Colors */
+  --color-dusty-rose: #CC8B86;
+  --color-linen: #F9EAE1;
+  --color-smoky-rose: #7D4F50;
+  --color-pale-oak: #D1BE9C;
+  --color-taupe: #AA998F;
+
+  /* Semantic colors — to be defined (must reference brand colors above) */
+
+  /* Typography — to be defined */
+
+  /* Spacing — to be defined */
+}
+
+/*
+ * Breakpoints — to be defined.
+ * Custom properties cannot be used inside media queries, so breakpoints are
+ * documented here and used as literal mobile-first `min-width` values.
+ */

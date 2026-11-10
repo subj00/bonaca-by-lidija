@@ -1,0 +1,27 @@
+---
+import type { Locale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const panelId = 'site-menu';
+---
+
+<!--
+  Wraps the navigation and language switcher once, so their markup is never duplicated.
+  Desktop: the panel is shown inline and the toggle is hidden.
+  Mobile: the toggle opens the panel (hamburger menu).
+  Toggle behavior and responsive styles are implemented later.
+-->
+<div class="mobile-menu">
+  <button class="mobile-menu__toggle" type="button" aria-controls={panelId}>
+    {t('menu.toggle')}
+  </button>
+  <div class="mobile-menu__panel" id={panelId}>
+    <slot />
+  </div>
+</div>

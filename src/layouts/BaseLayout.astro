@@ -1,0 +1,71 @@
+---
+import '@/styles/tokens.css';
+import '@/styles/reset.css';
+import '@/styles/global.css';
+
+import type { ImageMetadata } from 'astro';
+import Footer from '@/components/layout/Footer.astro';
+import Header from '@/components/layout/Header.astro';
+import SeoHead from '@/components/seo/SeoHead.astro';
+import { site } from '@/config/site';
+import { getLocale, languageTags } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import type { RouteKey } from '@/i18n/routes';
+
+interface Props {
+  routeKey: RouteKey;
+  /** Overrides the default page title (the navigation label). */
+  title?: string;
+  description?: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  noindex?: boolean;
+}
+
+const { routeKey, title, description, image, imageAlt, noindex } = Astro.props;
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+const pageTitle = title ?? (routeKey === 'home' ? undefined : t(`nav.${routeKey}`));
+const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name}` : site.name;
+---
+
+<!doctype html>
+<html lang={languageTags[locale]}>
+  <head>
+    <SeoHead
+      title={documentTitle}
+      locale={locale}
+      routeKey={routeKey}
+      description={description}
+      image={image}
+      imageAlt={imageAlt}
+      noindex={noindex}
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{t('skipLink')}</a>
+
+    <Header locale={locale} currentRoute={routeKey} />
+
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: translateY(-100%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+</style>
