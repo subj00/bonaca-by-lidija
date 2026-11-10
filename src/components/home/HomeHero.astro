@@ -26,40 +26,36 @@ const t = useTranslations(locale);
 
 <style>
   /*
-   * Mobile: the composition is derived from the real header height, so the
-   * photograph starts just below the header and the large logo overlaps its
-   * faded lower edge:
+   * Mobile layout, derived from the real header height and the initial
+   * (small) viewport height:
    *   photo top    = header height + small gap
    *   photo height = remaining screen height, capped so faces are never cropped
-   *   logo top     = photo bottom − overlap + extra drop (breathing room)
-   *   hero height  = photo + the part of the logo below it + bottom spacing
+   *   logo         = anchored near the bottom of the first screen, but never
+   *                  above the end of the photograph's fade
+   *   hero height  = at least one full screen (100svh)
    */
   .hero {
     --photo-top: calc(var(--header-height-mobile) + var(--space-sm));
     --title-width: min(74vw, 24rem);
     --title-height: calc(var(--title-width) * var(--logo-aspect));
-    --title-overlap: 0.6; /* share of the logo height that sits over the photo */
-    --title-drop: 3.25rem; /* extra space between the photograph and the logo */
-    --title-below: calc(
-      var(--title-height) * (1 - var(--title-overlap)) + var(--title-drop)
-    );
-    --bottom-space: 2.5rem;
     /*
-     * Space reserved for the logo when sizing the photograph. Kept independent of
-     * --title-drop so adjusting the logo position never resizes the photograph.
+     * Space reserved below the photograph when sizing it. Kept independent of
+     * the logo position, so moving the logo never resizes the photograph.
      */
-    --photo-reserve: calc(var(--title-height) * (1 - var(--title-overlap)) + 1.5rem);
-    --photo-height: clamp(
-      18rem,
-      100svh - var(--photo-top) - var(--photo-reserve) - var(--bottom-space),
-      125vw
+    --photo-reserve: calc(var(--title-height) * 0.4 + 4rem);
+    --photo-height: clamp(18rem, 100svh - var(--photo-top) - var(--photo-reserve), 125vw);
+    /* Where the photograph's fade ends (matches the 98% stop of its mask). */
+    --photo-fade-end: calc(var(--photo-top) + var(--photo-height) * 0.98);
+    --title-bottom-space: 2rem;
+    --title-top: max(
+      100svh - var(--title-bottom-space) - var(--title-height),
+      var(--photo-fade-end) + var(--space-xs)
     );
 
     position: relative;
     isolation: isolate;
-    height: calc(
-      var(--photo-top) + var(--photo-height) + var(--title-below) + var(--bottom-space)
-    );
+    min-height: 100svh;
+    height: calc(var(--title-top) + var(--title-height) + var(--space-lg));
     overflow: hidden;
   }
 
@@ -82,10 +78,7 @@ const t = useTranslations(locale);
 
   .hero__title {
     position: absolute;
-    inset-block-start: calc(
-      var(--photo-top) + var(--photo-height) - var(--title-height) * var(--title-overlap) +
-        var(--title-drop)
-    );
+    inset-block-start: var(--title-top);
     inset-inline-start: 50%;
     width: var(--title-width);
     translate: -50% 0;
