@@ -58,6 +58,12 @@
   /* Motion */
   --duration-fast: 200ms;
   --duration-base: 300ms;
+  --duration-menu-open: 450ms;
+  --duration-menu-close: 400ms;
+  --duration-menu-icon: 350ms;
+
+  /* Mobile menu: Linen overlay strength over the studio photograph. */
+  --menu-overlay-strength: 88%;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 

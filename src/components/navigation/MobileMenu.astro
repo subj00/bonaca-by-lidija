@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import studioPhoto from '@/assets/images/home/studio.jpeg';
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 
@@ -36,6 +38,23 @@ const panelId = 'site-menu';
   </button>
 
   <div class="mobile-menu__panel" id={panelId} data-menu-panel>
+    <!--
+      Decorative studio photograph behind the links (mobile only), muted by a
+      Linen overlay. Small responsive WebP versions are generated from the JPEG;
+      `display: none` on desktop means it is never downloaded there.
+    -->
+    <Image
+      class="mobile-menu__backdrop"
+      src={studioPhoto}
+      alt=""
+      width={960}
+      widths={[480, 720, 960]}
+      sizes="100vw"
+      loading="lazy"
+      decoding="async"
+      fetchpriority="low"
+    />
+
     <div class="mobile-menu__content">
       <slot />
     </div>
@@ -126,11 +145,9 @@ const panelId = 'site-menu';
 <style>
   /*
    * Sits in the header row; the negative margin keeps the 44px tap target
-   * without making the row taller. Stacked above the open panel.
+   * without making the row taller.
    */
   .mobile-menu__toggle {
-    position: relative;
-    z-index: 2;
     display: grid;
     place-items: center;
     width: 2.75rem;
@@ -160,8 +177,8 @@ const panelId = 'site-menu';
     height: var(--line-weight);
     background-color: currentColor;
     transition:
-      translate var(--duration-base) var(--ease-out),
-      rotate var(--duration-base) var(--ease-out),
+      translate var(--duration-menu-icon) var(--ease-out),
+      rotate var(--duration-menu-icon) var(--ease-out),
       opacity var(--duration-fast) var(--ease-out);
   }
 
@@ -191,34 +208,75 @@ const panelId = 'site-menu';
     rotate: -45deg;
   }
 
+  /*
+   * Full-screen panel painted *behind* the header's own content: the header is
+   * the stacking context (z-index 10 over the page), and z-index −1 places the
+   * panel under its logo and toggle while still above the page. The header
+   * therefore stays visible and stationary; only the panel animates.
+   * The top padding keeps the links below the header row.
+   */
   .mobile-menu__panel {
     position: fixed;
-    z-index: 1;
+    z-index: -1;
     inset: 0;
     display: grid;
     place-items: center;
-    padding: var(--space-2xl) var(--frame-padding-inline);
+    padding: calc(var(--header-height-mobile) + var(--space-lg)) var(--frame-padding-inline)
+      var(--space-2xl);
     background-color: var(--color-background);
     overflow-y: auto;
   }
 
+  /*
+   * Studio photograph, cropped towards the illuminated mirror and makeup
+   * stations, lightly desaturated and muted by a Linen overlay.
+   */
+  .mobile-menu__backdrop {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: cover;
+    object-position: 70% 50%;
+    filter: saturate(0.7);
+  }
+
+  .mobile-menu__panel::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-linen) var(--menu-overlay-strength),
+      transparent
+    );
+  }
+
   .mobile-menu__content {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--space-2xl);
   }
 
-  /* Closed by default; opens with a soft fade and a small slide down. */
+  /*
+   * Closed by default; opens with a soft fade and a small slide down.
+   * Opening and closing use their own durations (set on the target state).
+   */
   @media (scripting: enabled) {
     .mobile-menu__panel {
       visibility: hidden;
       opacity: 0;
       translate: 0 -0.75rem;
       transition:
-        opacity var(--duration-base) var(--ease-out),
-        translate var(--duration-base) var(--ease-out),
-        visibility 0s linear var(--duration-base);
+        opacity var(--duration-menu-close) var(--ease-out),
+        translate var(--duration-menu-close) var(--ease-out),
+        visibility 0s linear var(--duration-menu-close);
     }
 
     [data-open='true'] .mobile-menu__panel {
@@ -226,9 +284,17 @@ const panelId = 'site-menu';
       opacity: 1;
       translate: 0 0;
       transition:
-        opacity var(--duration-base) var(--ease-out),
-        translate var(--duration-base) var(--ease-out),
+        opacity var(--duration-menu-open) var(--ease-out),
+        translate var(--duration-menu-open) var(--ease-out),
         visibility 0s;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu__panel,
+    [data-open='true'] .mobile-menu__panel,
+    .mobile-menu__line {
+      transition: none;
     }
   }
 
@@ -247,6 +313,11 @@ const panelId = 'site-menu';
       padding-block: var(--space-xl) 0;
       background: none;
     }
+
+    .mobile-menu__backdrop,
+    .mobile-menu__panel::after {
+      display: none;
+    }
   }
 
   /* Prevent background scrolling while the mobile menu is open. */
@@ -257,7 +328,9 @@ const panelId = 'site-menu';
   }
 
   @media (min-width: 64rem) {
-    .mobile-menu__toggle {
+    .mobile-menu__toggle,
+    .mobile-menu__backdrop,
+    .mobile-menu__panel::after {
       display: none;
     }
 
