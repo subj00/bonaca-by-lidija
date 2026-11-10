@@ -1,32 +1,77 @@
 ---
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
-import { getPath, navigationItems, type RouteKey } from '@/i18n/routes';
+import { getSectionHref, navigationItems, sections } from '@/i18n/routes';
 
 interface Props {
   locale: Locale;
-  currentRoute: RouteKey;
 }
 
-const { locale, currentRoute } = Astro.props;
+const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
 
+<!--
+  In-page navigation: every link is a native anchor to a section of the page
+  (smooth scrolling and the URL hash are handled by the browser).
+  The script below marks the link of the section currently in view.
+-->
 <nav class="navigation" aria-label={t('nav.label')}>
   <ul class="navigation__list" role="list">
-    {navigationItems.map((routeKey) => (
+    {navigationItems.map((sectionKey) => (
       <li>
         <a
           class="navigation__link"
-          href={getPath(routeKey, locale)}
-          aria-current={routeKey === currentRoute ? 'page' : undefined}
+          href={getSectionHref(sectionKey, locale)}
+          aria-current={sectionKey === 'home' ? 'true' : undefined}
+          data-nav-section={sections[sectionKey]}
         >
-          {t(`nav.${routeKey}`)}
+          {t(`nav.${sectionKey}`)}
         </a>
       </li>
     ))}
   </ul>
 </nav>
+
+<script>
+  /*
+   * Active link = the section crossing a horizontal line at 40% of the viewport.
+   * When the end of the page is visible, the last section is active (it may be
+   * too short to ever reach that line). IntersectionObserver only, no scroll events.
+   */
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav-section]')];
+  const pageSections = [...document.querySelectorAll<HTMLElement>('[data-section]')];
+  const pageEnd = document.querySelector('[data-page-end]');
+
+  let sectionInView = pageSections[0]?.id;
+  let atPageEnd = false;
+
+  const render = () => {
+    const activeId = atPageEnd ? pageSections.at(-1)?.id : sectionInView;
+    links.forEach((link) => {
+      if (link.dataset.navSection === activeId) link.setAttribute('aria-current', 'true');
+      else link.removeAttribute('aria-current');
+    });
+  };
+
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) sectionInView = entry.target.id;
+      });
+      render();
+    },
+    { rootMargin: '-40% 0px -59% 0px' },
+  );
+  pageSections.forEach((section) => sectionObserver.observe(section));
+
+  if (pageEnd) {
+    new IntersectionObserver(([entry]) => {
+      atPageEnd = entry.isIntersecting;
+      render();
+    }).observe(pageEnd);
+  }
+</script>
 
 <style>
   .navigation__list {
@@ -51,7 +96,7 @@ const t = useTranslations(locale);
   }
 
   .navigation__link:hover,
-  .navigation__link[aria-current='page'] {
+  .navigation__link[aria-current='true'] {
     text-decoration-color: currentColor;
   }
 

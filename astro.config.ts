@@ -24,6 +24,26 @@ export default defineConfig({
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['sans-serif'],
     },
+    {
+      // Modern, elegant display face for page headings.
+      provider: fontProviders.fontsource(),
+      name: 'Tenor Sans',
+      cssVariable: '--font-tenor',
+      weights: ['400'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['sans-serif'],
+    },
+    {
+      // Clean, readable upright serif for longer reading text (no italics loaded).
+      provider: fontProviders.fontsource(),
+      name: 'Source Serif 4',
+      cssVariable: '--font-source-serif',
+      weights: ['400'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['serif'],
+    },
   ],
   i18n: {
     defaultLocale,

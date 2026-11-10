@@ -1,22 +1,28 @@
 import { defaultLocale, languageTags, locales, type Locale } from './config';
 
 /**
- * Localized paths for every page.
- * Serbian uses unprefixed routes; English lives under `/en` with English slugs.
- * Every page file in `src/pages` must have a matching entry here.
+ * The website is a single page per language. Serbian lives at `/`, English at `/en`.
+ * Every content section is part of that page and is reached through its anchor.
  */
 export const routes = {
   home: { sr: '/', en: '/en' },
-  about: { sr: '/o-nama', en: '/en/about' },
-  services: { sr: '/usluge', en: '/en/services' },
-  education: { sr: '/edukacije', en: '/en/education' },
-  reviews: { sr: '/recenzije', en: '/en/reviews' },
-  contact: { sr: '/kontakt', en: '/en/contact' },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type RouteKey = keyof typeof routes;
 
-/** Pages shown in the main navigation, in display order. */
+/** Anchor ids of the page sections (identical in every language). */
+export const sections = {
+  home: 'pocetna',
+  about: 'o-nama',
+  services: 'usluge',
+  education: 'edukacije',
+  reviews: 'recenzije',
+  contact: 'kontakt',
+} as const;
+
+export type SectionKey = keyof typeof sections;
+
+/** Sections shown in the main navigation, in page order. */
 export const navigationItems = [
   'home',
   'about',
@@ -24,10 +30,15 @@ export const navigationItems = [
   'education',
   'reviews',
   'contact',
-] as const satisfies readonly RouteKey[];
+] as const satisfies readonly SectionKey[];
 
 export function getPath(routeKey: RouteKey, locale: Locale): string {
   return routes[routeKey][locale];
+}
+
+/** Link to a section of the page, e.g. `/#recenzije` or `/en#recenzije`. */
+export function getSectionHref(section: SectionKey, locale: Locale): string {
+  return `${getPath('home', locale)}#${sections[section]}`;
 }
 
 function normalizePath(path: string): string {

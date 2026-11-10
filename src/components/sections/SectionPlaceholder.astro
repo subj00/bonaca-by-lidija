@@ -1,0 +1,34 @@
+---
+import SectionTitle from '@/components/ui/SectionTitle.astro';
+
+interface Props {
+  /** Anchor id of the section (from `sections` in `@/i18n/routes`). */
+  id: string;
+  /** Section name, taken from the navigation label. */
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<!--
+  Temporary structural section for content that has not been designed yet.
+  It only provides the navigation target and the section heading.
+-->
+<section class="section-placeholder" id={id} aria-labelledby={`${id}-title`} data-section>
+  <SectionTitle id={`${id}-title`}>{title}</SectionTitle>
+</section>
+
+<style>
+  .section-placeholder {
+    /* Temporary height so each anchor is a distinct scroll target. */
+    min-height: 50svh;
+    padding: var(--space-lg) var(--frame-padding-inline) var(--space-2xl);
+  }
+
+  @media (min-width: 64rem) {
+    .section-placeholder {
+      padding-block-start: var(--space-md);
+    }
+  }
+</style>

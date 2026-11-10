@@ -1,0 +1,293 @@
+---
+import ArrowIcon from '@/assets/icons/arrow.svg';
+import ReviewCard from '@/components/reviews/ReviewCard.astro';
+import SectionTitle from '@/components/ui/SectionTitle.astro';
+import { reviews, reviewsLanguage } from '@/data/reviews';
+import { getLocale, languageTags } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import { sections } from '@/i18n/routes';
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+// Reviews are written in Serbian; mark their language on other locales.
+const reviewLang = languageTags[locale] === reviewsLanguage ? undefined : reviewsLanguage;
+
+// Alternate by the review's original index: A, B, A, B (same order on every layout).
+const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
+---
+
+<section class="reviews" id={sections.reviews} aria-labelledby="reviews-title" data-section>
+  <div class="reviews__intro">
+    <SectionTitle id="reviews-title">{t('reviews.title')}</SectionTitle>
+  </div>
+
+  <!--
+    One list for every layout: a two-column grid from 48rem, and a horizontal
+    swipe slider (scroll-snap) with arrows and dots below that.
+  -->
+  <div class="reviews__carousel" data-reviews>
+    <ul class="reviews__track" role="list" aria-label={t('reviews.listLabel')} data-reviews-track>
+      {
+        reviews.map((review, index) => (
+          <li
+            class="reviews__slide"
+            id={`review-${index + 1}`}
+            aria-label={`${index + 1} ${t('reviews.of')} ${reviews.length}`}
+            data-reviews-slide
+          >
+            <ReviewCard {...review} lang={reviewLang} tone={toneFor(index)} />
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="reviews__controls">
+      <button
+        class="reviews__arrow reviews__arrow--prev"
+        type="button"
+        aria-label={t('reviews.previous')}
+        data-reviews-prev
+      >
+        <ArrowIcon class="reviews__arrow-icon" aria-hidden="true" />
+      </button>
+
+      <div class="reviews__dots">
+        {
+          reviews.map((_, index) => (
+            <button
+              class="reviews__dot"
+              type="button"
+              aria-label={`${t('reviews.goTo')} ${index + 1}`}
+              aria-controls={`review-${index + 1}`}
+              aria-current={index === 0 ? 'true' : undefined}
+              data-reviews-dot
+            />
+          ))
+        }
+      </div>
+
+      <button
+        class="reviews__arrow reviews__arrow--next"
+        type="button"
+        aria-label={t('reviews.next')}
+        data-reviews-next
+      >
+        <ArrowIcon class="reviews__arrow-icon" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  /*
+   * Mobile review slider. Swiping is native (CSS scroll-snap); this script only
+   * connects the arrows and dots to the scroll position.
+   */
+  function initReviewSlider() {
+    const root = document.querySelector<HTMLElement>('[data-reviews]');
+    const track = root?.querySelector<HTMLElement>('[data-reviews-track]');
+    const prev = root?.querySelector<HTMLButtonElement>('[data-reviews-prev]');
+    const next = root?.querySelector<HTMLButtonElement>('[data-reviews-next]');
+    if (!root || !track || !prev || !next) return;
+
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-reviews-slide]')];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('[data-reviews-dot]')];
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let current = 0;
+    let frame = 0;
+
+    const offsetOf = (index: number) => slides[index].offsetLeft - slides[0].offsetLeft;
+
+    const nearestIndex = () => {
+      let nearest = 0;
+      slides.forEach((_, index) => {
+        if (Math.abs(offsetOf(index) - track.scrollLeft) < Math.abs(offsetOf(nearest) - track.scrollLeft)) {
+          nearest = index;
+        }
+      });
+      return nearest;
+    };
+
+    const render = (index: number) => {
+      current = index;
+      dots.forEach((dot, dotIndex) => {
+        if (dotIndex === index) dot.setAttribute('aria-current', 'true');
+        else dot.removeAttribute('aria-current');
+      });
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+    };
+
+    const goTo = (index: number) => {
+      const target = Math.max(0, Math.min(slides.length - 1, index));
+      track.scrollTo({
+        left: offsetOf(target),
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      });
+      render(target);
+    };
+
+    prev.addEventListener('click', () => goTo(current - 1));
+    next.addEventListener('click', () => goTo(current + 1));
+    dots.forEach((dot, index) => dot.addEventListener('click', () => goTo(index)));
+
+    // Keep the controls in sync with swipes.
+    track.addEventListener(
+      'scroll',
+      () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => render(nearestIndex()));
+      },
+      { passive: true },
+    );
+
+    // Arrow keys move between reviews while a slider control has focus.
+    root.addEventListener('keydown', (event) => {
+      if (!(event.target instanceof HTMLButtonElement)) return;
+      if (event.key === 'ArrowRight') goTo(current + 1);
+      if (event.key === 'ArrowLeft') goTo(current - 1);
+    });
+
+    render(0);
+  }
+
+  initReviewSlider();
+</script>
+
+<style>
+  .reviews {
+    padding: var(--space-lg) var(--frame-padding-inline) var(--space-2xl);
+    color: var(--color-ink);
+  }
+
+  .reviews__intro {
+    margin-block-end: var(--space-xl);
+  }
+
+  /*
+   * Mobile slider: one review at a time, native swipe with snapping.
+   * All slides stretch to the height of the longest review, so the track keeps
+   * one stable height and the controls below it never move between slides.
+   */
+  .reviews__track {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-md);
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .reviews__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reviews__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  .reviews__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-start: var(--space-lg);
+  }
+
+  .reviews__arrow {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .reviews__arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .reviews__arrow-icon {
+    width: 1.5rem;
+  }
+
+  .reviews__arrow--prev .reviews__arrow-icon {
+    rotate: 180deg;
+  }
+
+  .reviews__dots {
+    display: flex;
+    gap: var(--space-2xs);
+  }
+
+  /* 28px tap target around a small dot. */
+  .reviews__dot {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .reviews__dot::before {
+    content: '';
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--color-taupe) 55%, transparent);
+    transition:
+      background-color var(--duration-base) var(--ease-out),
+      scale var(--duration-base) var(--ease-out);
+  }
+
+  .reviews__dot[aria-current='true']::before {
+    background-color: var(--color-smoky-rose);
+    scale: 1.15;
+  }
+
+  /* Without JavaScript the reviews still swipe; the controls are hidden. */
+  @media (scripting: none) {
+    .reviews__controls {
+      display: none;
+    }
+  }
+
+  /* Tablet and desktop: all four reviews in a balanced two-column grid. */
+  @media (min-width: 48rem) {
+    .reviews__track {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(1.25rem, 2.5vw, 2.25rem);
+      max-width: 72rem;
+      margin-inline: auto;
+      overflow: visible;
+      scroll-snap-type: none;
+    }
+
+    .reviews__controls {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .reviews {
+      padding-block: var(--space-md) clamp(4rem, 7vw, 6rem);
+    }
+
+    .reviews__intro {
+      margin-block-end: clamp(2.5rem, 4vw, 3.5rem);
+    }
+  }
+</style>

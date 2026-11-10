@@ -14,9 +14,16 @@
   /* Semantic colors (derived from the brand palette; black matches the logo) */
   --color-text: #000000;
   --color-background: var(--color-linen);
+  --color-ink: color-mix(in srgb, var(--color-smoky-rose) 30%, var(--color-text)); /* very dark brown */
+  --color-accent: var(--color-dusty-rose);
+  --color-card: color-mix(in srgb, var(--color-dusty-rose) 7%, var(--color-linen));
+  --color-card-alt: color-mix(in srgb, var(--color-dusty-rose) 15%, var(--color-linen));
+  --color-shadow-soft: color-mix(in srgb, var(--color-smoky-rose) 8%, transparent);
 
   /* Typography */
   --font-body: var(--font-montserrat);
+  --font-display: var(--font-tenor);
+  --font-reading: var(--font-source-serif);
   --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
@@ -37,6 +44,7 @@
   --page-gutter: clamp(0.75rem, 2.2vw, 2rem);
   --frame-padding-inline: clamp(1rem, 3.5vw, 3.25rem);
   --frame-padding-block: clamp(1rem, 3vw, 2.25rem);
+  --radius-card: 0.75rem;
 
   /* Logo artwork height / width (1032 / 3662), used to derive heights from widths. */
   --logo-aspect: 0.2818;
@@ -53,6 +61,14 @@
   --header-logo-width-mobile: clamp(7rem, 32vw, 8.5rem);
   --header-height-mobile: calc(
     var(--frame-padding-block) * 2 + var(--header-logo-width-mobile) * var(--logo-aspect)
+  );
+
+  /* Desktop header (≥ 64rem): logo, centred navigation and language switcher. */
+  --header-logo-width-desktop: clamp(8.5rem, 11.7vw, 12.25rem);
+  --header-padding-block-desktop: clamp(1.25rem, 2.2vw, 2rem);
+  --header-height-desktop: calc(
+    var(--header-padding-block-desktop) * 2 +
+      var(--header-logo-width-desktop) * var(--logo-aspect)
   );
 
   /* Motion */

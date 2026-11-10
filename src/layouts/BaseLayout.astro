@@ -5,7 +5,6 @@ import '@/styles/global.css';
 
 import type { ImageMetadata } from 'astro';
 import { Font } from 'astro:assets';
-import { ClientRouter, fade } from 'astro:transitions';
 import Footer from '@/components/layout/Footer.astro';
 import Header from '@/components/layout/Header.astro';
 import SeoHead from '@/components/seo/SeoHead.astro';
@@ -22,12 +21,9 @@ interface Props {
   image?: ImageMetadata;
   imageAlt?: string;
   noindex?: boolean;
-  /** Places the header over the page's first section (e.g. the Home hero). */
-  headerOverlay?: boolean;
 }
 
-const { routeKey, title, description, image, imageAlt, noindex, headerOverlay = false } =
-  Astro.props;
+const { routeKey, title, description, image, imageAlt, noindex } = Astro.props;
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -38,11 +34,10 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
 
 <!doctype html>
 <!--
-  Client-side navigation (SPA-like): internal links are fetched and swapped
-  without a full reload, with a subtle cross-fade of the whole page.
-  Without JavaScript, links work as normal page loads.
+  One-page website: every section lives on this page and the navigation scrolls
+  to it through native anchor links (smooth scrolling is set in global.css).
 -->
-<html lang={languageTags[locale]} transition:animate={fade({ duration: '250ms' })}>
+<html lang={languageTags[locale]}>
   <head>
     <SeoHead
       title={documentTitle}
@@ -54,18 +49,25 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
       noindex={noindex}
     />
     <Font cssVariable="--font-montserrat" preload={[{ subset: 'latin', weight: '400' }]} />
-    <ClientRouter />
+    <!-- Declared on every page; font files download only where they are used. -->
+    <Font cssVariable="--font-tenor" />
+    <Font cssVariable="--font-source-serif" />
   </head>
   <body>
+    <!-- Markers observed by the header (background) and navigation (active link). -->
+    <div class="page-marker page-marker--top" data-page-top aria-hidden="true"></div>
+
     <a class="skip-link" href="#main-content">{t('skipLink')}</a>
 
-    <Header locale={locale} currentRoute={routeKey} overlay={headerOverlay} />
+    <Header locale={locale} currentRoute={routeKey} />
 
     <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
     <Footer />
+
+    <div class="page-marker" data-page-end aria-hidden="true"></div>
   </body>
 </html>
 
@@ -87,5 +89,18 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
 
   main:focus {
     outline: none;
+  }
+
+  .page-marker {
+    height: 1px;
+  }
+
+  /* Out of the flow, so the hero still starts at the very top. */
+  .page-marker--top {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 0.5rem;
+    pointer-events: none;
   }
 </style>

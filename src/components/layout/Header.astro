@@ -1,6 +1,6 @@
 ---
 import type { Locale } from '@/i18n/config';
-import { getPath, type RouteKey } from '@/i18n/routes';
+import { getSectionHref, type RouteKey } from '@/i18n/routes';
 import LanguageSwitcher from '@/components/navigation/LanguageSwitcher.astro';
 import MobileMenu from '@/components/navigation/MobileMenu.astro';
 import Navigation from '@/components/navigation/Navigation.astro';
@@ -9,41 +9,55 @@ import Logo from '@/components/ui/Logo.astro';
 interface Props {
   locale: Locale;
   currentRoute: RouteKey;
-  /** Positions the header over the first page section instead of in the flow. */
-  overlay?: boolean;
 }
 
-const { locale, currentRoute, overlay = false } = Astro.props;
+const { locale, currentRoute } = Astro.props;
 ---
 
-<header class:list={['site-header', { 'site-header--overlay': overlay }]}>
-  <a class="site-header__brand" href={getPath('home', locale)}>
+<!--
+  Fixed at the top of the one-page site. Transparent over the hero; once the
+  page is scrolled it gets the Linen background so it stays readable over content.
+-->
+<header class="site-header" data-site-header>
+  <a class="site-header__brand" href={getSectionHref('home', locale)}>
     <Logo sizes="(min-width: 64rem) 12.25rem, 8.5rem" />
   </a>
 
   <MobileMenu locale={locale}>
-    <Navigation locale={locale} currentRoute={currentRoute} />
+    <Navigation locale={locale} />
     <LanguageSwitcher locale={locale} currentRoute={currentRoute} />
   </MobileMenu>
 </header>
 
+<script>
+  // Toggle the header background when the top-of-page marker leaves the viewport.
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  const topMarker = document.querySelector('[data-page-top]');
+
+  if (header && topMarker) {
+    new IntersectionObserver(([entry]) => {
+      header.dataset.scrolled = String(!entry.isIntersecting);
+    }).observe(topMarker);
+  }
+</script>
+
 <style>
   /* Mobile: logo on the left and hamburger on the right, in a single row. */
   .site-header {
-    position: relative;
+    position: fixed;
     z-index: 10;
+    inset-block-start: 0;
+    inset-inline: 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding: var(--frame-padding-block) var(--frame-padding-inline);
+    padding: var(--frame-padding-block) calc(var(--page-gutter) + var(--frame-padding-inline));
+    transition: background-color var(--duration-base) var(--ease-out);
   }
 
-  /* Anchored to the top edge so it sits above the photograph. */
-  .site-header--overlay {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline: var(--page-gutter);
+  .site-header[data-scrolled='true'] {
+    background-color: var(--color-background);
   }
 
   .site-header__brand {
@@ -64,12 +78,12 @@ const { locale, currentRoute, overlay = false } = Astro.props;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       column-gap: var(--space-lg);
-      padding-block: clamp(1.25rem, 2.2vw, 2rem);
+      padding-block: var(--header-padding-block-desktop);
     }
 
     .site-header__brand {
       justify-self: start;
-      width: clamp(8.5rem, 11.7vw, 12.25rem);
+      width: var(--header-logo-width-desktop);
     }
 
     .site-header :global(.language-switcher) {

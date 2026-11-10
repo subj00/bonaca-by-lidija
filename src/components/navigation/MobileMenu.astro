@@ -104,9 +104,7 @@ const panelId = 'site-menu';
   }
 
   /*
-   * Runs on the first load and after every client-side navigation. The menu
-   * markup is replaced on each navigation, so its listeners are bound to fresh
-   * elements and never duplicated.
+   * Binds the toggle and the links once, when the page loads.
    */
   function initMobileMenu() {
     const elements = getMenu();
@@ -115,14 +113,17 @@ const panelId = 'site-menu';
 
     toggle.addEventListener('click', () => setOpen(!isOpen(menu)));
 
-    // Selecting a link closes the menu while the router navigates.
+    /*
+     * Selecting a link closes the menu (the X animates back into the hamburger)
+     * and releases the scroll lock synchronously, so the browser's native anchor
+     * navigation then smoothly scrolls to the section and updates the URL hash.
+     */
     panel.addEventListener('click', (event) => {
       if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
     });
   }
 
-  // Document-level listeners are registered once, when this module first runs.
-  document.addEventListener('astro:page-load', initMobileMenu);
+  initMobileMenu();
 
   document.addEventListener('keydown', (event) => {
     const elements = getMenu();

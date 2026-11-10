@@ -3,8 +3,20 @@
  * Keep this file minimal; component styles live in their Astro components.
  */
 
+/* Smooth in-page navigation (disabled for reduced motion in reset.css). */
 html {
   scroll-behavior: smooth;
+}
+
+/* Sections stop just below the fixed header when reached through an anchor. */
+[data-section] {
+  scroll-margin-top: var(--header-height-mobile);
+}
+
+@media (min-width: 64rem) {
+  [data-section] {
+    scroll-margin-top: var(--header-height-desktop);
+  }
 }
 
 body {

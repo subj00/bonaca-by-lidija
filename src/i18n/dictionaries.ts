@@ -17,6 +17,12 @@ const sr = {
   'menu.close': 'Zatvori meni',
   'languageSwitcher.label': 'Izbor jezika',
   'home.hero.imageAlt': 'Dve žene sa četkicama za šminku u rukama',
+  'reviews.title': 'Iskustva polaznica',
+  'reviews.listLabel': 'Recenzije polaznica',
+  'reviews.previous': 'Prethodna recenzija',
+  'reviews.next': 'Sledeća recenzija',
+  'reviews.goTo': 'Prikaži recenziju',
+  'reviews.of': 'od',
 } as const;
 
 export type TranslationKey = keyof typeof sr;
@@ -36,6 +42,12 @@ const en: Dictionary = {
   'menu.close': 'Close menu',
   'languageSwitcher.label': 'Language selection',
   'home.hero.imageAlt': 'Two women holding makeup brushes',
+  'reviews.title': 'Student experiences',
+  'reviews.listLabel': 'Student reviews',
+  'reviews.previous': 'Previous review',
+  'reviews.next': 'Next review',
+  'reviews.goTo': 'Show review',
+  'reviews.of': 'of',
 };
 
 const dictionaries: Record<Locale, Dictionary> = { sr, en };

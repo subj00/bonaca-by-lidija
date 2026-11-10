@@ -4,12 +4,13 @@ import heroPhoto from '@/assets/images/home/home-page.png';
 import Logo from '@/components/ui/Logo.astro';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
+import { sections } from '@/i18n/routes';
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 ---
 
-<section class="hero">
+<section class="hero" id={sections.home} data-section>
   <Image
     class="hero__photo"
     src={heroPhoto}

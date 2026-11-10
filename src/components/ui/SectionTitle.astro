@@ -1,0 +1,49 @@
+---
+interface Props {
+  /** Id of the heading, referenced by the section's `aria-labelledby`. */
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<!-- Centered section heading with a subtle divider line (Reviews style). -->
+<header class="section-title">
+  <h2 class="section-title__text" id={id}><slot /></h2>
+  <span class="section-title__rule" aria-hidden="true"></span>
+</header>
+
+<style>
+  .section-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--color-ink);
+  }
+
+  .section-title__text {
+    font-family: var(--font-display);
+    font-size: clamp(1.625rem, 7.2vw, 2.25rem);
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: 0.16em;
+    /* Balance the trailing letter-spacing so the text is optically centred. */
+    padding-inline-start: 0.16em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .section-title__rule {
+    width: 2.75rem;
+    height: 1px;
+    margin-block-start: var(--space-lg);
+    background-color: var(--color-ink);
+  }
+
+  @media (min-width: 64rem) {
+    .section-title__text {
+      font-size: clamp(2.5rem, 3.6vw, 3.25rem);
+    }
+  }
+</style>

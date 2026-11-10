@@ -1,0 +1,90 @@
+---
+import type { Review } from '@/data/reviews';
+
+interface Props extends Review {
+  /** Language of the review text, when it differs from the page language. */
+  lang?: string | undefined;
+  /** Card background: light Linen or a soft Dusty Rose tint. */
+  tone?: 'light' | 'rose';
+}
+
+const { name, text, lang, tone = 'light' } = Astro.props;
+---
+
+<figure class:list={['review-card', { 'review-card--rose': tone === 'rose' }]}>
+  <span class="review-card__mark" aria-hidden="true">“</span>
+  <blockquote class="review-card__quote" lang={lang}>
+    <p>{text}</p>
+  </blockquote>
+  <figcaption class="review-card__name">{name}</figcaption>
+</figure>
+
+<style>
+  .review-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding: var(--space-lg) clamp(1.125rem, 5vw, 1.5rem) var(--space-xl);
+    border-radius: var(--radius-card);
+    background-color: var(--color-card);
+    box-shadow: 0 1px 2px var(--color-shadow-soft);
+    color: var(--color-ink);
+  }
+
+  .review-card--rose {
+    background-color: var(--color-card-alt);
+  }
+
+  .review-card__mark {
+    display: block;
+    height: 2.25rem;
+    font-family: var(--font-reading);
+    font-size: 3.75rem;
+    line-height: 1;
+    color: var(--color-accent);
+  }
+
+  /* Clean upright serif: no italics, generous size and leading. */
+  .review-card__quote {
+    margin-block: var(--space-sm) 0;
+    font-family: var(--font-reading);
+    /* 16px on the narrowest phones, up to 17px; 18px on desktop. */
+    font-size: clamp(1rem, 0.875rem + 0.6vw, 1.0625rem);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  /* Short divider above the name, pinned to the bottom of the card. */
+  .review-card__name {
+    margin-block-start: auto;
+    padding-block-start: var(--space-xl);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-smoky-rose);
+  }
+
+  .review-card__name::before {
+    content: '';
+    display: block;
+    width: 1.75rem;
+    height: 1px;
+    margin-block-end: var(--space-md);
+    background-color: var(--color-ink);
+  }
+
+  @media (min-width: 64rem) {
+    .review-card {
+      padding: clamp(2rem, 3vw, 2.75rem) clamp(2rem, 3.5vw, 3.25rem);
+    }
+
+    .review-card__quote {
+      margin-block-start: var(--space-md);
+      font-size: 1.125rem;
+      line-height: 1.75;
+    }
+  }
+</style>
