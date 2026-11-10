@@ -17,6 +17,7 @@ const t = useTranslations(locale);
     {navigationItems.map((routeKey) => (
       <li>
         <a
+          class="navigation__link"
           href={getPath(routeKey, locale)}
           aria-current={routeKey === currentRoute ? 'page' : undefined}
         >
@@ -26,3 +27,43 @@ const t = useTranslations(locale);
     ))}
   </ul>
 </nav>
+
+<style>
+  .navigation__list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .navigation__link {
+    display: inline-block;
+    padding-block: var(--space-2xs);
+    font-size: var(--text-md);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.7em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .navigation__link:hover,
+  .navigation__link[aria-current='page'] {
+    text-decoration-color: currentColor;
+  }
+
+  @media (min-width: 64rem) {
+    .navigation__list {
+      flex-direction: row;
+      gap: clamp(1rem, 4.4vw - 1.25rem, 3.25rem);
+    }
+
+    .navigation__link {
+      font-size: var(--text-xs);
+      white-space: nowrap;
+    }
+  }
+</style>

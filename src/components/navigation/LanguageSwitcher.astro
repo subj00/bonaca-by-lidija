@@ -15,8 +15,9 @@ const t = useTranslations(locale);
 <nav class="language-switcher" aria-label={t('languageSwitcher.label')}>
   <ul class="language-switcher__list" role="list">
     {locales.map((item) => (
-      <li>
+      <li class="language-switcher__item">
         <a
+          class="language-switcher__link"
           href={getPath(currentRoute, item)}
           hreflang={languageTags[item]}
           lang={languageTags[item]}
@@ -29,3 +30,42 @@ const t = useTranslations(locale);
     ))}
   </ul>
 </nav>
+
+<style>
+  .language-switcher__list {
+    display: flex;
+    align-items: center;
+  }
+
+  .language-switcher__item + .language-switcher__item::before {
+    /* Visual separator only; hidden from assistive technology. */
+    content: '|' / '';
+    padding-inline: 0.6em;
+    font-weight: 400;
+  }
+
+  .language-switcher__item {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .language-switcher__link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.5em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .language-switcher__link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  @media (min-width: 64rem) {
+    .language-switcher__item {
+      font-size: var(--text-xs);
+      line-height: 1.75;
+    }
+  }
+</style>

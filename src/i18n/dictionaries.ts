@@ -13,8 +13,10 @@ const sr = {
   'nav.education': 'Edukacije',
   'nav.reviews': 'Recenzije',
   'nav.contact': 'Kontakt',
-  'menu.toggle': 'Meni',
+  'menu.open': 'Otvori meni',
+  'menu.close': 'Zatvori meni',
   'languageSwitcher.label': 'Izbor jezika',
+  'home.hero.imageAlt': 'Dve žene sa četkicama za šminku u rukama',
 } as const;
 
 export type TranslationKey = keyof typeof sr;
@@ -30,8 +32,10 @@ const en: Dictionary = {
   'nav.education': 'Education',
   'nav.reviews': 'Reviews',
   'nav.contact': 'Contact',
-  'menu.toggle': 'Menu',
+  'menu.open': 'Open menu',
+  'menu.close': 'Close menu',
   'languageSwitcher.label': 'Language selection',
+  'home.hero.imageAlt': 'Two women holding makeup brushes',
 };
 
 const dictionaries: Record<Locale, Dictionary> = { sr, en };

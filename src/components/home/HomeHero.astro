@@ -1,0 +1,125 @@
+---
+import { Image } from 'astro:assets';
+import heroPhoto from '@/assets/images/home/home-page.png';
+import Logo from '@/components/ui/Logo.astro';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+---
+
+<section class="hero">
+  <Image
+    class="hero__photo"
+    src={heroPhoto}
+    alt={t('home.hero.imageAlt')}
+    widths={[480, 720, 960, 1312]}
+    sizes="(min-width: 64rem) 100vh, 140vw"
+    priority
+  />
+
+  <h1 class="hero__title">
+    <Logo sizes="(min-width: 64rem) min(38vw, 62vh, 36rem), min(74vw, 24rem)" />
+  </h1>
+</section>
+
+<style>
+  /*
+   * Mobile: the composition is derived from the real header height, so the
+   * photograph starts just below the header and the large logo overlaps its
+   * faded lower edge:
+   *   photo top    = header height + small gap
+   *   photo height = remaining screen height, capped so faces are never cropped
+   *   logo top     = photo bottom − overlap + extra drop (breathing room)
+   *   hero height  = photo + the part of the logo below it + bottom spacing
+   */
+  .hero {
+    --photo-top: calc(var(--header-height-mobile) + var(--space-sm));
+    --title-width: min(74vw, 24rem);
+    --title-height: calc(var(--title-width) * var(--logo-aspect));
+    --title-overlap: 0.6; /* share of the logo height that sits over the photo */
+    --title-drop: 3.25rem; /* extra space between the photograph and the logo */
+    --title-below: calc(
+      var(--title-height) * (1 - var(--title-overlap)) + var(--title-drop)
+    );
+    --bottom-space: 2.5rem;
+    /*
+     * Space reserved for the logo when sizing the photograph. Kept independent of
+     * --title-drop so adjusting the logo position never resizes the photograph.
+     */
+    --photo-reserve: calc(var(--title-height) * (1 - var(--title-overlap)) + 1.5rem);
+    --photo-height: clamp(
+      18rem,
+      100svh - var(--photo-top) - var(--photo-reserve) - var(--bottom-space),
+      125vw
+    );
+
+    position: relative;
+    isolation: isolate;
+    height: calc(
+      var(--photo-top) + var(--photo-height) + var(--title-below) + var(--bottom-space)
+    );
+    overflow: hidden;
+  }
+
+  /*
+   * The photograph is a transparent cut-out, so it is sized by height and
+   * centred horizontally: both women stay visible and nothing is stretched.
+   * Only the lower edge fades into the background.
+   */
+  .hero__photo {
+    position: absolute;
+    z-index: -1;
+    inset-block-start: var(--photo-top);
+    inset-inline-start: 50%;
+    width: auto;
+    max-width: none;
+    height: var(--photo-height);
+    translate: -50% 0;
+    mask-image: linear-gradient(to bottom, black 60%, transparent 98%);
+  }
+
+  .hero__title {
+    position: absolute;
+    inset-block-start: calc(
+      var(--photo-top) + var(--photo-height) - var(--title-height) * var(--title-overlap) +
+        var(--title-drop)
+    );
+    inset-inline-start: 50%;
+    width: var(--title-width);
+    translate: -50% 0;
+  }
+
+  /* Soft, localized light behind the logo to keep it legible over the photograph. */
+  .hero__title::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -70% -20% -60%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-linen) 78%, transparent) 30%,
+      transparent
+    );
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      height: 100svh;
+      min-height: 38rem;
+    }
+
+    .hero__photo {
+      inset-block-start: 10%;
+      height: 102%;
+      mask-image: none;
+    }
+
+    .hero__title {
+      inset-block-start: auto;
+      inset-block-end: 8%;
+      width: min(38vw, 62svh, 36rem);
+    }
+  }
+</style>

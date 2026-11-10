@@ -4,6 +4,8 @@ import '@/styles/reset.css';
 import '@/styles/global.css';
 
 import type { ImageMetadata } from 'astro';
+import { Font } from 'astro:assets';
+import { ClientRouter, fade } from 'astro:transitions';
 import Footer from '@/components/layout/Footer.astro';
 import Header from '@/components/layout/Header.astro';
 import SeoHead from '@/components/seo/SeoHead.astro';
@@ -20,9 +22,12 @@ interface Props {
   image?: ImageMetadata;
   imageAlt?: string;
   noindex?: boolean;
+  /** Places the header over the page's first section (e.g. the Home hero). */
+  headerOverlay?: boolean;
 }
 
-const { routeKey, title, description, image, imageAlt, noindex } = Astro.props;
+const { routeKey, title, description, image, imageAlt, noindex, headerOverlay = false } =
+  Astro.props;
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -32,7 +37,12 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
 ---
 
 <!doctype html>
-<html lang={languageTags[locale]}>
+<!--
+  Client-side navigation (SPA-like): internal links are fetched and swapped
+  without a full reload, with a subtle cross-fade of the whole page.
+  Without JavaScript, links work as normal page loads.
+-->
+<html lang={languageTags[locale]} transition:animate={fade({ duration: '250ms' })}>
   <head>
     <SeoHead
       title={documentTitle}
@@ -43,11 +53,13 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
       imageAlt={imageAlt}
       noindex={noindex}
     />
+    <Font cssVariable="--font-montserrat" preload={[{ subset: 'latin', weight: '400' }]} />
+    <ClientRouter />
   </head>
   <body>
     <a class="skip-link" href="#main-content">{t('skipLink')}</a>
 
-    <Header locale={locale} currentRoute={routeKey} />
+    <Header locale={locale} currentRoute={routeKey} overlay={headerOverlay} />
 
     <main id="main-content" tabindex="-1">
       <slot />
@@ -60,12 +72,20 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
 <style>
   .skip-link {
     position: absolute;
+    z-index: 100;
     inset-block-start: 0;
     inset-inline-start: 0;
+    padding: var(--space-xs) var(--space-md);
+    background-color: var(--color-background);
+    font-size: var(--text-sm);
     transform: translateY(-100%);
   }
 
   .skip-link:focus {
     transform: none;
+  }
+
+  main:focus {
+    outline: none;
   }
 </style>

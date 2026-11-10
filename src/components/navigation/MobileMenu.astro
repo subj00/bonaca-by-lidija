@@ -13,15 +13,267 @@ const panelId = 'site-menu';
 
 <!--
   Wraps the navigation and language switcher once, so their markup is never duplicated.
-  Desktop: the panel is shown inline and the toggle is hidden.
-  Mobile: the toggle opens the panel (hamburger menu).
-  Toggle behavior and responsive styles are implemented later.
+  Mobile: a full-screen panel toggled by one button whose hamburger icon morphs into an X.
+  Desktop (≥ 64rem): the wrappers use `display: contents` and the header lays out the links.
+  Without JavaScript the panel is rendered as a plain, always-visible list.
 -->
-<div class="mobile-menu">
-  <button class="mobile-menu__toggle" type="button" aria-controls={panelId}>
-    {t('menu.toggle')}
+<div class="mobile-menu" data-mobile-menu data-open="false">
+  <button
+    class="mobile-menu__toggle"
+    type="button"
+    aria-controls={panelId}
+    aria-expanded="false"
+    aria-label={t('menu.open')}
+    data-menu-toggle
+    data-label-open={t('menu.open')}
+    data-label-close={t('menu.close')}
+  >
+    <span class="mobile-menu__icon" aria-hidden="true">
+      <span class="mobile-menu__line"></span>
+      <span class="mobile-menu__line"></span>
+      <span class="mobile-menu__line"></span>
+    </span>
   </button>
-  <div class="mobile-menu__panel" id={panelId}>
-    <slot />
+
+  <div class="mobile-menu__panel" id={panelId} data-menu-panel>
+    <div class="mobile-menu__content">
+      <slot />
+    </div>
   </div>
 </div>
+
+<script>
+  const DESKTOP_QUERY = window.matchMedia('(min-width: 64rem)');
+
+  function getMenu() {
+    const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+    const toggle = menu?.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const panel = menu?.querySelector<HTMLElement>('[data-menu-panel]');
+    return menu && toggle && panel ? { menu, toggle, panel } : undefined;
+  }
+
+  function isOpen(menu: HTMLElement) {
+    return menu.dataset.open === 'true';
+  }
+
+  function setOpen(open: boolean) {
+    const elements = getMenu();
+    if (!elements) return;
+    const { menu, toggle } = elements;
+
+    menu.dataset.open = String(open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute(
+      'aria-label',
+      (open ? toggle.dataset.labelClose : toggle.dataset.labelOpen) ?? '',
+    );
+  }
+
+  /** Keeps keyboard focus inside the open menu (toggle button + links). */
+  function trapFocus(event: KeyboardEvent, toggle: HTMLElement, panel: HTMLElement) {
+    const focusable = [toggle, ...panel.querySelectorAll<HTMLElement>('a[href]')];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  /*
+   * Runs on the first load and after every client-side navigation. The menu
+   * markup is replaced on each navigation, so its listeners are bound to fresh
+   * elements and never duplicated.
+   */
+  function initMobileMenu() {
+    const elements = getMenu();
+    if (!elements) return;
+    const { menu, toggle, panel } = elements;
+
+    toggle.addEventListener('click', () => setOpen(!isOpen(menu)));
+
+    // Selecting a link closes the menu while the router navigates.
+    panel.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
+    });
+  }
+
+  // Document-level listeners are registered once, when this module first runs.
+  document.addEventListener('astro:page-load', initMobileMenu);
+
+  document.addEventListener('keydown', (event) => {
+    const elements = getMenu();
+    if (!elements || !isOpen(elements.menu) || DESKTOP_QUERY.matches) return;
+
+    if (event.key === 'Escape') {
+      setOpen(false);
+      elements.toggle.focus();
+    } else if (event.key === 'Tab') {
+      trapFocus(event, elements.toggle, elements.panel);
+    }
+  });
+
+  // Reset the menu if the viewport grows to the desktop layout while it is open.
+  DESKTOP_QUERY.addEventListener('change', (event) => {
+    if (event.matches) setOpen(false);
+  });
+</script>
+
+<style>
+  /*
+   * Sits in the header row; the negative margin keeps the 44px tap target
+   * without making the row taller. Stacked above the open panel.
+   */
+  .mobile-menu__toggle {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    /* Aligns the visible icon (1.625rem wide) with the header padding edge. */
+    margin-block: calc(var(--space-sm) * -1);
+    margin-inline: calc((2.75rem - 1.625rem) / -2);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  /* Hamburger icon: three thin lines that morph into a symmetrical X. */
+  .mobile-menu__icon {
+    position: relative;
+    width: 1.625rem;
+    height: 1.125rem;
+  }
+
+  .mobile-menu__line {
+    --line-weight: 1.25px;
+
+    position: absolute;
+    inset-inline: 0;
+    height: var(--line-weight);
+    background-color: currentColor;
+    transition:
+      translate var(--duration-base) var(--ease-out),
+      rotate var(--duration-base) var(--ease-out),
+      opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .mobile-menu__line:nth-child(1) {
+    inset-block-start: 0;
+  }
+
+  .mobile-menu__line:nth-child(2) {
+    inset-block-start: calc(50% - var(--line-weight) / 2);
+  }
+
+  .mobile-menu__line:nth-child(3) {
+    inset-block-end: 0;
+  }
+
+  [data-open='true'] .mobile-menu__line:nth-child(1) {
+    translate: 0 calc(0.5625rem - var(--line-weight) / 2);
+    rotate: 45deg;
+  }
+
+  [data-open='true'] .mobile-menu__line:nth-child(2) {
+    opacity: 0;
+  }
+
+  [data-open='true'] .mobile-menu__line:nth-child(3) {
+    translate: 0 calc(-0.5625rem + var(--line-weight) / 2);
+    rotate: -45deg;
+  }
+
+  .mobile-menu__panel {
+    position: fixed;
+    z-index: 1;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-2xl) var(--frame-padding-inline);
+    background-color: var(--color-background);
+    overflow-y: auto;
+  }
+
+  .mobile-menu__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xl);
+  }
+
+  /* Closed by default; opens with a soft fade and a small slide down. */
+  @media (scripting: enabled) {
+    .mobile-menu__panel {
+      visibility: hidden;
+      opacity: 0;
+      translate: 0 -0.75rem;
+      transition:
+        opacity var(--duration-base) var(--ease-out),
+        translate var(--duration-base) var(--ease-out),
+        visibility 0s linear var(--duration-base);
+    }
+
+    [data-open='true'] .mobile-menu__panel {
+      visibility: visible;
+      opacity: 1;
+      translate: 0 0;
+      transition:
+        opacity var(--duration-base) var(--ease-out),
+        translate var(--duration-base) var(--ease-out),
+        visibility 0s;
+    }
+  }
+
+  /* Without JavaScript the links are shown as a plain list below the logo. */
+  @media (scripting: none) {
+    .mobile-menu {
+      flex-basis: 100%;
+    }
+
+    .mobile-menu__toggle {
+      display: none;
+    }
+
+    .mobile-menu__panel {
+      position: static;
+      padding-block: var(--space-xl) 0;
+      background: none;
+    }
+  }
+
+  /* Prevent background scrolling while the mobile menu is open. */
+  @media (width < 64rem) {
+    :global(html:has(.mobile-menu[data-open='true'])) {
+      overflow: hidden;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .mobile-menu__toggle {
+      display: none;
+    }
+
+    /* Let the parent header lay out the navigation and language switcher directly. */
+    .mobile-menu,
+    .mobile-menu__panel,
+    .mobile-menu__content {
+      display: contents;
+    }
+
+    .mobile-menu__panel,
+    [data-open='true'] .mobile-menu__panel {
+      visibility: visible;
+      opacity: 1;
+      translate: none;
+      transition: none;
+    }
+  }
+</style>

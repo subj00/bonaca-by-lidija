@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { defaultLocale, locales } from './src/i18n/config';
 import { getAlternateLinks, getRouteKeyByPath } from './src/i18n/routes';
@@ -12,6 +12,19 @@ export default defineConfig({
   build: {
     format: 'file',
   },
+  fonts: [
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Montserrat',
+      cssVariable: '--font-montserrat',
+      // 600 (SemiBold) is used for navigation; 400 for body text.
+      weights: ['400', '600'],
+      styles: ['normal'],
+      // latin-ext is required for Serbian Latin characters (č, ć, š, ž, đ).
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['sans-serif'],
+    },
+  ],
   i18n: {
     defaultLocale,
     locales: [...locales],

@@ -11,15 +11,59 @@
   --color-pale-oak: #D1BE9C;
   --color-taupe: #AA998F;
 
-  /* Semantic colors — to be defined (must reference brand colors above) */
+  /* Semantic colors (derived from the brand palette; black matches the logo) */
+  --color-text: #000000;
+  --color-background: var(--color-linen);
 
-  /* Typography — to be defined */
+  /* Typography */
+  --font-body: var(--font-montserrat);
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 1rem;
+  --tracking-wide: 0.12em;
+  --font-weight-semibold: 600;
 
-  /* Spacing — to be defined */
+  /* Spacing */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Layout */
+  --page-gutter: clamp(0.75rem, 2.2vw, 2rem);
+  --frame-padding-inline: clamp(1rem, 3.5vw, 3.25rem);
+  --frame-padding-block: clamp(1rem, 3vw, 2.25rem);
+
+  /* Logo artwork height / width (1032 / 3662), used to derive heights from widths. */
+  --logo-aspect: 0.2818;
+
+  /*
+   * Optical centre of the logo. The BONACA wordmark fills only the top 53% of the
+   * artwork (549 of 1032 px) with the script "by Lidija" below it, so its centre
+   * sits at 26.6% of the logo height. Shifting the logo down by 50% − 26.6% puts
+   * the wordmark on the row's centre line, level with the navigation and icon.
+   */
+  --logo-optical-offset: 23.4%;
+
+  /* Mobile header: one row with the logo (left) and the hamburger (right). */
+  --header-logo-width-mobile: clamp(7rem, 32vw, 8.5rem);
+  --header-height-mobile: calc(
+    var(--frame-padding-block) * 2 + var(--header-logo-width-mobile) * var(--logo-aspect)
+  );
+
+  /* Motion */
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /*
- * Breakpoints — to be defined.
- * Custom properties cannot be used inside media queries, so breakpoints are
- * documented here and used as literal mobile-first `min-width` values.
+ * Breakpoints (mobile-first, used as literal `min-width` values because
+ * custom properties cannot be used inside media queries):
+ *   md — 48rem (768px)  tablets
+ *   lg — 64rem (1024px) desktop navigation and hero layout
  */
