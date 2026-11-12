@@ -8,9 +8,14 @@ const SITE_URL = 'https://example.com';
 
 export default defineConfig({
   site: SITE_URL,
-  trailingSlash: 'never',
+  /*
+   * Every page is built as `<path>/index.html` (e.g. `dist/en/index.html`), which
+   * any static host — including Vercel — serves at `/en/` without extra rewrite
+   * rules. URLs therefore always end with a slash.
+   */
+  trailingSlash: 'always',
   build: {
-    format: 'file',
+    format: 'directory',
   },
   fonts: [
     {

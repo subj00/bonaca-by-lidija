@@ -1,11 +1,13 @@
 import { defaultLocale, languageTags, locales, type Locale } from './config';
 
 /**
- * The website is a single page per language. Serbian lives at `/`, English at `/en`.
+ * The website is a single page per language. Serbian lives at `/`, English at `/en/`.
  * Every content section is part of that page and is reached through its anchor.
+ * Paths end with a slash to match the `trailingSlash: 'always'` build output
+ * (`dist/index.html`, `dist/en/index.html`).
  */
 export const routes = {
-  home: { sr: '/', en: '/en' },
+  home: { sr: '/', en: '/en/' },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type RouteKey = keyof typeof routes;
@@ -42,13 +44,14 @@ export function getPath(routeKey: RouteKey, locale: Locale): string {
   return routes[routeKey][locale];
 }
 
-/** Link to a section of the page, e.g. `/#recenzije` or `/en#recenzije`. */
+/** Link to a section of the page, e.g. `/#recenzije` or `/en/#recenzije`. */
 export function getSectionHref(section: SectionKey, locale: Locale): string {
   return `${getPath('home', locale)}#${sections[section]}`;
 }
 
+/** Ensures a single trailing slash, matching the route map (`/en` → `/en/`). */
 function normalizePath(path: string): string {
-  return path.length > 1 ? path.replace(/\/+$/, '') : path;
+  return `${path.replace(/\/+$/, '')}/`;
 }
 
 /** Finds the route key for a localized path (used by the sitemap). */
