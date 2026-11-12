@@ -41,9 +41,16 @@ const { id } = Astro.props;
     background-color: var(--color-ink);
   }
 
+  /* Desktop: compact, controlled title (36–42px). */
   @media (min-width: 64rem) {
     .section-title__text {
-      font-size: clamp(2.5rem, 3.6vw, 3.25rem);
+      font-size: clamp(2.25rem, 2.6vw, 2.625rem);
+      letter-spacing: 0.14em;
+      padding-inline-start: 0.14em;
+    }
+
+    .section-title__rule {
+      margin-block-start: var(--space-md);
     }
   }
 </style>

@@ -2,16 +2,13 @@
 import ArrowIcon from '@/assets/icons/arrow.svg';
 import ReviewCard from '@/components/reviews/ReviewCard.astro';
 import SectionTitle from '@/components/ui/SectionTitle.astro';
-import { reviews, reviewsLanguage } from '@/data/reviews';
-import { getLocale, languageTags } from '@/i18n/config';
+import { reviews } from '@/data/reviews';
+import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { sections } from '@/i18n/routes';
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-
-// Reviews are written in Serbian; mark their language on other locales.
-const reviewLang = languageTags[locale] === reviewsLanguage ? undefined : reviewsLanguage;
 
 // Alternate by the review's original index: A, B, A, B (same order on every layout).
 const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
@@ -36,7 +33,7 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
             aria-label={`${index + 1} ${t('reviews.of')} ${reviews.length}`}
             data-reviews-slide
           >
-            <ReviewCard {...review} lang={reviewLang} tone={toneFor(index)} />
+            <ReviewCard name={review.name} text={review.text[locale]} tone={toneFor(index)} />
           </li>
         ))
       }
@@ -264,13 +261,13 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
     }
   }
 
-  /* Tablet and desktop: all four reviews in a balanced two-column grid. */
+  /* Tablet and desktop: all four reviews in a wide two-column grid (16–24px gap). */
   @media (min-width: 48rem) {
     .reviews__track {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(1.25rem, 2.5vw, 2.25rem);
-      max-width: 72rem;
+      gap: clamp(1rem, 1.6vw, 1.5rem);
+      max-width: 80rem;
       margin-inline: auto;
       overflow: visible;
       scroll-snap-type: none;
@@ -281,13 +278,25 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
     }
   }
 
+  /*
+   * Desktop: aim for one screen below the fixed header. `min-height` (not a fixed
+   * height) lets the section grow on shorter screens; nothing is clipped.
+   */
   @media (min-width: 64rem) {
     .reviews {
-      padding-block: var(--space-md) clamp(4rem, 7vw, 6rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(100svh - var(--header-height-desktop));
+      padding: clamp(0.75rem, 2svh, 2.25rem) clamp(1.5rem, 2.5vw, 3rem);
     }
 
     .reviews__intro {
-      margin-block-end: clamp(2.5rem, 4vw, 3.5rem);
+      margin-block-end: clamp(1rem, 2svh, 2rem);
+    }
+
+    .reviews__carousel {
+      width: 100%;
     }
   }
 </style>

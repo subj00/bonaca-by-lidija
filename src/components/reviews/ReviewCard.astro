@@ -1,19 +1,17 @@
 ---
-import type { Review } from '@/data/reviews';
-
-interface Props extends Review {
-  /** Language of the review text, when it differs from the page language. */
-  lang?: string | undefined;
+interface Props {
+  name: string;
+  /** Review text in the language of the current page. */
+  text: string;
   /** Card background: light Linen or a soft Dusty Rose tint. */
   tone?: 'light' | 'rose';
 }
 
-const { name, text, lang, tone = 'light' } = Astro.props;
+const { name, text, tone = 'light' } = Astro.props;
 ---
 
 <figure class:list={['review-card', { 'review-card--rose': tone === 'rose' }]}>
-  <span class="review-card__mark" aria-hidden="true">“</span>
-  <blockquote class="review-card__quote" lang={lang}>
+  <blockquote class="review-card__quote">
     <p>{text}</p>
   </blockquote>
   <figcaption class="review-card__name">{name}</figcaption>
@@ -36,24 +34,19 @@ const { name, text, lang, tone = 'light' } = Astro.props;
     background-color: var(--color-card-alt);
   }
 
-  .review-card__mark {
-    display: block;
-    height: 2.25rem;
-    font-family: var(--font-reading);
-    font-size: 3.75rem;
-    line-height: 1;
-    color: var(--color-accent);
-  }
-
-  /* Clean upright serif: no italics, generous size and leading. */
+  /*
+   * Clean upright serif. Left-aligned on phones and tablets: their narrow
+   * lines (about 35–45 characters) would get very wide word gaps if justified.
+   */
   .review-card__quote {
-    margin-block: var(--space-sm) 0;
+    margin: 0;
     font-family: var(--font-reading);
-    /* 16px on the narrowest phones, up to 17px; 18px on desktop. */
+    /* 16px on the narrowest phones, up to 17px; 16px on desktop. */
     font-size: clamp(1rem, 0.875rem + 0.6vw, 1.0625rem);
     font-style: normal;
     font-weight: 400;
     line-height: 1.7;
+    text-align: start;
   }
 
   /* Short divider above the name, pinned to the bottom of the card. */
@@ -76,15 +69,35 @@ const { name, text, lang, tone = 'light' } = Astro.props;
     background-color: var(--color-ink);
   }
 
+  /* Desktop: compact editorial card (24–30px vertical, 28–36px horizontal padding). */
   @media (min-width: 64rem) {
     .review-card {
-      padding: clamp(2rem, 3vw, 2.75rem) clamp(2rem, 3.5vw, 3.25rem);
+      padding: clamp(1.375rem, 2.8svh, 1.875rem) clamp(1.75rem, 2.4vw, 2.25rem);
     }
 
+    /*
+     * Justified on desktop, where lines are long enough for even word spacing.
+     * Hyphenation (where the browser supports it) follows the page language
+     * set on <html> (`sr-Latn` or `en`).
+     */
     .review-card__quote {
-      margin-block-start: var(--space-md);
-      font-size: 1.125rem;
-      line-height: 1.75;
+      font-size: 1rem;
+      line-height: 1.55;
+      text-align: justify;
+      text-justify: inter-word;
+      -webkit-hyphens: auto;
+      hyphens: auto;
+      hyphenate-limit-chars: 7 3 3;
+    }
+
+    .review-card__name {
+      padding-block-start: var(--space-sm);
+      font-size: var(--text-2xs);
+    }
+
+    .review-card__name::before {
+      width: 1.5rem;
+      margin-block-end: var(--space-xs);
     }
   }
 </style>

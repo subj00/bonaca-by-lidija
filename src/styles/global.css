@@ -3,8 +3,12 @@
  * Keep this file minimal; component styles live in their Astro components.
  */
 
-/* Smooth in-page navigation (disabled for reduced motion in reset.css). */
-html {
+/*
+ * Smooth in-page navigation, switched on after the page loads (see Navigation),
+ * so arriving on a URL with a hash lands on the section without an animation.
+ * Disabled for reduced motion in reset.css.
+ */
+html[data-smooth-scroll] {
   scroll-behavior: smooth;
 }
 

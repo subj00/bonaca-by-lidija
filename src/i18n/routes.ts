@@ -22,6 +22,12 @@ export const sections = {
 
 export type SectionKey = keyof typeof sections;
 
+/**
+ * Browser event dispatched on `document` whenever the section in view changes.
+ * `detail` is the section's anchor id (e.g. `recenzije`).
+ */
+export const SECTION_CHANGE_EVENT = 'bonaca:section-change';
+
 /** Sections shown in the main navigation, in page order. */
 export const navigationItems = [
   'home',

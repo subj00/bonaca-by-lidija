@@ -19,6 +19,7 @@ const t = useTranslations(locale);
         <a
           class="language-switcher__link"
           href={getPath(currentRoute, item)}
+          data-language-base={getPath(currentRoute, item)}
           hreflang={languageTags[item]}
           lang={languageTags[item]}
           aria-label={languageNames[item]}
@@ -30,6 +31,27 @@ const t = useTranslations(locale);
     ))}
   </ul>
 </nav>
+
+<script>
+  import { SECTION_CHANGE_EVENT, sections } from '@/i18n/routes';
+
+  /*
+   * Keeps the reader's place when switching language: the links always point to
+   * the section currently in view (e.g. `/#recenzije` ↔ `/en#recenzije`), whether
+   * it was reached through the navigation or by scrolling. The active section
+   * comes from the navigation's existing IntersectionObserver.
+   */
+  const languageLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-language-base]')];
+
+  document.addEventListener(SECTION_CHANGE_EVENT, (event) => {
+    const sectionId = (event as CustomEvent<string>).detail;
+    const hash = sectionId && sectionId !== sections.home ? `#${sectionId}` : '';
+
+    languageLinks.forEach((link) => {
+      link.setAttribute('href', `${link.dataset.languageBase}${hash}`);
+    });
+  });
+</script>
 
 <style>
   .language-switcher__list {

@@ -15,7 +15,6 @@
   --color-text: #000000;
   --color-background: var(--color-linen);
   --color-ink: color-mix(in srgb, var(--color-smoky-rose) 30%, var(--color-text)); /* very dark brown */
-  --color-accent: var(--color-dusty-rose);
   --color-card: color-mix(in srgb, var(--color-dusty-rose) 7%, var(--color-linen));
   --color-card-alt: color-mix(in srgb, var(--color-dusty-rose) 15%, var(--color-linen));
   --color-shadow-soft: color-mix(in srgb, var(--color-smoky-rose) 8%, transparent);

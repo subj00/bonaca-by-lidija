@@ -34,10 +34,13 @@ const t = useTranslations(locale);
 </nav>
 
 <script>
+  import { SECTION_CHANGE_EVENT } from '@/i18n/routes';
+
   /*
    * Active link = the section crossing a horizontal line at 40% of the viewport.
    * When the end of the page is visible, the last section is active (it may be
    * too short to ever reach that line). IntersectionObserver only, no scroll events.
+   * Changes are announced with SECTION_CHANGE_EVENT (used by the language switcher).
    */
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav-section]')];
   const pageSections = [...document.querySelectorAll<HTMLElement>('[data-section]')];
@@ -45,6 +48,7 @@ const t = useTranslations(locale);
 
   let sectionInView = pageSections[0]?.id;
   let atPageEnd = false;
+  let announcedId: string | undefined;
 
   const render = () => {
     const activeId = atPageEnd ? pageSections.at(-1)?.id : sectionInView;
@@ -52,7 +56,23 @@ const t = useTranslations(locale);
       if (link.dataset.navSection === activeId) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     });
+
+    if (activeId && activeId !== announcedId) {
+      announcedId = activeId;
+      document.dispatchEvent(new CustomEvent(SECTION_CHANGE_EVENT, { detail: activeId }));
+    }
   };
+
+  /*
+   * Smooth scrolling is enabled only after the page has loaded, so arriving on a
+   * URL with a hash (e.g. after switching language) jumps straight to the section
+   * instead of visibly scrolling down from the top.
+   */
+  const enableSmoothScroll = () =>
+    requestAnimationFrame(() => document.documentElement.setAttribute('data-smooth-scroll', ''));
+
+  if (document.readyState === 'complete') enableSmoothScroll();
+  else window.addEventListener('load', enableSmoothScroll, { once: true });
 
   const sectionObserver = new IntersectionObserver(
     (entries) => {
