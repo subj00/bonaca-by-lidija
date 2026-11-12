@@ -9,9 +9,6 @@ import { sections } from '@/i18n/routes';
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-
-// Alternate by the review's original index: A, B, A, B (same order on every layout).
-const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
 ---
 
 <section class="reviews" id={sections.reviews} aria-labelledby="reviews-title" data-section>
@@ -33,7 +30,7 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
             aria-label={`${index + 1} ${t('reviews.of')} ${reviews.length}`}
             data-reviews-slide
           >
-            <ReviewCard name={review.name} text={review.text[locale]} tone={toneFor(index)} />
+            <ReviewCard name={review.name} text={review.text[locale]} />
           </li>
         ))
       }
@@ -188,6 +185,14 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
     scroll-snap-align: start;
   }
 
+  /*
+   * Card colours (A = --color-card, B = --color-card-alt), by the review's
+   * position in the list. Slider: a simple alternation A, B, A, B.
+   */
+  .reviews__slide:nth-child(even) {
+    --review-card-bg: var(--color-card-alt);
+  }
+
   .reviews__controls {
     display: flex;
     align-items: center;
@@ -275,6 +280,19 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
 
     .reviews__controls {
       display: none;
+    }
+
+    /*
+     * Grid: matching colours on the diagonal. In every block of four reviews,
+     * 1 and 4 use A, 2 and 3 use B:  A B / B A.
+     */
+    .reviews__slide:nth-child(even) {
+      --review-card-bg: var(--color-card);
+    }
+
+    .reviews__slide:nth-child(4n + 2),
+    .reviews__slide:nth-child(4n + 3) {
+      --review-card-bg: var(--color-card-alt);
     }
   }
 

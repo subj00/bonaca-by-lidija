@@ -3,14 +3,16 @@ interface Props {
   name: string;
   /** Review text in the language of the current page. */
   text: string;
-  /** Card background: light Linen or a soft Dusty Rose tint. */
-  tone?: 'light' | 'rose';
 }
 
-const { name, text, tone = 'light' } = Astro.props;
+const { name, text } = Astro.props;
 ---
 
-<figure class:list={['review-card', { 'review-card--rose': tone === 'rose' }]}>
+<!--
+  The background comes from `--review-card-bg`, set by the parent layout
+  (the colour order differs between the mobile slider and the desktop grid).
+-->
+<figure class="review-card">
   <blockquote class="review-card__quote">
     <p>{text}</p>
   </blockquote>
@@ -25,13 +27,9 @@ const { name, text, tone = 'light' } = Astro.props;
     margin: 0;
     padding: var(--space-lg) clamp(1.125rem, 5vw, 1.5rem) var(--space-xl);
     border-radius: var(--radius-card);
-    background-color: var(--color-card);
+    background-color: var(--review-card-bg, var(--color-card));
     box-shadow: 0 1px 2px var(--color-shadow-soft);
     color: var(--color-ink);
-  }
-
-  .review-card--rose {
-    background-color: var(--color-card-alt);
   }
 
   /*
