@@ -58,13 +58,20 @@ const { name, text } = Astro.props;
     color: var(--color-smoky-rose);
   }
 
+  /*
+   * Small Smoky Rose divider above the reviewer name (one rule for every card).
+   * Drawn as a border so it snaps to whole device pixels: a 1px-tall background
+   * rendered sharp or smeared over two pixels depending on where each card's
+   * line happened to land, so the thickness differed between cards.
+   * 1.6px = exactly two device pixels at 125% zoom; ~1.5px on high-DPI phones.
+   */
   .review-card__name::before {
     content: '';
     display: block;
     width: 1.75rem;
-    height: 1px;
+    height: 0;
     margin-block-end: var(--space-md);
-    background-color: var(--color-ink);
+    border-block-start: 1.6px solid var(--color-smoky-rose);
   }
 
   /* Desktop: compact editorial card (24–30px vertical, 28–36px horizontal padding). */

@@ -1,6 +1,6 @@
 /** Global site constants. Business details are added once confirmed. */
 export const site = {
-  name: 'Bonaca',
+  name: 'Bonaca by Lidija',
   /** Text shown in the logo artwork; used as its alt text. */
   logoText: 'Bonaca by Lidija',
   titleSeparator: ' | ',

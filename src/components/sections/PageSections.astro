@@ -1,4 +1,5 @@
 ---
+import ContactSection from '@/components/contact/ContactSection.astro';
 import HomeHero from '@/components/home/HomeHero.astro';
 import ReviewsSection from '@/components/reviews/ReviewsSection.astro';
 import SectionPlaceholder from '@/components/sections/SectionPlaceholder.astro';
@@ -16,4 +17,4 @@ const t = useTranslations(locale);
 <SectionPlaceholder id={sections.services} title={t('nav.services')} />
 <SectionPlaceholder id={sections.education} title={t('nav.education')} />
 <ReviewsSection />
-<SectionPlaceholder id={sections.contact} title={t('nav.contact')} />
+<ContactSection />

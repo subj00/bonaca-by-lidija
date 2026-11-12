@@ -18,6 +18,13 @@
   --color-card: color-mix(in srgb, var(--color-dusty-rose) 7%, var(--color-linen));
   --color-card-alt: color-mix(in srgb, var(--color-dusty-rose) 15%, var(--color-linen));
   --color-shadow-soft: color-mix(in srgb, var(--color-smoky-rose) 8%, transparent);
+  /*
+   * Contact "business card": Linen with a touch of Taupe (same warm undertone
+   * as the page, just slightly deeper), a fine Taupe edge and Taupe hairlines.
+   */
+  --color-panel: color-mix(in srgb, var(--color-linen) 95%, var(--color-taupe));
+  --color-panel-border: color-mix(in srgb, var(--color-taupe) 35%, transparent);
+  --color-hairline: color-mix(in srgb, var(--color-taupe) 60%, transparent);
 
   /* Typography */
   --font-body: var(--font-montserrat);

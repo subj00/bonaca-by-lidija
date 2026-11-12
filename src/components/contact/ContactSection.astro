@@ -1,0 +1,301 @@
+---
+import InstagramIcon from '@/assets/icons/instagram.svg';
+import MailIcon from '@/assets/icons/mail.svg';
+import MapPinIcon from '@/assets/icons/map-pin.svg';
+import SectionTitle from '@/components/ui/SectionTitle.astro';
+import { contactPeople, studioAddress } from '@/data/contact';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import { sections } from '@/i18n/routes';
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+---
+
+<section class="contact" id={sections.contact} aria-labelledby="contact-title" data-section>
+  <div class="contact__intro">
+    <SectionTitle id="contact-title" subtitle={t('contact.subtitle')}>
+      {t('contact.title')}
+    </SectionTitle>
+  </div>
+
+  <!--
+    Desktop: two columns (studio address | contact people) separated by a thin
+    Pale Oak line. Mobile: one centred column with short Pale Oak dividers.
+  -->
+  <address class="contact__body">
+    <div class="contact__location">
+      <MapPinIcon class="contact__pin" aria-hidden="true" />
+      <p class="contact__label">{t('contact.addressLabel')}</p>
+      <p class="contact__address">{studioAddress}</p>
+    </div>
+
+    <div class="contact__people">
+      {
+        contactPeople.map((person) => (
+          <div class="contact__person">
+            <h3 class="contact__name">{person.name}</h3>
+            <ul class="contact__links" role="list">
+              <li>
+                <a
+                  class="contact__link"
+                  href={`mailto:${person.email}`}
+                  aria-label={`${t('contact.email')}: ${person.email}`}
+                >
+                  <MailIcon class="contact__icon" aria-hidden="true" />
+                  <span>{person.email}</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  class="contact__link"
+                  href={person.instagram.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Instagram: ${person.instagram.handle} (${t('contact.newTab')})`}
+                >
+                  <InstagramIcon class="contact__icon" aria-hidden="true" />
+                  <span>{person.instagram.handle}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </address>
+</section>
+
+<style>
+  /*
+   * At least one screen below the header: Contact is the last section, so this
+   * lets the KONTAKT link bring its heading right under the header on every
+   * device. The section still grows with its content.
+   */
+  .contact {
+    /* Shared by the desktop card and the two mobile cards. */
+    --contact-card-shadow:
+      0 1px 2px var(--color-shadow-soft), 0 1.25rem 2rem -1.75rem var(--color-shadow-soft);
+
+    min-height: calc(100svh - var(--header-height-mobile));
+    padding: var(--space-xl) var(--frame-padding-inline) var(--space-2xl);
+    color: var(--color-ink);
+  }
+
+  .contact__intro {
+    margin-block-end: var(--space-xl);
+  }
+
+  /*
+   * Business-card panel: a surface only slightly deeper than the Linen page,
+   * defined mainly by a fine Taupe edge, soft corners and a barely visible
+   * shadow, like a printed card on a similarly coloured table.
+   * Mobile: a single centred column.
+   */
+  .contact__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 8vw, 2.5rem) clamp(1.25rem, 6vw, 2rem);
+    border: 1px solid var(--color-panel-border);
+    border-radius: var(--radius-card);
+    background-color: var(--color-panel);
+    box-shadow: var(--contact-card-shadow);
+    font-style: normal;
+    text-align: center;
+  }
+
+  .contact__location {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Icons in Smoky Rose echo the heading; names and details stay dark. */
+  .contact__pin {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-smoky-rose);
+  }
+
+  .contact__label {
+    margin-block-start: var(--space-md);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.22em;
+    padding-inline-start: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .contact__address {
+    margin-block-start: var(--space-2xs);
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    letter-spacing: 0.02em;
+  }
+
+  .contact__people {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    width: 100%;
+  }
+
+  /* Short Taupe hairline before each contact group. */
+  .contact__person::before {
+    content: '';
+    display: block;
+    width: 3rem;
+    height: 1px;
+    margin: 0 auto var(--space-xl);
+    background-color: var(--color-hairline);
+  }
+
+  .contact__name {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .contact__links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-block-start: var(--space-sm);
+    padding: 0;
+  }
+
+  .contact__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: 2.25rem;
+    font-size: 0.9375rem;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.3em;
+    overflow-wrap: anywhere;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .contact__link:hover {
+    color: var(--color-smoky-rose);
+    text-decoration-color: currentColor;
+  }
+
+  .contact__icon {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-smoky-rose);
+  }
+
+  /*
+   * Phones and tablets: two matching cards stacked vertically (studio address,
+   * then both contact people together). The outer container becomes a plain
+   * wrapper and its card styling moves to the two blocks, so both cards share
+   * exactly the same background, border, radius and shadow.
+   */
+  @media (width < 64rem) {
+    .contact__body {
+      gap: clamp(1rem, 4vw, 1.5rem);
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    .contact__location,
+    .contact__people {
+      width: 100%;
+      padding: clamp(1.75rem, 7vw, 2.25rem) clamp(1.25rem, 6vw, 2rem);
+      border: 1px solid var(--color-panel-border);
+      border-radius: var(--radius-card);
+      background-color: var(--color-panel);
+      box-shadow: var(--contact-card-shadow);
+    }
+
+    /* The cards themselves separate the address from the people. */
+    .contact__person:first-child::before {
+      display: none;
+    }
+  }
+
+  /*
+   * Desktop: address on the left, contact people on the right, separated by a
+   * thin vertical Taupe hairline inside the card. Aims for one screen below the
+   * fixed header (`min-height`, so the section still grows if it needs more space).
+   */
+  @media (min-width: 64rem) {
+    .contact {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(100svh - var(--header-height-desktop));
+      padding: clamp(1.5rem, 4svh, 3rem) var(--content-inset);
+    }
+
+    .contact__intro {
+      margin-block-end: clamp(2rem, 5svh, 3.5rem);
+    }
+
+    .contact__body {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      gap: 0;
+      max-width: 62rem;
+      padding: clamp(2.25rem, 6svh, 3.75rem) clamp(2.5rem, 5vw, 4.5rem);
+      text-align: start;
+    }
+
+    .contact__pin {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .contact__address {
+      font-size: 1.75rem;
+    }
+
+    .contact__people {
+      gap: var(--space-xl);
+      padding-block: var(--space-lg);
+      padding-inline-start: clamp(3rem, 6vw, 5.5rem);
+      border-inline-start: 1px solid var(--color-hairline);
+    }
+
+    /* Only between the two people, aligned with the text. */
+    .contact__person::before {
+      display: none;
+    }
+
+    .contact__person + .contact__person::before {
+      display: block;
+      width: 2.5rem;
+      margin: 0 0 var(--space-xl);
+    }
+
+    .contact__name {
+      font-size: 1.5rem;
+    }
+
+    .contact__link {
+      font-size: 1rem;
+    }
+
+    .contact__links {
+      align-items: flex-start;
+    }
+  }
+</style>

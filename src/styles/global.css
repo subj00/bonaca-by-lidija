@@ -12,6 +12,21 @@ html[data-smooth-scroll] {
   scroll-behavior: smooth;
 }
 
+/*
+ * Decorative divider under main section headings (shared by every section).
+ * Drawn as a 1px border rather than a 1px-tall background: borders snap to
+ * whole device pixels, so the line looks equally thin wherever it lands.
+ */
+.section-divider {
+  display: block;
+  width: 3.25rem;
+  height: 0;
+  margin-inline: auto;
+  border: 0;
+  border-block-start: 1px solid var(--color-smoky-rose);
+  opacity: 0.7;
+}
+
 /* Sections stop just below the fixed header when reached through an anchor. */
 [data-section] {
   scroll-margin-top: var(--header-height-mobile);

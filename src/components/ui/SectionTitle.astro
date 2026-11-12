@@ -2,15 +2,26 @@
 interface Props {
   /** Id of the heading, referenced by the section's `aria-labelledby`. */
   id: string;
+  /** Optional small uppercase line under the heading; replaces the divider. */
+  subtitle?: string;
 }
 
-const { id } = Astro.props;
+const { id, subtitle } = Astro.props;
 ---
 
-<!-- Centered section heading with a subtle divider line (Reviews style). -->
+<!--
+  Centered section heading, followed by either a subtle divider line
+  (Reviews style) or a small subtitle (Contact style).
+-->
 <header class="section-title">
   <h2 class="section-title__text" id={id}><slot /></h2>
-  <span class="section-title__rule" aria-hidden="true"></span>
+  {
+    subtitle ? (
+      <p class="section-title__subtitle">{subtitle}</p>
+    ) : (
+      <span class="section-divider section-title__rule" aria-hidden="true" />
+    )
+  }
 </header>
 
 <style>
@@ -22,7 +33,9 @@ const { id } = Astro.props;
     color: var(--color-ink);
   }
 
+  /* Main section headings carry the brand's Smoky Rose (logo and navigation stay black). */
   .section-title__text {
+    color: var(--color-smoky-rose);
     font-family: var(--font-display);
     font-size: clamp(1.625rem, 7.2vw, 2.25rem);
     font-weight: 400;
@@ -34,11 +47,17 @@ const { id } = Astro.props;
     text-wrap: balance;
   }
 
+  /* The line itself is the shared `.section-divider` (global.css); only spacing here. */
   .section-title__rule {
-    width: 2.75rem;
-    height: 1px;
     margin-block-start: var(--space-lg);
-    background-color: var(--color-ink);
+  }
+
+  .section-title__subtitle {
+    margin-block-start: var(--space-sm);
+    font-size: var(--text-xs);
+    letter-spacing: 0.24em;
+    padding-inline-start: 0.24em;
+    text-transform: uppercase;
   }
 
   /* Desktop: compact, controlled title (36–42px). */
@@ -51,6 +70,10 @@ const { id } = Astro.props;
 
     .section-title__rule {
       margin-block-start: var(--space-md);
+    }
+
+    .section-title__subtitle {
+      font-size: var(--text-sm);
     }
   }
 </style>
