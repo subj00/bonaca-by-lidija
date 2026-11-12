@@ -11,20 +11,31 @@
   --color-pale-oak: #D1BE9C;
   --color-taupe: #AA998F;
 
-  /* Semantic colors (derived from the brand palette; black matches the logo) */
-  --color-text: #000000;
+  /*
+   * Text colour experiment: one primary text colour (Smoky Rose) for all text
+   * on light backgrounds. Logos are images and the footer sets its own light
+   * colour, so neither is affected.
+   * To revert, set --color-text-primary back to #000000 and restore:
+   *   --color-ink: color-mix(in srgb, var(--color-smoky-rose) 30%, var(--color-text));
+   *   --color-hairline: color-mix(in srgb, var(--color-taupe) 60%, transparent);
+   */
+  --color-text-primary: var(--color-smoky-rose);
+
+  /* Semantic colors (derived from the brand palette) */
+  --color-text: var(--color-text-primary); /* navigation, SR | EN, icons, body text */
   --color-background: var(--color-linen);
-  --color-ink: color-mix(in srgb, var(--color-smoky-rose) 30%, var(--color-text)); /* very dark brown */
+  --color-ink: var(--color-text-primary); /* reviews, contact details, subtitles */
   --color-card: color-mix(in srgb, var(--color-dusty-rose) 7%, var(--color-linen));
   --color-card-alt: color-mix(in srgb, var(--color-dusty-rose) 15%, var(--color-linen));
   --color-shadow-soft: color-mix(in srgb, var(--color-smoky-rose) 8%, transparent);
   /*
    * Contact "business card": Linen with a touch of Taupe (same warm undertone
-   * as the page, just slightly deeper), a fine Taupe edge and Taupe hairlines.
+   * as the page, just slightly deeper) and a fine Taupe edge. Its divider
+   * hairlines follow the primary text colour, softened like the heading dividers.
    */
   --color-panel: color-mix(in srgb, var(--color-linen) 95%, var(--color-taupe));
   --color-panel-border: color-mix(in srgb, var(--color-taupe) 35%, transparent);
-  --color-hairline: color-mix(in srgb, var(--color-taupe) 60%, transparent);
+  --color-hairline: color-mix(in srgb, var(--color-text-primary) 70%, transparent);
 
   /* Typography */
   --font-body: var(--font-montserrat);
