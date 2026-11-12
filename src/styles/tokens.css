@@ -43,6 +43,11 @@
   --page-gutter: clamp(0.75rem, 2.2vw, 2rem);
   --frame-padding-inline: clamp(1rem, 3.5vw, 3.25rem);
   --frame-padding-block: clamp(1rem, 3vw, 2.25rem);
+  /*
+   * Horizontal inset of the page content from the viewport edges. The header
+   * uses it (logo and SR | EN sit on these edges); desktop sections align to it.
+   */
+  --content-inset: calc(var(--page-gutter) + var(--frame-padding-inline));
   --radius-card: 0.75rem;
 
   /* Logo artwork height / width (1032 / 3662), used to derive heights from widths. */

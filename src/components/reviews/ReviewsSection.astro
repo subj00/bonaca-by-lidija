@@ -159,7 +159,7 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
   }
 
   .reviews__intro {
-    margin-block-end: var(--space-xl);
+    margin-block-end: var(--space-lg);
   }
 
   /*
@@ -288,7 +288,8 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
       flex-direction: column;
       justify-content: center;
       min-height: calc(100svh - var(--header-height-desktop));
-      padding: clamp(0.75rem, 2svh, 2.25rem) clamp(1.5rem, 2.5vw, 3rem);
+      /* Same horizontal inset as the header: the grid spans logo → SR | EN. */
+      padding: clamp(0.75rem, 2svh, 2.25rem) var(--content-inset);
     }
 
     .reviews__intro {
@@ -297,6 +298,11 @@ const toneFor = (index: number) => (index % 2 === 0 ? 'light' : 'rose');
 
     .reviews__carousel {
       width: 100%;
+    }
+
+    .reviews__track {
+      max-width: none;
+      gap: clamp(1.25rem, 1.8vw, 2rem);
     }
   }
 </style>
