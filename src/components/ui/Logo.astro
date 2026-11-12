@@ -1,23 +1,35 @@
 ---
 import { Image } from 'astro:assets';
-import logo from '@/assets/logos/bonaca-logo.png';
+import logoDark from '@/assets/logos/bonaca-logo.png';
+import logoLight from '@/assets/logos/bonaca-logo-white.png';
 import { site } from '@/config/site';
 
 interface Props {
   /** Rendered width of the logo, as a CSS `sizes` value. */
   sizes: string;
+  /** `dark` (black artwork, default) or `light` (white artwork, for dark backgrounds). */
+  variant?: 'dark' | 'light';
+  /** `eager` above the fold (header, hero); `lazy` further down (footer). */
+  loading?: 'eager' | 'lazy';
   class?: string;
 }
 
-const { sizes, class: className } = Astro.props;
+const { sizes, variant = 'dark', loading = 'eager', class: className } = Astro.props;
 
 /*
- * The source file has a large transparent margin around the artwork.
+ * The source files have a transparent margin around the artwork.
  * The wrapper takes the aspect ratio of the visible artwork and the image is
- * offset so only the transparent margin is hidden. The file is not modified.
- * Values are measured from the 4000 × 2250 source: artwork 3662 × 1032 at (179, 683).
+ * offset so only the transparent margin is hidden. The files are not modified.
+ * Artwork boxes measured from each source file:
+ *   dark  — 4000 × 2250 source: artwork 3662 × 1032 at (179, 683)
+ *   light — 1376 × 768 source:  artwork 1261 × 356 at (61, 230)
  */
-const artwork = { x: 179, y: 683, width: 3662, height: 1032 };
+const variants = {
+  dark: { image: logoDark, artwork: { x: 179, y: 683, width: 3662, height: 1032 } },
+  light: { image: logoLight, artwork: { x: 61, y: 230, width: 1261, height: 356 } },
+};
+
+const { image: logo, artwork } = variants[variant];
 
 const percent = (value: number) => `${(value * 100).toFixed(4)}%`;
 
@@ -35,9 +47,9 @@ const imageSizes = `calc((${sizes}) * ${(logo.width / artwork.width).toFixed(3)}
   <Image
     src={logo}
     alt={site.logoText}
-    widths={[320, 640, 960, 1280, 1920]}
+    widths={[320, 640, 960, 1280, 1920].filter((width) => width <= logo.width)}
     sizes={imageSizes}
-    loading="eager"
+    loading={loading}
     style={imageStyle}
   />
 </span>
