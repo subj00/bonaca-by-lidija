@@ -40,14 +40,14 @@ export default defineConfig({
       fallbacks: ['sans-serif'],
     },
     {
-      // Clean, readable upright serif for longer reading text (no italics loaded).
+      // Clean, modern sans-serif for the review text (no italics loaded).
       provider: fontProviders.fontsource(),
-      name: 'Source Serif 4',
-      cssVariable: '--font-source-serif',
+      name: 'DM Sans',
+      cssVariable: '--font-dm-sans',
       weights: ['400'],
       styles: ['normal'],
       subsets: ['latin', 'latin-ext'],
-      fallbacks: ['serif'],
+      fallbacks: ['sans-serif'],
     },
   ],
   i18n: {

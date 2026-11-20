@@ -33,7 +33,7 @@ const { name, text } = Astro.props;
   }
 
   /*
-   * Clean upright serif. Left-aligned on phones and tablets: their narrow
+   * DM Sans (clean, modern sans-serif). Left-aligned on phones and tablets: their narrow
    * lines (about 35–45 characters) would get very wide word gaps if justified.
    */
   .review-card__quote {
@@ -43,6 +43,11 @@ const { name, text } = Astro.props;
     font-size: clamp(1rem, 0.875rem + 0.6vw, 1.0625rem);
     font-style: normal;
     font-weight: 400;
+    /*
+     * A touch of tracking opens up DM Sans at small sizes and keeps the same
+     * line breaks, so the cards keep exactly their previous dimensions.
+     */
+    letter-spacing: 0.01em;
     line-height: 1.7;
     text-align: start;
   }

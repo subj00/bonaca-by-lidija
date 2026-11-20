@@ -40,7 +40,7 @@
   /* Typography */
   --font-body: var(--font-montserrat);
   --font-display: var(--font-tenor);
-  --font-reading: var(--font-source-serif);
+  --font-reading: var(--font-dm-sans);
   --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
