@@ -12,6 +12,7 @@ export interface ContactPerson {
 }
 
 export const studioAddress = 'Blok 63';
+export const studioMapUrl = 'https://maps.app.goo.gl/c9UKSf9Mx7BGVDym6';
 
 export const contactPeople: ContactPerson[] = [
   {
