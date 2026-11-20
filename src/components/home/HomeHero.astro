@@ -21,7 +21,7 @@ const t = useTranslations(locale);
   />
 
   <h1 class="hero__title">
-    <Logo sizes="(min-width: 64rem) min(38vw, 62vh, 36rem), min(74vw, 24rem)" />
+    <Logo sizes="(min-width: 64rem) min(38vw, 62vh, 36rem), min(61vw, 20rem)" />
   </h1>
 </section>
 
@@ -29,28 +29,32 @@ const t = useTranslations(locale);
   /*
    * Mobile layout, derived from the real header height and the initial
    * (small) viewport height:
-   *   photo top    = header height + small gap
+   *   photo top    = header height + a very small gap
    *   photo height = remaining screen height, capped so faces are never cropped
-   *   logo         = anchored near the bottom of the first screen, but never
-   *                  above the end of the photograph's fade
+   *   logo         = centred in the space between the end of the photograph's
+   *                  fade and the bottom of the first screen (at least 1rem
+   *                  below the fade), so the gaps above and below stay balanced
    *   hero height  = at least one full screen (100svh)
    */
   .hero {
-    --photo-top: calc(var(--header-height-mobile) + var(--space-sm));
-    --title-width: min(74vw, 24rem);
+    --photo-top: calc(var(--header-height-mobile) + var(--space-2xs));
+    /* Hero logo about 18% smaller than the original min(74vw, 24rem). */
+    --title-width: min(61vw, 20rem);
     --title-height: calc(var(--title-width) * var(--logo-aspect));
     /*
      * Space reserved below the photograph when sizing it. Kept independent of
-     * the logo position, so moving the logo never resizes the photograph.
+     * the logo size and position, so changing the logo never resizes the photograph.
      */
-    --photo-reserve: calc(var(--title-height) * 0.4 + 4rem);
+    --photo-reserve: calc(min(74vw, 24rem) * var(--logo-aspect) * 0.4 + 4rem);
     --photo-height: clamp(18rem, 100svh - var(--photo-top) - var(--photo-reserve), 125vw);
-    /* Where the photograph's fade ends (matches the 98% stop of its mask). */
-    --photo-fade-end: calc(var(--photo-top) + var(--photo-height) * 0.98);
+    /* Where the photograph's fade ends (matches the last stop of its mask). */
+    --photo-fade-end: calc(var(--photo-top) + var(--photo-height) * 0.99);
     --title-bottom-space: 2rem;
-    --title-top: max(
-      100svh - var(--title-bottom-space) - var(--title-height),
-      var(--photo-fade-end) + var(--space-xs)
+    --title-free-space: calc(
+      100svh - var(--title-bottom-space) - var(--title-height) - var(--photo-fade-end)
+    );
+    --title-top: calc(
+      var(--photo-fade-end) + max(var(--space-md), var(--title-free-space) * 0.5)
     );
 
     position: relative;
@@ -63,7 +67,9 @@ const t = useTranslations(locale);
   /*
    * The photograph is a transparent cut-out, so it is sized by height and
    * centred horizontally: both women stay visible and nothing is stretched.
-   * Only the lower edge fades into the background.
+   * Only the lower edge fades, straight into the Linen page behind it (no
+   * overlay). The eased mask keeps the photo fully opaque down to 66% and
+   * then dissolves gradually, so the fade has no visible edge.
    */
   .hero__photo {
     position: absolute;
@@ -74,7 +80,16 @@ const t = useTranslations(locale);
     max-width: none;
     height: var(--photo-height);
     translate: -50% 0;
-    mask-image: linear-gradient(to bottom, black 60%, transparent 98%);
+    mask-image: linear-gradient(
+      to bottom,
+      black 66%,
+      rgb(0 0 0 / 0.92) 73%,
+      rgb(0 0 0 / 0.74) 80%,
+      rgb(0 0 0 / 0.48) 87%,
+      rgb(0 0 0 / 0.22) 93%,
+      rgb(0 0 0 / 0.06) 97%,
+      transparent 99%
+    );
   }
 
   .hero__title {
@@ -85,20 +100,24 @@ const t = useTranslations(locale);
     translate: -50% 0;
   }
 
-  /* Soft, localized light behind the logo to keep it legible over the photograph. */
-  .hero__title::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    inset: -70% -20% -60%;
-    background: radial-gradient(
-      closest-side,
-      color-mix(in srgb, var(--color-linen) 78%, transparent) 30%,
-      transparent
-    );
-  }
-
   @media (min-width: 64rem) {
+    /*
+     * Desktop only: the logo sits over the photograph, so a soft, localized
+     * light behind it keeps it legible. (On mobile the logo sits below the
+     * photo, where this light only fogged the photo's lower edge.)
+     */
+    .hero__title::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      inset: -70% -20% -60%;
+      background: radial-gradient(
+        closest-side,
+        color-mix(in srgb, var(--color-linen) 78%, transparent) 30%,
+        transparent
+      );
+    }
+
     .hero {
       height: 100svh;
       min-height: 38rem;
