@@ -9,8 +9,8 @@ const { name, text } = Astro.props;
 ---
 
 <!--
-  The background comes from `--review-card-bg`, set by the parent layout
-  (the colour order differs between the mobile slider and the desktop grid).
+  The background and shadow come from `--review-card-bg` / `--review-card-shadow`,
+  set by the parent layout (the slider and the seamless grid differ).
 -->
 <figure class="review-card">
   <blockquote class="review-card__quote">
@@ -26,9 +26,10 @@ const { name, text } = Astro.props;
     height: 100%;
     margin: 0;
     padding: var(--space-lg) clamp(1.125rem, 5vw, 1.5rem) var(--space-xl);
-    border-radius: var(--radius-card);
+    /* Sharp, editorial corners. */
+    border-radius: 0;
     background-color: var(--review-card-bg, var(--color-card));
-    box-shadow: 0 1px 2px var(--color-shadow-soft);
+    box-shadow: var(--review-card-shadow, 0 1px 2px var(--color-shadow-soft));
     color: var(--color-ink);
   }
 

@@ -266,12 +266,18 @@ const t = useTranslations(locale);
     }
   }
 
-  /* Tablet and desktop: all four reviews in a wide two-column grid (16–24px gap). */
+  /*
+   * Tablet and desktop: all four reviews in one seamless two-column grid. No
+   * gaps, corners or shadows between the cards; only the two subtle background
+   * shades tell them apart, so the grid reads as a single rectangular surface.
+   */
   @media (min-width: 48rem) {
     .reviews__track {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(1rem, 1.6vw, 1.5rem);
+      /* Equal rows (sized by the longest review) keep the grid one clean rectangle. */
+      grid-auto-rows: 1fr;
+      gap: 0;
       max-width: 80rem;
       margin-inline: auto;
       overflow: visible;
@@ -280,6 +286,10 @@ const t = useTranslations(locale);
 
     .reviews__controls {
       display: none;
+    }
+
+    .reviews__slide {
+      --review-card-shadow: none;
     }
 
     /*
@@ -320,7 +330,6 @@ const t = useTranslations(locale);
 
     .reviews__track {
       max-width: none;
-      gap: clamp(1.25rem, 1.8vw, 2rem);
     }
   }
 </style>
