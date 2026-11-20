@@ -16,12 +16,12 @@ const t = useTranslations(locale);
     src={heroPhoto}
     alt={t('home.hero.imageAlt')}
     widths={[480, 720, 960, 1312]}
-    sizes="(min-width: 64rem) 100vh, 140vw"
+    sizes="(min-width: 64rem) 62vw, 140vw"
     priority
   />
 
   <h1 class="hero__title">
-    <Logo sizes="(min-width: 64rem) min(38vw, 62vh, 36rem), min(61vw, 20rem)" />
+    <Logo sizes="(min-width: 64rem) min(38vw, 66vh, 38rem), min(61vw, 20rem)" />
   </h1>
 </section>
 
@@ -100,39 +100,88 @@ const t = useTranslations(locale);
     translate: -50% 0;
   }
 
+  /*
+   * Desktop: asymmetrical split. The photograph sits on the left, starting at
+   * the header's left content edge; the large logo is centred in the space to
+   * its right, slightly above the middle of the area below the header.
+   */
   @media (min-width: 64rem) {
-    /*
-     * Desktop only: the logo sits over the photograph, so a soft, localized
-     * light behind it keeps it legible. (On mobile the logo sits below the
-     * photo, where this light only fogged the photo's lower edge.)
-     */
-    .hero__title::before {
-      content: '';
-      position: absolute;
-      z-index: -1;
-      inset: -70% -20% -60%;
-      background: radial-gradient(
-        closest-side,
-        color-mix(in srgb, var(--color-linen) 78%, transparent) 30%,
-        transparent
-      );
-    }
-
     .hero {
+      --hero-height: max(100svh, 38rem);
+      /* Photograph's width / height (525 × 480 source). */
+      --photo-ratio: 1.09375;
+      /*
+       * Size (unchanged by the position below): on shorter screens the
+       * photograph is 20% taller than the space below the header, so its faded
+       * lower part continues below the fold. It never takes more than 62% of
+       * the content width, which keeps room for the logo on wider screens.
+       */
+      --photo-height: min(
+        (var(--hero-height) - var(--header-height-desktop) - 1.75rem) * 1.2,
+        (100vw - 2 * var(--content-inset)) * 0.62 / var(--photo-ratio)
+      );
+      --photo-width: calc(var(--photo-height) * var(--photo-ratio));
+      /*
+       * Position: measured from the visible header row (logo and navigation),
+       * not from the header box, whose bottom padding is transparent empty
+       * space. The hair starts ~1.3% below the top of the image, so the hair
+       * sits about 30–40px below the header row on every desktop size.
+       */
+      --photo-top: calc(
+        var(--header-height-desktop) - var(--header-padding-block-desktop) + 1.25rem
+      );
+      /*
+       * Part of the photograph above the bottom of the hero: all of it when it
+       * ends above the bottom (its fade then completes on the beige page).
+       */
+      --photo-visible: min(var(--photo-height), var(--hero-height) - var(--photo-top));
+      /*
+       * Large logo: about 25–30% larger than before, limited by the free space
+       * to the right of the photograph (with room on both sides).
+       */
+      --title-width: min(
+        38vw,
+        66svh,
+        38rem,
+        100% - 2 * var(--content-inset) - var(--photo-width) - 2 * var(--space-xl)
+      );
+
       height: 100svh;
       min-height: 38rem;
     }
 
     .hero__photo {
-      inset-block-start: 10%;
-      height: 102%;
-      mask-image: none;
+      inset-block-start: var(--photo-top);
+      inset-inline-start: var(--content-inset);
+      width: var(--photo-width);
+      height: var(--photo-height);
+      translate: none;
+      /*
+       * Same soft fade as on mobile, measured on the visible part, so it always
+       * ends exactly at the bottom of the hero (never cut off mid-fade).
+       */
+      mask-image: linear-gradient(
+        to bottom,
+        black calc(var(--photo-visible) * 0.66),
+        rgb(0 0 0 / 0.92) calc(var(--photo-visible) * 0.73),
+        rgb(0 0 0 / 0.74) calc(var(--photo-visible) * 0.8),
+        rgb(0 0 0 / 0.48) calc(var(--photo-visible) * 0.87),
+        rgb(0 0 0 / 0.22) calc(var(--photo-visible) * 0.93),
+        rgb(0 0 0 / 0.06) calc(var(--photo-visible) * 0.97),
+        transparent calc(var(--photo-visible) * 0.99)
+      );
     }
 
+    /*
+     * Centred in the space to the right of the photograph, about 36px above
+     * the middle of the area between the header and the bottom of the hero.
+     */
     .hero__title {
-      inset-block-start: auto;
-      inset-block-end: 8%;
-      width: min(38vw, 62svh, 36rem);
+      inset-block-start: calc(
+        (var(--header-height-desktop) + var(--hero-height)) / 2 - 2.25rem
+      );
+      inset-inline-start: calc((var(--photo-width) + 100%) / 2);
+      translate: -50% -50%;
     }
   }
 </style>
