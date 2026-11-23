@@ -1,0 +1,445 @@
+---
+import ArrowIcon from '@/assets/icons/arrow.svg';
+import type { Review } from '@/data/reviews';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+
+interface Props {
+  /** Prefix for the element ids (unique on the page). */
+  id: string;
+  reviews: Review[];
+  /** Small secondary line under the heading (optional). */
+  subtitle?: string;
+  /** Level of the slider heading, one below the heading it sits under. */
+  headingLevel?: 3 | 4;
+}
+
+const { id, reviews, subtitle, headingLevel = 4 } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const Heading = `h${headingLevel}` as const;
+const titleId = `${id}-title`;
+const pad = (value: number) => String(value).padStart(2, '0');
+---
+
+<!--
+  Compact testimonial slider: one review at a time at every width. Swiping and
+  trackpad scrolling are native (CSS scroll-snap); the script connects the
+  arrows, dots and counter to the scroll position. No automatic rotation.
+-->
+<div class="testimonials" aria-labelledby={titleId} role="region" data-testimonials>
+  <header class="testimonials__header">
+    <Heading class="testimonials__title" id={titleId}>{t('reviews.title')}</Heading>
+    <span class="testimonials__rule" aria-hidden="true"></span>
+    {subtitle && <p class="testimonials__subtitle">{subtitle}</p>}
+  </header>
+
+  <ul
+    class="testimonials__track"
+    id={`${id}-track`}
+    role="list" aria-label={t('reviews.listLabel')} data-testimonials-track>
+    {
+      reviews.map((review, index) => (
+        <li
+          class="testimonials__slide"
+          id={`${id}-${index + 1}`}
+          aria-label={`${index + 1} ${t('reviews.of')} ${reviews.length}`}
+          data-testimonials-slide
+        >
+          <figure class="testimonials__card">
+            <blockquote class="testimonials__quote">
+              <p>{review.text[locale]}</p>
+            </blockquote>
+            <figcaption class="testimonials__name">{review.name}</figcaption>
+          </figure>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="testimonials__controls">
+    <p class="testimonials__counter" aria-hidden="true">
+      <span data-testimonials-current>{pad(1)}</span>
+      <span class="testimonials__counter-total"> / {pad(reviews.length)}</span>
+    </p>
+
+    <div class="testimonials__nav">
+      <button
+        class="testimonials__arrow testimonials__arrow--prev"
+        type="button"
+        aria-label={t('reviews.previous')}
+        aria-controls={`${id}-track`}
+        data-testimonials-prev
+      >
+        <ArrowIcon class="testimonials__arrow-icon" aria-hidden="true" />
+      </button>
+
+      <div class="testimonials__dots">
+        {
+          reviews.map((_, index) => (
+            <button
+              class="testimonials__dot"
+              type="button"
+              aria-label={`${t('reviews.goTo')} ${index + 1}`}
+              aria-controls={`${id}-${index + 1}`}
+              aria-current={index === 0 ? 'true' : undefined}
+              data-testimonials-dot
+            />
+          ))
+        }
+      </div>
+
+      <button
+        class="testimonials__arrow testimonials__arrow--next"
+        type="button"
+        aria-label={t('reviews.next')}
+        aria-controls={`${id}-track`}
+        data-testimonials-next
+      >
+        <ArrowIcon class="testimonials__arrow-icon" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /*
+   * State: `current` is the review shown by the controls. During an arrow or
+   * dot scroll, `target` holds the destination, and scroll events do not touch
+   * the controls (so the dots never flicker through the reviews in between).
+   * When the scroll settles (`scrollend`, or a short pause where it is not
+   * supported) the controls are reconciled with the real position. Any direct
+   * interaction (touch, pointer, wheel) releases the target, so swipes always
+   * win over a programmatic scroll that is still running.
+   */
+  const SETTLE_DELAY = 140;
+
+  document.querySelectorAll<HTMLElement>('[data-testimonials]').forEach((root) => {
+    if (root.dataset.testimonialsReady) return;
+    root.dataset.testimonialsReady = 'true';
+
+    const track = root.querySelector<HTMLElement>('[data-testimonials-track]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-testimonials-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-testimonials-next]');
+    const counter = root.querySelector<HTMLElement>('[data-testimonials-current]');
+    if (!track || !prev || !next || !counter) return;
+
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-testimonials-slide]')];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('[data-testimonials-dot]')];
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const last = slides.length - 1;
+
+    let current = 0;
+    let target: number | null = null;
+    let frame = 0;
+    let settleTimer = 0;
+
+    const clamp = (index: number) => Math.max(0, Math.min(last, index));
+    const offsetOf = (index: number) => slides[index].offsetLeft - slides[0].offsetLeft;
+    const nearestIndex = () => clamp(Math.round(track.scrollLeft / Math.max(1, track.clientWidth)));
+
+    const render = (index: number) => {
+      current = index;
+      dots.forEach((dot, dotIndex) => {
+        if (dotIndex === index) dot.setAttribute('aria-current', 'true');
+        else dot.removeAttribute('aria-current');
+      });
+      prev.disabled = index === 0;
+      next.disabled = index === last;
+      counter.textContent = String(index + 1).padStart(2, '0');
+    };
+
+    const goTo = (index: number) => {
+      const destination = clamp(index);
+      if (destination === current && target === null) return;
+      render(destination);
+      if (Math.abs(track.scrollLeft - offsetOf(destination)) < 1) {
+        target = null;
+        return;
+      }
+      target = destination;
+      track.scrollTo({
+        left: offsetOf(destination),
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      });
+    };
+
+    const settle = () => {
+      window.clearTimeout(settleTimer);
+      // One frame later, so the final scroll position has been applied.
+      requestAnimationFrame(() => {
+        target = null;
+        render(nearestIndex());
+      });
+    };
+
+    const release = () => {
+      target = null;
+    };
+
+    prev.addEventListener('click', () => goTo((target ?? current) - 1));
+    next.addEventListener('click', () => goTo((target ?? current) + 1));
+    dots.forEach((dot, index) => dot.addEventListener('click', () => goTo(index)));
+
+    track.addEventListener(
+      'scroll',
+      () => {
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(settle, SETTLE_DELAY);
+        if (target !== null) return;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          if (target === null) render(nearestIndex());
+        });
+      },
+      { passive: true },
+    );
+    track.addEventListener('scrollend', settle);
+
+    track.addEventListener('pointerdown', release, { passive: true });
+    track.addEventListener('touchstart', release, { passive: true });
+    track.addEventListener('wheel', release, { passive: true });
+
+    // Arrow keys move between reviews while a slider control has focus.
+    root.addEventListener('keydown', (event) => {
+      if (!(event.target instanceof HTMLButtonElement)) return;
+      if (event.key === 'ArrowRight') goTo((target ?? current) + 1);
+      if (event.key === 'ArrowLeft') goTo((target ?? current) - 1);
+    });
+
+    // Keep the shown review in place when the slider's width changes.
+    new ResizeObserver(() => {
+      if (target === null) track.scrollLeft = offsetOf(current);
+    }).observe(track);
+
+    render(0);
+  });
+</script>
+
+<style>
+  .testimonials {
+    max-width: 47.5rem;
+    margin-inline: auto;
+  }
+
+  /*
+   * Subsection heading (much smaller than the section title), a short Taupe
+   * line, and an optional quiet subtitle, all centred.
+   */
+  .testimonials__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-block-end: clamp(1.25rem, 4vw, 1.75rem);
+    text-align: center;
+  }
+
+  .testimonials__title {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: clamp(1.0625rem, 4.2vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: 0.16em;
+    padding-inline-start: 0.16em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .testimonials__rule {
+    width: 2rem;
+    border-block-start: 1px solid var(--color-taupe);
+  }
+
+  .testimonials__subtitle {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-reading);
+    font-size: 0.9375rem;
+    font-style: italic;
+    line-height: 1.5;
+    opacity: 0.85;
+    text-wrap: balance;
+  }
+
+  /*
+   * One review per view, native swipe with snapping. All cards share the height
+   * of the longest review, so the controls below never jump between slides.
+   */
+  .testimonials__track {
+    display: flex;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .testimonials__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .testimonials__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Very light Taupe wash over Linen, with a faint Smoky Rose edge. */
+  .testimonials__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding: clamp(1.25rem, 5vw, 2rem) clamp(1.125rem, 5vw, 2.5rem);
+    border: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
+    background-color: color-mix(in srgb, var(--color-taupe) 10%, var(--color-linen));
+    color: var(--color-ink);
+  }
+
+  .testimonials__quote {
+    margin: 0;
+    font-family: var(--font-reading);
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    line-height: 1.7;
+    text-align: start;
+    text-wrap: pretty;
+  }
+
+  /* Short line above the name, which sits at the bottom of the card. */
+  .testimonials__name {
+    margin-block-start: auto;
+    padding-block-start: var(--space-lg);
+    color: var(--color-smoky-rose);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .testimonials__name::before {
+    content: '';
+    display: block;
+    width: 1.75rem;
+    margin-block-end: var(--space-sm);
+    border-block-start: 1px solid var(--color-smoky-rose);
+  }
+
+  /* ---- Controls: counter on the left, arrows and dots on the right ---- */
+
+  .testimonials__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-block-start: var(--space-sm);
+  }
+
+  .testimonials__counter {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .testimonials__counter-total {
+    opacity: 0.55;
+  }
+
+  .testimonials__nav {
+    display: flex;
+    align-items: center;
+    margin-inline-end: -0.625rem;
+  }
+
+  .testimonials__arrow {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-smoky-rose);
+    cursor: pointer;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .testimonials__arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .testimonials__arrow-icon {
+    width: 1.375rem;
+  }
+
+  .testimonials__arrow--prev .testimonials__arrow-icon {
+    rotate: 180deg;
+  }
+
+  .testimonials__dots {
+    display: flex;
+  }
+
+  /* 28px tap target around a small dot. */
+  .testimonials__dot {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .testimonials__dot::before {
+    content: '';
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--color-taupe) 55%, transparent);
+    transition:
+      background-color var(--duration-base) var(--ease-out),
+      scale var(--duration-base) var(--ease-out);
+  }
+
+  .testimonials__dot[aria-current='true']::before {
+    background-color: var(--color-smoky-rose);
+    scale: 1.15;
+  }
+
+  .testimonials__arrow:focus-visible,
+  .testimonials__dot:focus-visible {
+    outline: 1px solid var(--color-smoky-rose);
+    outline-offset: -2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonials__dot::before,
+    .testimonials__arrow {
+      transition: none;
+    }
+  }
+
+  /* Without JavaScript the reviews still swipe; the controls are hidden. */
+  @media (scripting: none) {
+    .testimonials__controls {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .testimonials__quote {
+      font-size: 1.03125rem;
+      line-height: 1.75;
+    }
+  }
+</style>

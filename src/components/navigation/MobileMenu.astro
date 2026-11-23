@@ -88,9 +88,17 @@ const panelId = 'site-menu';
     );
   }
 
-  /** Keeps keyboard focus inside the open menu (toggle button + links). */
+  /** Keeps keyboard focus inside the open menu (toggle button, links, submenu buttons). */
   function trapFocus(event: KeyboardEvent, toggle: HTMLElement, panel: HTMLElement) {
-    const focusable = [toggle, ...panel.querySelectorAll<HTMLElement>('a[href]')];
+    // Hidden controls (not rendered or `visibility: hidden`) are skipped.
+    const focusable = [
+      toggle,
+      ...[...panel.querySelectorAll<HTMLElement>('a[href], button')].filter(
+        (element) =>
+          element.getClientRects().length > 0 &&
+          getComputedStyle(element).visibility === 'visible',
+      ),
+    ];
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
 
@@ -223,7 +231,8 @@ const panelId = 'site-menu';
     z-index: -1;
     inset: 0;
     display: grid;
-    place-items: center;
+    /* Centred via auto margins on the content, so a tall menu scrolls from its top. */
+    place-items: start center;
     padding: calc(var(--header-height-mobile) + var(--space-lg)) var(--frame-padding-inline)
       var(--space-2xl);
     background-color: var(--color-background);
@@ -261,6 +270,7 @@ const panelId = 'site-menu';
   .mobile-menu__content {
     position: relative;
     z-index: 1;
+    margin-block: auto;
     display: flex;
     flex-direction: column;
     align-items: center;

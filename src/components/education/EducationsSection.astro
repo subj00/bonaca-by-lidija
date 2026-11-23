@@ -1,0 +1,228 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import EducationCourse from '@/components/education/EducationCourse.astro';
+import TestimonialSlider from '@/components/reviews/TestimonialSlider.astro';
+import SectionTitle from '@/components/ui/SectionTitle.astro';
+import { educationArtists } from '@/data/educations';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import { sections } from '@/i18n/routes';
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+/*
+ * Decorative makeup textures (optional). Add transparent PNG/WebP files to
+ *   src/assets/images/education/
+ * named so they include:
+ *   "texture-top"    — e.g. a soft cream/foundation smear, upper right
+ *   "texture-bottom" — e.g. a subtle blush/powder texture, lower left
+ * They are picked up automatically and stay in the side margins, away from
+ * text and buttons (smaller on tablets, hidden on phones where space is tight).
+ * Until the files exist, nothing is rendered.
+ */
+const textureFiles = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/images/education/*.{png,webp,avif,PNG,WEBP,AVIF}',
+  { eager: true },
+);
+const findTexture = (key: string) =>
+  Object.entries(textureFiles).find(([path]) => path.toLowerCase().includes(key))?.[1].default;
+const textures = [
+  { image: findTexture('texture-top'), className: 'educations__texture--top' },
+  { image: findTexture('texture-bottom'), className: 'educations__texture--bottom' },
+].filter((texture) => texture.image);
+---
+
+<section
+  class="educations"
+  id={sections.education}
+  aria-labelledby="educations-title"
+  data-section
+>
+  {
+    textures.map((texture) => (
+      <Image
+        class:list={['educations__texture', texture.className]}
+        src={texture.image!}
+        alt=""
+        aria-hidden="true"
+        widths={[320, 520]}
+        sizes="(min-width: 64rem) 22rem, 14rem"
+        loading="lazy"
+        decoding="async"
+      />
+    ))
+  }
+
+  <div class="educations__intro">
+    <SectionTitle id="educations-title" flanked>{t('education.title')}</SectionTitle>
+  </div>
+
+  <div class="educations__inner">
+    {
+      educationArtists.map((artist) => (
+        <div class="educations__artist" aria-labelledby={`education-${artist.id}-name`} role="group">
+          <header class="educations__artist-header">
+            <h3 class="educations__artist-name" id={`education-${artist.id}-name`}>
+              {artist.name}
+            </h3>
+            <p class="educations__artist-subtitle">{artist.subtitle[locale]}</p>
+          </header>
+
+          <div class="educations__courses">
+            {artist.courses.map((course) => (
+              <EducationCourse course={course} artistName={artist.name} />
+            ))}
+          </div>
+
+          {artist.testimonials && (
+            <div class="educations__testimonials">
+              <TestimonialSlider
+                id={`education-${artist.id}-reviews`}
+                reviews={artist.testimonials}
+                subtitle={artist.testimonialsSubtitle?.[locale]}
+              />
+            </div>
+          )}
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .educations {
+    position: relative;
+    overflow: clip;
+    padding: var(--space-xl) var(--frame-padding-inline) var(--space-2xl);
+    background-color: var(--color-linen);
+    color: var(--color-ink);
+  }
+
+  .educations__intro {
+    margin-block-end: clamp(2rem, 6vw, 3rem);
+  }
+
+  .educations__inner {
+    position: relative;
+    max-width: 62rem;
+    margin-inline: auto;
+  }
+
+  /* ---- Artist groups ---- */
+
+  .educations__artist + .educations__artist {
+    margin-block-start: clamp(3rem, 9vw, 5rem);
+    padding-block-start: clamp(3rem, 9vw, 4.5rem);
+    border-block-start: 1px solid var(--color-panel-border);
+  }
+
+  /* Centred chapter opener: the artist's name and a short line under it. */
+  .educations__artist-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-block-end: clamp(2rem, 6vw, 3.25rem);
+    text-align: center;
+  }
+
+  .educations__artist-name {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-body);
+    /* About 20–25% larger than the 13px artist labels in Services (15.5px → 16px). */
+    font-size: clamp(0.96875rem, 0.875rem + 0.4vw, 1rem);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.4;
+    letter-spacing: 0.28em;
+    padding-inline-start: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .educations__artist-subtitle {
+    font-family: var(--font-reading);
+    font-size: 1rem;
+    font-style: italic;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  /* ---- Courses: open layout, separated by thin horizontal lines ---- */
+
+  .educations__courses > :global(.course + .course) {
+    margin-block-start: clamp(2.5rem, 7vw, 3.5rem);
+    padding-block-start: clamp(2.5rem, 7vw, 3.5rem);
+    border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 18%, transparent);
+  }
+
+  /* After the artist's last course, separated by the same thin line as the courses. */
+  .educations__testimonials {
+    margin-block-start: clamp(2.5rem, 7vw, 3.5rem);
+    padding-block-start: clamp(2.5rem, 7vw, 3.5rem);
+    border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 18%, transparent);
+  }
+
+  /* ---- Decorative textures (side margins only, never behind text) ---- */
+
+  .educations__texture {
+    display: none;
+    position: absolute;
+    z-index: 0;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .educations__intro,
+  .educations__inner {
+    z-index: 1;
+  }
+
+  .educations__intro {
+    position: relative;
+  }
+
+  @media (min-width: 48rem) {
+    .educations__texture {
+      display: block;
+      width: clamp(9rem, 16vw, 13rem);
+      opacity: 0.8;
+    }
+
+    .educations__texture--top {
+      top: 0;
+      right: 0;
+      translate: 30% -10%;
+    }
+
+    .educations__texture--bottom {
+      bottom: 0;
+      left: 0;
+      translate: -30% 10%;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .educations {
+      padding: clamp(1.5rem, 4svh, 3rem) var(--content-inset) clamp(3rem, 8svh, 5rem);
+    }
+
+    .educations__inner {
+      max-width: 60rem;
+    }
+
+    .educations__texture {
+      width: clamp(13rem, 17vw, 22rem);
+      opacity: 1;
+    }
+
+    .educations__texture--top {
+      translate: 18% -6%;
+    }
+
+    .educations__texture--bottom {
+      translate: -18% 6%;
+    }
+  }
+</style>

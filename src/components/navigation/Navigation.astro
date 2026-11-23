@@ -1,7 +1,9 @@
 ---
+import ChevronDownIcon from '@/assets/icons/chevron-down.svg';
+import { educationArtists } from '@/data/educations';
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
-import { getSectionHref, navigationItems, sections } from '@/i18n/routes';
+import { getPath, getSectionHref, navigationItems, sections } from '@/i18n/routes';
 
 interface Props {
   locale: Locale;
@@ -9,27 +11,77 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
+
+/* The four education courses, in page order, for the Educations submenu. */
+const educationCourses = educationArtists.flatMap((artist) =>
+  artist.courses.map((course) => ({
+    title: course.title[locale],
+    href: `${getPath('home', locale)}#${course.id}`,
+  })),
+);
+const submenuId = 'navigation-education-submenu';
 ---
 
 <!--
   In-page navigation: every link is a native anchor to a section of the page
   (smooth scrolling and the URL hash are handled by the browser).
   The script below marks the link of the section currently in view.
+
+  Educations has a submenu with links to its four courses. The label stays a
+  normal link to the section; a separate chevron button opens the submenu
+  (a dropdown on desktop, an expandable list inside the mobile menu).
 -->
 <nav class="navigation" aria-label={t('nav.label')}>
   <ul class="navigation__list" role="list">
-    {navigationItems.map((sectionKey) => (
-      <li>
-        <a
-          class="navigation__link"
-          href={getSectionHref(sectionKey, locale)}
-          aria-current={sectionKey === 'home' ? 'true' : undefined}
-          data-nav-section={sections[sectionKey]}
-        >
-          {t(`nav.${sectionKey}`)}
-        </a>
-      </li>
-    ))}
+    {navigationItems.map((sectionKey) =>
+      sectionKey === 'education' ? (
+        <li class="navigation__item navigation__item--submenu" data-submenu>
+          <div class="navigation__row">
+            <a
+              class="navigation__link"
+              href={getSectionHref(sectionKey, locale)}
+              data-nav-section={sections[sectionKey]}
+            >
+              {t(`nav.${sectionKey}`)}
+            </a>
+            <button
+              class="navigation__submenu-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls={submenuId}
+              aria-label={t('nav.educationCourses')}
+              data-submenu-toggle
+            >
+              <ChevronDownIcon class="navigation__chevron" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="navigation__dropdown" id={submenuId} data-submenu-panel>
+            <div class="navigation__dropdown-inner">
+              <ul class="navigation__submenu" role="list">
+                {educationCourses.map((course) => (
+                  <li>
+                    <a class="navigation__sublink" href={course.href}>
+                      {course.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </li>
+      ) : (
+        <li class="navigation__item">
+          <a
+            class="navigation__link"
+            href={getSectionHref(sectionKey, locale)}
+            aria-current={sectionKey === 'home' ? 'true' : undefined}
+            data-nav-section={sections[sectionKey]}
+          >
+            {t(`nav.${sectionKey}`)}
+          </a>
+        </li>
+      ),
+    )}
   </ul>
 </nav>
 
@@ -91,6 +143,79 @@ const t = useTranslations(locale);
       render();
     }).observe(pageEnd);
   }
+
+  /*
+   * Educations submenu. The chevron button toggles it (`aria-expanded` on the
+   * button, `data-open` on the item; CSS animates). Desktop only: it also opens
+   * on mouse hover and closes on Escape, an outside click or when focus leaves.
+   * Choosing a course closes it; the mobile menu closes itself on any link.
+   */
+  const DESKTOP_QUERY = window.matchMedia('(min-width: 64rem)');
+  const HOVER_CLOSE_DELAY = 150;
+
+  document.querySelectorAll<HTMLElement>('[data-submenu]').forEach((item) => {
+    const toggle = item.querySelector<HTMLButtonElement>('[data-submenu-toggle]');
+    const panel = item.querySelector<HTMLElement>('[data-submenu-panel]');
+    if (!toggle || !panel) return;
+
+    let closeTimer: number | undefined;
+    // Opened by hover: a click on the chevron then keeps it open instead of closing it.
+    let openedByHover = false;
+    const isOpen = () => item.hasAttribute('data-open');
+    const setOpen = (open: boolean) => {
+      window.clearTimeout(closeTimer);
+      if (!open) openedByHover = false;
+      item.toggleAttribute('data-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+
+    toggle.addEventListener('click', () => {
+      if (openedByHover) openedByHover = false;
+      else setOpen(!isOpen());
+    });
+
+    panel.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
+    });
+
+    // Hover (desktop mouse only); a short delay lets the pointer cross into the dropdown.
+    item.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'mouse' || !DESKTOP_QUERY.matches) return;
+      if (!isOpen()) {
+        setOpen(true);
+        openedByHover = true;
+      }
+      window.clearTimeout(closeTimer);
+    });
+    item.addEventListener('pointerleave', (event) => {
+      if (event.pointerType !== 'mouse' || !DESKTOP_QUERY.matches) return;
+      window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (DESKTOP_QUERY.matches && isOpen() && !item.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    });
+
+    item.addEventListener('focusout', (event) => {
+      if (DESKTOP_QUERY.matches && !item.contains(event.relatedTarget as Node | null)) {
+        setOpen(false);
+      }
+    });
+
+    // On phones Escape closes the whole mobile menu (handled by MobileMenu).
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !DESKTOP_QUERY.matches || !isOpen()) return;
+      const focusWasInside = item.contains(document.activeElement);
+      setOpen(false);
+      if (focusWasInside) toggle.focus();
+    });
+
+    // Start closed whenever the layout switches between phone and desktop.
+    DESKTOP_QUERY.addEventListener('change', () => setOpen(false));
+  });
 </script>
 
 <style>
@@ -120,15 +245,222 @@ const t = useTranslations(locale);
     text-decoration-color: currentColor;
   }
 
+  /* ---- Educations submenu: phones (inside the mobile menu) ---- */
+
+  .navigation__item--submenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /*
+   * The label stays centred like the other items; the chevron sits just to its
+   * right, outside the label's box, with a comfortable 44px tap target.
+   */
+  .navigation__row {
+    position: relative;
+  }
+
+  .navigation__submenu-toggle {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 100%;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    translate: 0 -50%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .navigation__submenu-toggle:focus-visible,
+  .navigation__sublink:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .navigation__chevron {
+    width: 1.125rem;
+    height: 1.125rem;
+    transition: rotate var(--duration-base) var(--ease-out);
+  }
+
+  [data-open] > .navigation__row .navigation__chevron {
+    rotate: 180deg;
+  }
+
+  /* Expands smoothly (grid row 0fr → 1fr); hidden content is skipped by keyboard. */
+  .navigation__dropdown {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      grid-template-rows var(--duration-base) var(--ease-out),
+      opacity var(--duration-fast) var(--ease-out),
+      visibility 0s linear var(--duration-base);
+  }
+
+  [data-open] > .navigation__dropdown {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      grid-template-rows var(--duration-base) var(--ease-out),
+      opacity var(--duration-base) var(--ease-out),
+      visibility 0s;
+  }
+
+  .navigation__dropdown-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Indented under a thin line, smaller than the main items. */
+  .navigation__submenu {
+    display: flex;
+    flex-direction: column;
+    margin-block-start: var(--space-sm);
+    padding-inline-start: var(--space-md);
+    border-inline-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 30%, transparent);
+  }
+
+  .navigation__sublink {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  /* ---- Desktop: a compact Linen dropdown under the label ---- */
+
   @media (min-width: 64rem) {
+    /*
+     * Four items: about 58px apart at 1440px, up to 60px on wide screens, and
+     * narrowing on smaller desktops (about 33px at 1024px) so nothing meets the
+     * logo or the language switcher.
+     */
     .navigation__list {
       flex-direction: row;
-      gap: clamp(1rem, 4.4vw - 1.25rem, 3.25rem);
+      gap: clamp(1.5rem, 6vw - 1.75rem, 3.75rem);
     }
 
     .navigation__link {
       font-size: var(--text-xs);
       white-space: nowrap;
+    }
+
+    .navigation__item--submenu {
+      position: relative;
+      display: block;
+    }
+
+    .navigation__row {
+      display: flex;
+      align-items: center;
+    }
+
+    .navigation__submenu-toggle {
+      position: static;
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-inline-end: -0.375rem;
+      translate: none;
+    }
+
+    .navigation__chevron {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+
+    /*
+     * Floating menu centred under the item. The transparent top padding is the
+     * gap below the navigation and bridges it, so the pointer can move into the
+     * menu without leaving the item (the dropdown stays open). It fades in with
+     * a 4px drift only.
+     */
+    .navigation__dropdown {
+      position: absolute;
+      z-index: 20;
+      inset-block-start: 100%;
+      inset-inline-start: 50%;
+      display: block;
+      padding-block-start: 0.875rem;
+      translate: -50% -0.25rem;
+      transition:
+        opacity 160ms var(--ease-out),
+        translate 160ms var(--ease-out),
+        visibility 0s linear 160ms;
+    }
+
+    [data-open] > .navigation__dropdown {
+      translate: -50% 0;
+      transition:
+        opacity 200ms var(--ease-out),
+        translate 200ms var(--ease-out),
+        visibility 0s;
+    }
+
+    .navigation__dropdown-inner {
+      overflow: visible;
+    }
+
+    .navigation__submenu {
+      gap: 0.125rem;
+      min-width: 13.5rem;
+      margin: 0;
+      padding: 0.625rem;
+      border: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
+      border-radius: 0.5625rem;
+      background-color: var(--color-linen);
+      box-shadow:
+        0 1px 2px color-mix(in srgb, var(--color-smoky-rose) 5%, transparent),
+        0 12px 32px -8px color-mix(in srgb, var(--color-smoky-rose) 16%, transparent);
+    }
+
+    .navigation__sublink {
+      min-height: 0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.3125rem;
+      font-size: var(--text-sm);
+      white-space: nowrap;
+      opacity: 0.86;
+      transition:
+        background-color 180ms var(--ease-out),
+        opacity 180ms var(--ease-out);
+    }
+
+    /* Hover: full-strength text and a barely-there Taupe tint. */
+    .navigation__sublink:hover,
+    .navigation__sublink:focus-visible {
+      background-color: color-mix(in srgb, var(--color-taupe) 10%, transparent);
+      opacity: 1;
+    }
+
+    .navigation__sublink:focus-visible {
+      outline-offset: -2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navigation__chevron,
+    .navigation__dropdown,
+    [data-open] > .navigation__dropdown {
+      transition: none;
+    }
+  }
+
+  /* Without JavaScript the submenu cannot open: the label link still works. */
+  @media (scripting: none) {
+    .navigation__submenu-toggle,
+    .navigation__dropdown {
+      display: none;
     }
   }
 </style>

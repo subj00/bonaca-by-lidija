@@ -1,0 +1,433 @@
+---
+import BookOpenIcon from '@/assets/icons/book-open.svg';
+import CalendarIcon from '@/assets/icons/calendar.svg';
+import ClockIcon from '@/assets/icons/clock.svg';
+import RepeatIcon from '@/assets/icons/repeat.svg';
+import SparkleIcon from '@/assets/icons/sparkle.svg';
+import UserIcon from '@/assets/icons/user.svg';
+import UsersIcon from '@/assets/icons/users.svg';
+import AccordionItem from '@/components/ui/AccordionItem.astro';
+import PillLink from '@/components/ui/PillLink.astro';
+import type { Education, EducationIcon } from '@/data/educations';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+
+interface Props {
+  course: Education;
+  /** Artist's full name, for the booking link's accessible label. */
+  artistName: string;
+}
+
+const { course, artistName } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+const icons: Record<EducationIcon, typeof ClockIcon> = {
+  clock: ClockIcon,
+  calendar: CalendarIcon,
+  users: UsersIcon,
+  user: UserIcon,
+  lessons: BookOpenIcon,
+  repeat: RepeatIcon,
+  spark: SparkleIcon,
+};
+
+const titleId = `education-${course.id}-title`;
+const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${artistName} (${t('a11y.newTab')})`;
+---
+
+<!--
+  One education program, always fully visible: number | title, subtitle,
+  description, key facts, optional detail accordions, (price) and the booking
+  button. Only the detailed content sits inside the accordions.
+-->
+<article class="course" id={course.id} aria-labelledby={titleId}>
+  <p class="course__number" aria-hidden="true">{course.number}</p>
+
+  <div class="course__content">
+    <h4 class="course__title" id={titleId}>{course.title[locale]}</h4>
+    <p class="course__subtitle">{course.subtitle[locale]}</p>
+
+    <div class="course__text">
+      {course.description.map((paragraph) => <p>{paragraph[locale]}</p>)}
+    </div>
+
+    <ul class="course__facts" role="list" aria-label={t('education.facts')}>
+      {
+        course.facts.map((fact) => {
+          const Icon = icons[fact.icon];
+          return (
+            <li class="course__fact">
+              <Icon class="course__fact-icon" aria-hidden="true" />
+              <span>{fact.text[locale]}</span>
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    {
+      course.details.length > 0 && (
+        <div class="course__details">
+          {course.details.map((detail) => (
+            <AccordionItem
+              id={`education-${course.id}-${detail.id}`}
+              title={detail.title[locale]}
+              headingLevel={5}
+            >
+              {detail.blocks.map((block) => {
+                switch (block.type) {
+                  case 'paragraphs':
+                    return (
+                      <div class="detail__paragraphs">
+                        {block.items.map((item) => <p>{item[locale]}</p>)}
+                      </div>
+                    );
+                  case 'topics':
+                    return (
+                      <dl class="detail__topics">
+                        {block.items.map((item) => (
+                          <div class="detail__topic">
+                            <dt class="detail__topic-title">{item.title[locale]}</dt>
+                            <dd>{item.text[locale]}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    );
+                  case 'list':
+                    return (
+                      <ul class="detail__list" role="list">
+                        {block.items.map((item) => <li>{item[locale]}</li>)}
+                      </ul>
+                    );
+                  case 'numbered':
+                    return (
+                      <ol class="detail__numbered" role="list">
+                        {block.items.map((item, index) => (
+                          <li>
+                            <span class="detail__numbered-index" aria-hidden="true">
+                              {String(index + 1).padStart(2, '0')}
+                            </span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    );
+                  case 'note':
+                    return (
+                      <p class="detail__note">
+                        <span class="detail__note-label">{block.label[locale]}</span>
+                        <span>{block.text[locale]}</span>
+                      </p>
+                    );
+                  case 'closing':
+                    return <p class="detail__closing">{block.text[locale]}</p>;
+                }
+              })}
+            </AccordionItem>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="course__booking">
+      {
+        course.price && (
+          <p class="course__price">
+            <span class="course__price-label">{course.price.label[locale]}</span>
+            <span class="course__price-value">{course.price.value}</span>
+          </p>
+        )
+      }
+      <div class="course__button">
+        <PillLink href={course.instagramUrl} external aria-label={bookLabel}>
+          {t('education.book')}
+        </PillLink>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  /*
+   * Phones: the number sits above the title, followed by a short hairline;
+   * everything else is stacked. Tablet and desktop: number | thin vertical
+   * line | content.
+   */
+  .course {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-sm);
+    /* Reached through #course-id links: stops just below the fixed header. */
+    scroll-margin-top: calc(var(--header-height-mobile) + var(--space-lg));
+  }
+
+  .course__number {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--color-dusty-rose);
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+  }
+
+  .course__number::after {
+    content: '';
+    width: 2.5rem;
+    border-block-start: 1px solid var(--color-dusty-rose);
+    opacity: 0.8;
+  }
+
+  .course__content {
+    min-width: 0;
+  }
+
+  .course__title {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 6.6vw, 2.125rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .course__subtitle {
+    margin-block-start: var(--space-sm);
+    color: var(--color-smoky-rose);
+    font-family: var(--font-reading);
+    font-size: 1.0625rem;
+    font-style: italic;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .course__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    max-width: 46rem;
+    margin-block-start: var(--space-md);
+    font-size: 0.9375rem;
+    line-height: 1.75;
+  }
+
+  /* Key facts: a quiet metadata strip between two hairlines; items wrap freely. */
+  .course__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-lg);
+    max-width: 46rem;
+    margin-block-start: var(--space-lg);
+    padding-block: var(--space-sm);
+    border-block: 1px solid color-mix(in srgb, var(--color-smoky-rose) 18%, transparent);
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+  }
+
+  .course__fact {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .course__fact-icon {
+    flex-shrink: 0;
+    width: 1.0625rem;
+    height: 1.0625rem;
+    color: var(--color-dusty-rose);
+  }
+
+  .course__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    max-width: 46rem;
+    margin-block-start: var(--space-lg);
+  }
+
+  /* ---- Detailed content inside the accordions ---- */
+
+  .detail__paragraphs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .detail__topics {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding-block-start: var(--space-2xs);
+  }
+
+  .detail__topic dd {
+    margin: 0;
+  }
+
+  .detail__topic-title {
+    margin-block-end: var(--space-2xs);
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .detail__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .detail__list li {
+    position: relative;
+    padding-inline-start: var(--space-lg);
+  }
+
+  /* A small Dusty Rose dash instead of a bullet. */
+  .detail__list li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.85em;
+    width: 0.75rem;
+    border-block-start: 1px solid var(--color-dusty-rose);
+  }
+
+  .detail__numbered {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail__numbered li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding-block: var(--space-xs);
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  .detail__numbered li + li {
+    border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
+  }
+
+  .detail__numbered-index {
+    flex-shrink: 0;
+    min-width: 1.5rem;
+    color: var(--color-dusty-rose);
+    font-size: var(--text-sm);
+  }
+
+  .detail__note {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    margin-block-start: var(--space-md);
+    padding-block-start: var(--space-sm);
+    border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
+  }
+
+  .detail__note-label,
+  .course__price-label {
+    font-size: var(--text-2xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .detail__closing {
+    margin-block-start: var(--space-md);
+    padding-block-start: var(--space-sm);
+    border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
+    font-family: var(--font-reading);
+    font-size: 0.9375rem;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* ---- Price and booking ---- */
+
+  .course__booking {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin-block-start: var(--space-xl);
+  }
+
+  .course__price {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .course__price-value {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+  }
+
+  /* Phones: the button spans the column up to a comfortable width. */
+  .course__button {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 24rem);
+  }
+
+  @media (min-width: 64rem) {
+    .course {
+      scroll-margin-top: calc(var(--header-height-desktop) + var(--space-md));
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .course {
+      grid-template-columns: clamp(4.5rem, 9vw, 7rem) minmax(0, 1fr);
+      column-gap: 0;
+    }
+
+    .course__number {
+      display: block;
+      padding-block-start: 0.125rem;
+      font-size: clamp(2.5rem, 4.4vw, 3.5rem);
+    }
+
+    .course__number::after {
+      content: none;
+    }
+
+    /* Thin vertical line between the number and the content. */
+    .course__content {
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+      border-inline-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 22%, transparent);
+    }
+
+    .course__title {
+      font-size: clamp(2rem, 3.6vw, 2.625rem);
+    }
+
+    .course__subtitle {
+      font-size: 1.125rem;
+    }
+
+    .course__booking {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: var(--space-lg) var(--space-2xl);
+    }
+
+    .course__button {
+      width: auto;
+    }
+  }
+</style>

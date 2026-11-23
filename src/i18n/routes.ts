@@ -18,7 +18,6 @@ export const sections = {
   about: 'o-nama',
   services: 'usluge',
   education: 'edukacije',
-  reviews: 'recenzije',
   contact: 'kontakt',
 } as const;
 
@@ -26,7 +25,7 @@ export type SectionKey = keyof typeof sections;
 
 /**
  * Browser event dispatched on `document` whenever the section in view changes.
- * `detail` is the section's anchor id (e.g. `recenzije`).
+ * `detail` is the section's anchor id (e.g. `usluge`).
  */
 export const SECTION_CHANGE_EVENT = 'bonaca:section-change';
 
@@ -36,7 +35,6 @@ export const navigationItems = [
   'home',
   'services',
   'education',
-  'reviews',
   'contact',
 ] as const satisfies readonly SectionKey[];
 
@@ -44,7 +42,7 @@ export function getPath(routeKey: RouteKey, locale: Locale): string {
   return routes[routeKey][locale];
 }
 
-/** Link to a section of the page, e.g. `/#recenzije` or `/en/#recenzije`. */
+/** Link to a section of the page, e.g. `/#usluge` or `/en/#usluge`. */
 export function getSectionHref(section: SectionKey, locale: Locale): string {
   return `${getPath('home', locale)}#${sections[section]}`;
 }

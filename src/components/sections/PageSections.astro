@@ -1,7 +1,7 @@
 ---
 import ContactSection from '@/components/contact/ContactSection.astro';
+import EducationsSection from '@/components/education/EducationsSection.astro';
 import HomeHero from '@/components/home/HomeHero.astro';
-import ReviewsSection from '@/components/reviews/ReviewsSection.astro';
 import SectionPlaceholder from '@/components/sections/SectionPlaceholder.astro';
 import ServicesSection from '@/components/services/ServicesSection.astro';
 import { getLocale } from '@/i18n/config';
@@ -17,6 +17,5 @@ const t = useTranslations(locale);
 {/* About (O nama) is hidden for now. To restore it, put this back and add 'about' to navigationItems:
 <SectionPlaceholder id={sections.about} title={t('nav.about')} /> */}
 <ServicesSection />
-<SectionPlaceholder id={sections.education} title={t('nav.education')} />
-<ReviewsSection />
+<EducationsSection />
 <ContactSection />

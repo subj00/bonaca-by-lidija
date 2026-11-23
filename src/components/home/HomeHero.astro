@@ -180,56 +180,9 @@ const actions = [
        * allows (the longest label, "PROFESSIONAL MAKE UP", is ~16em wide).
        */
       --service-size: clamp(1rem, (var(--intro-width) - 3rem) / 16 * 0.82, 1.625rem);
-      /*
-       * Soft tonal background: overall strength of the warm tints
-       * (0% = plain Linen, to compare; higher = more visible).
-       */
-      --hero-tint: 14%;
 
       height: 100svh;
       min-height: 38rem;
-    }
-
-    /*
-     * Atmospheric depth behind the photograph and the text: two very large,
-     * very soft tints over the Linen page (colours from the palette only).
-     *   1. a muted blush (Dusty Rose) around the centre-right, behind the
-     *      services and buttons;
-     *   2. a warmer beige (Pale Oak) higher up on the right, so the tint shifts
-     *      gently in warmth instead of reading as one pink shape.
-     * Each fades out over many eased stops (no edge, no banding) and the whole
-     * layer dissolves towards the bottom, so it meets the next section without
-     * a seam. The left side, behind the photograph, stays almost neutral.
-     */
-    .hero::before {
-      --blush: var(--color-dusty-rose);
-      --warm: var(--color-pale-oak);
-
-      content: '';
-      position: absolute;
-      z-index: -2;
-      inset: 0;
-      background-image:
-        radial-gradient(
-          ellipse 62% 78% at 74% 52%,
-          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 1), transparent) 0%,
-          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.86), transparent) 18%,
-          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.64), transparent) 36%,
-          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.4), transparent) 54%,
-          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.2), transparent) 72%,
-          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.06), transparent) 88%,
-          transparent 100%
-        ),
-        radial-gradient(
-          ellipse 55% 60% at 88% 18%,
-          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 1.1), transparent) 0%,
-          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 0.8), transparent) 25%,
-          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 0.45), transparent) 50%,
-          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 0.15), transparent) 75%,
-          transparent 100%
-        );
-      mask-image: linear-gradient(to bottom, black 70%, transparent);
-      pointer-events: none;
     }
 
     .hero__photo {
