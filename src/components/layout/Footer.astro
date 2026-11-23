@@ -4,6 +4,7 @@ import MailIcon from '@/assets/icons/mail.svg';
 import Logo from '@/components/ui/Logo.astro';
 import { site } from '@/config/site';
 import { contactPeople } from '@/data/contact';
+import { studioServices } from '@/data/services';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { getSectionHref } from '@/i18n/routes';
@@ -11,7 +12,7 @@ import { getSectionHref } from '@/i18n/routes';
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
-const services = ['Professional make up', 'Lash & brow lift', 'Educations'];
+const services = studioServices;
 const credit = { label: 'Dotmind', url: 'https://subj-portfolio.vercel.app/sr' };
 const year = new Date().getFullYear();
 

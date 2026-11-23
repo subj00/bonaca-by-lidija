@@ -1,13 +1,22 @@
 ---
 import { Image } from 'astro:assets';
+import ArrowIcon from '@/assets/icons/arrow.svg';
 import heroPhoto from '@/assets/images/home/home-page.png';
 import Logo from '@/components/ui/Logo.astro';
+import { studioServices } from '@/data/services';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
-import { sections } from '@/i18n/routes';
+import { getSectionHref, sections } from '@/i18n/routes';
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
+
+// Desktop calls to action (three identical buttons).
+const actions = [
+  { label: t('home.hero.ctaServices'), href: getSectionHref('services', locale) },
+  { label: t('home.hero.ctaEducation'), href: getSectionHref('education', locale) },
+  { label: t('home.hero.ctaContact'), href: getSectionHref('contact', locale) },
+];
 ---
 
 <section class="hero" id={sections.home} data-section>
@@ -20,9 +29,33 @@ const t = useTranslations(locale);
     priority
   />
 
+  <!--
+    Mobile: the large logo below the photograph. Desktop: the logo stays in the
+    header only, so this heading is kept for assistive technology but hidden.
+  -->
   <h1 class="hero__title">
-    <Logo sizes="(min-width: 64rem) min(38vw, 66vh, 38rem), min(61vw, 20rem)" />
+    <Logo sizes="(min-width: 64rem) 1px, min(61vw, 20rem)" />
   </h1>
+
+  <!-- Desktop only: the three services and the calls to action. -->
+  <div class="hero__intro">
+    <ul class="hero__services" role="list">
+      {studioServices.map((service) => <li class="hero__service">{service}</li>)}
+    </ul>
+
+    <ul class="hero__actions" role="list">
+      {
+        actions.map((action) => (
+          <li>
+            <a class="hero__action" href={action.href}>
+              <span>{action.label}</span>
+              <ArrowIcon class="hero__action-icon" aria-hidden="true" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </section>
 
 <style>
@@ -100,10 +133,15 @@ const t = useTranslations(locale);
     translate: -50% 0;
   }
 
+  /* Services and calls to action exist on desktop only. */
+  .hero__intro {
+    display: none;
+  }
+
   /*
    * Desktop: asymmetrical split. The photograph sits on the left, starting at
-   * the header's left content edge; the large logo is centred in the space to
-   * its right, slightly above the middle of the area below the header.
+   * the header's left content edge; the services and calls to action are
+   * centred in the space to its right, below the header.
    */
   @media (min-width: 64rem) {
     .hero {
@@ -135,19 +173,63 @@ const t = useTranslations(locale);
        * ends above the bottom (its fade then completes on the beige page).
        */
       --photo-visible: min(var(--photo-height), var(--hero-height) - var(--photo-top));
+      /* Free width to the right of the photograph (inside the content edges). */
+      --intro-width: calc(100vw - 2 * var(--content-inset) - var(--photo-width));
       /*
-       * Large logo: about 25–30% larger than before, limited by the free space
-       * to the right of the photograph (with room on both sides).
+       * Service labels: about 18% smaller than the largest size the column
+       * allows (the longest label, "PROFESSIONAL MAKE UP", is ~16em wide).
        */
-      --title-width: min(
-        38vw,
-        66svh,
-        38rem,
-        100% - 2 * var(--content-inset) - var(--photo-width) - 2 * var(--space-xl)
-      );
+      --service-size: clamp(1rem, (var(--intro-width) - 3rem) / 16 * 0.82, 1.625rem);
+      /*
+       * Soft tonal background: overall strength of the warm tints
+       * (0% = plain Linen, to compare; higher = more visible).
+       */
+      --hero-tint: 14%;
 
       height: 100svh;
       min-height: 38rem;
+    }
+
+    /*
+     * Atmospheric depth behind the photograph and the text: two very large,
+     * very soft tints over the Linen page (colours from the palette only).
+     *   1. a muted blush (Dusty Rose) around the centre-right, behind the
+     *      services and buttons;
+     *   2. a warmer beige (Pale Oak) higher up on the right, so the tint shifts
+     *      gently in warmth instead of reading as one pink shape.
+     * Each fades out over many eased stops (no edge, no banding) and the whole
+     * layer dissolves towards the bottom, so it meets the next section without
+     * a seam. The left side, behind the photograph, stays almost neutral.
+     */
+    .hero::before {
+      --blush: var(--color-dusty-rose);
+      --warm: var(--color-pale-oak);
+
+      content: '';
+      position: absolute;
+      z-index: -2;
+      inset: 0;
+      background-image:
+        radial-gradient(
+          ellipse 62% 78% at 74% 52%,
+          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 1), transparent) 0%,
+          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.86), transparent) 18%,
+          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.64), transparent) 36%,
+          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.4), transparent) 54%,
+          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.2), transparent) 72%,
+          color-mix(in srgb, var(--blush) calc(var(--hero-tint) * 0.06), transparent) 88%,
+          transparent 100%
+        ),
+        radial-gradient(
+          ellipse 55% 60% at 88% 18%,
+          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 1.1), transparent) 0%,
+          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 0.8), transparent) 25%,
+          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 0.45), transparent) 50%,
+          color-mix(in srgb, var(--warm) calc(var(--hero-tint) * 0.15), transparent) 75%,
+          transparent 100%
+        );
+      mask-image: linear-gradient(to bottom, black 70%, transparent);
+      pointer-events: none;
     }
 
     .hero__photo {
@@ -172,16 +254,132 @@ const t = useTranslations(locale);
       );
     }
 
-    /*
-     * Centred in the space to the right of the photograph, about 36px above
-     * the middle of the area between the header and the bottom of the hero.
-     */
+    /* The logo lives in the header on desktop; the heading stays for screen readers. */
     .hero__title {
-      inset-block-start: calc(
-        (var(--header-height-desktop) + var(--hero-height)) / 2 - 2.25rem
-      );
-      inset-inline-start: calc((var(--photo-width) + 100%) / 2);
-      translate: -50% -50%;
+      inset: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /*
+     * Right column: from the photograph's right edge to the header's right
+     * content edge, vertically centred in the area below the header.
+     */
+    .hero__intro {
+      position: absolute;
+      inset-block: var(--header-height-desktop) 0;
+      inset-inline: calc(var(--content-inset) + var(--photo-width)) var(--content-inset);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      /* Space from the hairline below the services to the first button. */
+      gap: clamp(3.125rem, 5svh + 1.125rem, 4.125rem);
+      color: var(--color-smoky-rose);
+    }
+
+    /*
+     * Tenor Sans, the same display face as the section headings, framed by
+     * two short decorative hairlines (above the first and below the last label).
+     */
+    .hero__services {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.5rem, 1.6svh, 0.875rem);
+      padding: 0;
+    }
+
+    .hero__services::before,
+    .hero__services::after {
+      content: '';
+      width: 5rem;
+      border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 55%, transparent);
+    }
+
+    .hero__services::before {
+      margin-block-end: clamp(0.75rem, 2svh, 1.25rem);
+    }
+
+    .hero__services::after {
+      margin-block-start: clamp(0.75rem, 2svh, 1.25rem);
+    }
+
+    /* All three labels in Smoky Rose, the same colour as the button hover fill. */
+    .hero__service {
+      font-family: var(--font-display);
+      font-size: var(--service-size);
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: 0.14em;
+      /* Balances the trailing letter-spacing so each label is optically centred. */
+      padding-inline-start: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--color-smoky-rose);
+    }
+
+    /*
+     * Three identical outlined pill buttons (Smoky Rose text, arrow and border
+     * on the Linen page); on hover each fills with Smoky Rose and turns white.
+     */
+    .hero__actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      width: min(17rem, 100%);
+      padding: 0;
+    }
+
+    .hero__action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      height: 3rem;
+      padding-inline: var(--space-lg);
+      border: 1px solid var(--color-smoky-rose);
+      /* Soft pill shape. */
+      border-radius: 9999px;
+      font-size: var(--text-xs);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.18em;
+      text-decoration: none;
+      text-transform: uppercase;
+      background-color: transparent;
+      color: var(--color-smoky-rose);
+      transition:
+        background-color 250ms var(--ease-out),
+        color 250ms var(--ease-out);
+    }
+
+    .hero__action-icon {
+      flex-shrink: 0;
+      width: 1.125rem;
+      height: 0.5625rem;
+      transition: translate 250ms var(--ease-out);
+    }
+
+    /* Only for pointers that can hover; touch screens keep the default look. */
+    @media (hover: hover) {
+      .hero__action:hover {
+        background-color: var(--color-smoky-rose);
+        color: var(--color-white);
+      }
+
+      .hero__action:hover .hero__action-icon {
+        translate: 3px 0;
+      }
+    }
+  }
+
+  @media (min-width: 64rem) and (prefers-reduced-motion: reduce) {
+    .hero__action,
+    .hero__action-icon {
+      transition: none;
     }
   }
 </style>
