@@ -514,6 +514,16 @@ const placeholderCount = 4;
   @media (min-width: 64rem) {
     .gallery__track {
       --gallery-per-view: 4;
+      /* A little more air between the photos on desktop (14px). */
+      --gallery-gap: 0.875rem;
+    }
+
+    /*
+     * Desktop cards use a slightly wider shape (6:7 instead of 4:5), so the
+     * wide carousels do not become too tall.
+     */
+    .gallery__image {
+      aspect-ratio: 6 / 7;
     }
   }
 </style>
