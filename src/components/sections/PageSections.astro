@@ -3,6 +3,7 @@ import ContactSection from '@/components/contact/ContactSection.astro';
 import HomeHero from '@/components/home/HomeHero.astro';
 import ReviewsSection from '@/components/reviews/ReviewsSection.astro';
 import SectionPlaceholder from '@/components/sections/SectionPlaceholder.astro';
+import ServicesSection from '@/components/services/ServicesSection.astro';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { sections } from '@/i18n/routes';
@@ -14,7 +15,7 @@ const t = useTranslations(locale);
 <!-- All sections of the one-page website, in navigation order. -->
 <HomeHero />
 <SectionPlaceholder id={sections.about} title={t('nav.about')} />
-<SectionPlaceholder id={sections.services} title={t('nav.services')} />
+<ServicesSection />
 <SectionPlaceholder id={sections.education} title={t('nav.education')} />
 <ReviewsSection />
 <ContactSection />

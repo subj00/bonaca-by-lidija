@@ -4,22 +4,25 @@ interface Props {
   id: string;
   /** Optional small uppercase line under the heading; replaces the divider. */
   subtitle?: string;
+  /** Thin lines on both sides of the heading instead of the divider below it. */
+  flanked?: boolean;
 }
 
-const { id, subtitle } = Astro.props;
+const { id, subtitle, flanked = false } = Astro.props;
 ---
 
 <!--
   Centered section heading, followed by either a subtle divider line
-  (Reviews style) or a small subtitle (Contact style).
+  (Reviews style) or a small subtitle (Contact style), or flanked by two thin
+  lines (Services style).
 -->
-<header class="section-title">
+<header class:list={['section-title', { 'section-title--flanked': flanked }]}>
   <h2 class="section-title__text" id={id}><slot /></h2>
   {
     subtitle ? (
       <p class="section-title__subtitle">{subtitle}</p>
     ) : (
-      <span class="section-divider section-title__rule" aria-hidden="true" />
+      !flanked && <span class="section-divider section-title__rule" aria-hidden="true" />
     )
   }
 </header>
@@ -52,6 +55,29 @@ const { id, subtitle } = Astro.props;
     margin-block-start: var(--space-lg);
   }
 
+  /* Flanked: the same thin line as `.section-divider`, on both sides of the text. */
+  .section-title--flanked .section-title__text {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 1.5rem);
+    /* The lines are symmetric on their own (see ::after), so no balancing padding. */
+    padding-inline-start: 0;
+  }
+
+  .section-title--flanked .section-title__text::before,
+  .section-title--flanked .section-title__text::after {
+    content: '';
+    flex-shrink: 0;
+    width: clamp(2.5rem, 9vw, 4rem);
+    border-block-start: 1px solid var(--color-smoky-rose);
+    opacity: 0.7;
+  }
+
+  /* Cancels the trailing letter-spacing before the right-hand line. */
+  .section-title--flanked .section-title__text::after {
+    margin-inline-start: -0.16em;
+  }
+
   .section-title__subtitle {
     margin-block-start: var(--space-sm);
     font-size: var(--text-xs);
@@ -66,6 +92,10 @@ const { id, subtitle } = Astro.props;
       font-size: clamp(2.25rem, 2.6vw, 2.625rem);
       letter-spacing: 0.14em;
       padding-inline-start: 0.14em;
+    }
+
+    .section-title--flanked .section-title__text::after {
+      margin-inline-start: -0.14em;
     }
 
     .section-title__rule {

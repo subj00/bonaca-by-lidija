@@ -1,0 +1,206 @@
+---
+import ChevronDownIcon from '@/assets/icons/chevron-down.svg';
+
+interface Item {
+  id: string;
+  title: string;
+  description: string;
+}
+
+interface Props {
+  /** Prefix for the element ids (unique on the page). */
+  idPrefix: string;
+  items: Item[];
+  /** Index of the row that starts expanded (the first one, as in the design). */
+  openIndex?: number;
+  /** Level of the row headings, one below the heading they sit under. */
+  headingLevel?: 3 | 4;
+}
+
+const { idPrefix, items, openIndex = 0, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+---
+
+<!--
+  Compact rows with thin borders. Each title is a button that shows or hides its
+  description (`aria-expanded` + `data-open`, animated); rows open and close
+  independently.
+  Without JavaScript every description is shown.
+-->
+<div class="accordion" data-accordion>
+  {
+    items.map((item, index) => {
+      const open = index === openIndex;
+      const buttonId = `${idPrefix}-${item.id}-button`;
+      const panelId = `${idPrefix}-${item.id}-panel`;
+      return (
+        <div class="accordion__item">
+          <Heading class="accordion__heading">
+            <button
+              class="accordion__trigger"
+              id={buttonId}
+              type="button"
+              aria-expanded={open ? 'true' : 'false'}
+              aria-controls={panelId}
+              data-accordion-trigger
+            >
+              <span>{item.title}</span>
+              <ChevronDownIcon class="accordion__chevron" aria-hidden="true" />
+            </button>
+          </Heading>
+          <div
+            class="accordion__panel"
+            id={panelId}
+            role="region"
+            aria-labelledby={buttonId}
+            data-open={open ? '' : undefined}
+          >
+            <div class="accordion__panel-inner">
+              <p class="accordion__text">{item.description}</p>
+            </div>
+          </div>
+        </div>
+      );
+    })
+  }
+</div>
+
+<script>
+  /*
+   * The open state lives on the button (`aria-expanded`) and on the panel
+   * (`data-open`); CSS animates the change. Collapsed panels are `visibility:
+   * hidden` once closed, so their text is skipped by keyboard and screen readers.
+   */
+  document.querySelectorAll<HTMLElement>('[data-accordion]').forEach((accordion) => {
+    if (accordion.dataset.accordionReady) return;
+    accordion.dataset.accordionReady = 'true';
+
+    accordion
+      .querySelectorAll<HTMLButtonElement>('[data-accordion-trigger]')
+      .forEach((trigger) => {
+        const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+        if (!panel) return;
+        trigger.addEventListener('click', () => {
+          const open = trigger.getAttribute('aria-expanded') !== 'true';
+          trigger.setAttribute('aria-expanded', String(open));
+          panel.toggleAttribute('data-open', open);
+        });
+      });
+  });
+</script>
+
+<style>
+  .accordion {
+    --accordion-duration: 320ms;
+    --accordion-ease: cubic-bezier(0.45, 0, 0.25, 1);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .accordion__item {
+    border: 1px solid var(--color-panel-border);
+  }
+
+  .accordion__heading {
+    margin: 0;
+    font: inherit;
+  }
+
+  .accordion__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-xs) var(--space-md);
+    border: 0;
+    /* Header: a light wash of Pale Oak over the Linen page (palette colours only). */
+    background-color: color-mix(in srgb, var(--color-pale-oak) 22%, var(--color-linen));
+    color: var(--color-smoky-rose);
+    font-family: inherit;
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.16em;
+    text-align: start;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .accordion__chevron {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    transition: rotate var(--accordion-duration) var(--accordion-ease);
+  }
+
+  .accordion__trigger[aria-expanded='true'] .accordion__chevron {
+    rotate: 180deg;
+  }
+
+  /*
+   * Height animates through the grid row (0fr → 1fr), which works with any
+   * amount of text, unlike `height: auto`. The text fades in alongside it.
+   * When closing, `visibility` switches off only after the row has collapsed.
+   */
+  .accordion__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      grid-template-rows var(--accordion-duration) var(--accordion-ease),
+      opacity calc(var(--accordion-duration) * 0.7) var(--accordion-ease),
+      visibility 0s linear var(--accordion-duration);
+  }
+
+  .accordion__panel[data-open] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      grid-template-rows var(--accordion-duration) var(--accordion-ease),
+      opacity var(--accordion-duration) var(--accordion-ease) calc(var(--accordion-duration) * 0.15),
+      visibility 0s linear 0s;
+  }
+
+  .accordion__panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /*
+   * Description on the page colour, divided from the header by a hairline.
+   * Padding and line sit inside the clipped area, so a closed row has no leftover
+   * space or line, and nothing changes colour while it animates.
+   */
+  .accordion__text {
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    border-block-start: 1px solid var(--color-panel-border);
+    background-color: var(--color-linen);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--color-ink);
+  }
+
+  /* Without JavaScript the rows cannot open, so every description is shown. */
+  @media (scripting: none) {
+    .accordion__panel {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .accordion__chevron {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .accordion {
+      --accordion-duration: 0s;
+    }
+  }
+</style>

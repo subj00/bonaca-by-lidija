@@ -1,0 +1,472 @@
+---
+import { getImage, Image } from 'astro:assets';
+import ChevronRightIcon from '@/assets/icons/chevron-right.svg';
+import type { GalleryImage } from '@/data/serviceImages';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+
+interface Props {
+  /** One artist's portfolio only. */
+  images: GalleryImage[];
+  /** Accessible name of the gallery, e.g. "Galerija radova: Lidija". */
+  label: string;
+  class?: string;
+}
+
+const { images, label, class: className } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+/*
+ * Enlarged view: the whole, uncropped photo, generated from the original file
+ * (same format, at most 2400px on the long side). The originals are 5–20 MB,
+ * far too heavy to send to a phone as they are.
+ */
+const LIGHTBOX_LONG_SIDE = 2400;
+const slides = await Promise.all(
+  images.map(async (image) => {
+    const { width, height } = image.src;
+    const scale = Math.min(1, LIGHTBOX_LONG_SIDE / Math.max(width, height));
+    const large = await getImage({
+      src: image.src,
+      width: Math.round(width * scale),
+      format: image.src.format === 'png' ? 'png' : 'jpg',
+      quality: 82,
+    });
+    return {
+      ...image,
+      large: {
+        src: large.src,
+        width: Math.round(width * scale),
+        height: Math.round(height * scale),
+      },
+    };
+  }),
+);
+
+/* Neutral frames in the same layout while the artist's folder is still empty. */
+const placeholderCount = 4;
+---
+
+<!--
+  Portfolio carousel: about four photos side by side on desktop, a swipeable
+  row on phones (native scroll-snap). Thin arrows and small dots are connected
+  by the script below.
+-->
+<div
+  class:list={['gallery', className]}
+  role="group"
+  aria-roledescription="carousel"
+  aria-label={label}
+  data-gallery
+  data-lightbox-close={t('lightbox.close')}
+  data-lightbox-zoom={t('lightbox.zoom')}
+  data-lightbox-previous={t('lightbox.previous')}
+  data-lightbox-next={t('lightbox.next')}
+  data-lightbox-of={t('lightbox.of')}
+>
+  <ul class="gallery__track" role="list" data-gallery-track>
+    {
+      slides.length > 0
+        ? slides.map((image) => (
+            <li class="gallery__slide">
+              <a
+                class="gallery__link"
+                href={image.large.src}
+                data-pswp-width={image.large.width}
+                data-pswp-height={image.large.height}
+                aria-label={`${image.alt[locale]} (${t('services.enlarge')})`}
+              >
+                <Image
+                  class="gallery__image"
+                  src={image.src}
+                  alt={image.alt[locale]}
+                  widths={[320, 480, 720]}
+                  sizes="(min-width: 64rem) 15rem, (min-width: 48rem) 30vw, 72vw"
+                  loading="lazy"
+                  decoding="async"
+                  style={`object-position: 50% ${image.focusY}`}
+                />
+              </a>
+            </li>
+          ))
+        : Array.from({ length: placeholderCount }, () => (
+            <li class="gallery__slide" aria-hidden="true">
+              <div class="gallery__image gallery__image--placeholder" />
+            </li>
+          ))
+    }
+  </ul>
+
+  <button
+    class="gallery__arrow gallery__arrow--prev"
+    type="button"
+    aria-label={t('services.galleryPrevious')}
+    data-gallery-prev
+  >
+    <ChevronRightIcon class="gallery__arrow-icon" aria-hidden="true" />
+  </button>
+
+  <button
+    class="gallery__arrow gallery__arrow--next"
+    type="button"
+    aria-label={t('services.galleryNext')}
+    data-gallery-next
+  >
+    <ChevronRightIcon class="gallery__arrow-icon" aria-hidden="true" />
+  </button>
+
+  <!-- Filled by the script: one dot per group of visible photos. -->
+  <div class="gallery__dots" data-gallery-dots data-label={t('services.galleryGoTo')}></div>
+</div>
+
+<script>
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+  import 'photoswipe/style.css';
+
+  /*
+   * Swiping and scrolling are native (scroll-snap). This script only connects
+   * the arrows and dots to the scroll position. A "page" is the group of photos
+   * visible at once (about four on desktop, one on phones).
+   */
+  const MAX_DOTS = 8;
+
+  function initGallery(root: HTMLElement) {
+    const track = root.querySelector<HTMLElement>('[data-gallery-track]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-gallery-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-gallery-next]');
+    const dotsBox = root.querySelector<HTMLElement>('[data-gallery-dots]');
+    if (!track || !prev || !next || !dotsBox) return;
+
+    const slides = [...track.children] as HTMLElement[];
+    if (slides.length === 0) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let perView = 1;
+    let pages = 1;
+    let current = 0;
+    let frame = 0;
+
+    const maxScroll = () => track.scrollWidth - track.clientWidth;
+
+    const pageOffset = (page: number) =>
+      page >= pages - 1
+        ? maxScroll()
+        : slides[page * perView].offsetLeft - slides[0].offsetLeft;
+
+    const pageAtScroll = () => {
+      if (track.scrollLeft >= maxScroll() - 2) return pages - 1;
+      let nearest = 0;
+      for (let page = 0; page < pages; page += 1) {
+        if (
+          Math.abs(pageOffset(page) - track.scrollLeft) <
+          Math.abs(pageOffset(nearest) - track.scrollLeft)
+        ) {
+          nearest = page;
+        }
+      }
+      return nearest;
+    };
+
+    const render = (page: number) => {
+      current = page;
+      prev.disabled = page === 0;
+      next.disabled = page === pages - 1;
+      dotsBox.querySelectorAll('button').forEach((dot, index) => {
+        if (index === page) dot.setAttribute('aria-current', 'true');
+        else dot.removeAttribute('aria-current');
+      });
+      const counter = dotsBox.querySelector('[data-gallery-counter]');
+      if (counter) counter.textContent = `${page + 1} / ${pages}`;
+    };
+
+    const goTo = (page: number) => {
+      const target = Math.max(0, Math.min(pages - 1, page));
+      track.scrollTo({
+        left: pageOffset(target),
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      });
+      render(target);
+    };
+
+    // Dots for a few pages; a quiet "2 / 12" counter when there are many.
+    const buildDots = () => {
+      dotsBox.replaceChildren();
+      if (pages > MAX_DOTS) {
+        const counter = document.createElement('span');
+        counter.className = 'gallery__counter';
+        counter.dataset.galleryCounter = '';
+        counter.setAttribute('aria-hidden', 'true');
+        dotsBox.append(counter);
+        return;
+      }
+      for (let page = 0; page < pages; page += 1) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'gallery__dot';
+        dot.setAttribute('aria-label', `${dotsBox.dataset.label ?? ''} ${page + 1}`);
+        dot.addEventListener('click', () => goTo(page));
+        dotsBox.append(dot);
+      }
+    };
+
+    const measure = () => {
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      const slideWidth = slides[0].getBoundingClientRect().width;
+      const fit = Math.round((track.clientWidth + gap) / (slideWidth + gap));
+      const nextPerView = Math.max(1, fit);
+      const nextPages = Math.ceil(slides.length / nextPerView);
+      if (nextPerView !== perView || nextPages !== pages || !dotsBox.hasChildNodes()) {
+        perView = nextPerView;
+        pages = nextPages;
+        buildDots();
+      }
+      // Everything already visible: no controls needed.
+      root.toggleAttribute('data-gallery-static', pages <= 1);
+      render(pageAtScroll());
+    };
+
+    prev.addEventListener('click', () => goTo(current - 1));
+    next.addEventListener('click', () => goTo(current + 1));
+
+    track.addEventListener(
+      'scroll',
+      () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => render(pageAtScroll()));
+      },
+      { passive: true },
+    );
+
+    new ResizeObserver(measure).observe(track);
+    measure();
+  }
+
+  /*
+   * Enlarged view (PhotoSwipe 5), one lightbox per artist, so each one only
+   * moves through that artist's photos, in carousel order. The PhotoSwipe core
+   * is downloaded the first time a photo is opened. Swipe, pinch-zoom, wheel
+   * zoom, arrow keys and Escape are built in.
+   */
+  function initLightbox(root: HTMLElement) {
+    const track = root.querySelector<HTMLElement>('[data-gallery-track]');
+    if (!track?.querySelector('a[data-pswp-width]')) return;
+    const labels = root.dataset;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: track,
+      children: 'a[data-pswp-width]',
+      pswpModule: () => import('photoswipe'),
+      // The carousel photos are cropped, so a fade reads better than a zoom-from-thumbnail.
+      showHideAnimationType: 'fade',
+      bgOpacity: 0.88,
+      wheelToZoom: true,
+      padding: { top: 48, bottom: 48, left: 16, right: 16 },
+      closeTitle: labels.lightboxClose,
+      zoomTitle: labels.lightboxZoom,
+      arrowPrevTitle: labels.lightboxPrevious,
+      arrowNextTitle: labels.lightboxNext,
+      indexIndicatorSep: ` ${labels.lightboxOf ?? '/'} `,
+    });
+
+    // Alternative text of each photo for the enlarged image.
+    lightbox.addFilter('itemData', (itemData) => {
+      const img = itemData.element?.querySelector('img');
+      if (img) itemData.alt = img.alt;
+      return itemData;
+    });
+
+    lightbox.init();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((root) => {
+    // Guard against running twice for the same gallery.
+    if (root.dataset.galleryReady) return;
+    root.dataset.galleryReady = 'true';
+    initGallery(root);
+    initLightbox(root);
+  });
+</script>
+
+<style>
+  /*
+   * Phones: the photos swipe in one row with the next photo peeking in; the
+   * arrows sit on both sides of the dots below. From 48rem the arrows move to
+   * the sides of the row.
+   */
+  .gallery {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'track track track'
+      'prev dots next';
+    align-items: center;
+    row-gap: var(--space-sm);
+  }
+
+  .gallery__track {
+    --gallery-gap: var(--space-xs);
+    --gallery-per-view: 1.35;
+
+    grid-area: track;
+    display: flex;
+    gap: var(--gallery-gap);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .gallery__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery__slide {
+    flex: 0 0
+      calc(
+        (100% - var(--gallery-gap) * (var(--gallery-per-view) - 1)) / var(--gallery-per-view)
+      );
+    scroll-snap-align: start;
+  }
+
+  /* One fixed card per photo: every card has the same size and clips its photo. */
+  .gallery__link {
+    display: block;
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  /*
+   * Identical 4:5 cards in both galleries (portrait, like the photographs, so
+   * faces need little cropping). Each photo fills its card (cover, no zoom) and
+   * sets its own vertical framing (`object-position`, from the image data).
+   */
+  .gallery__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .gallery__image--placeholder {
+    background-color: color-mix(in srgb, var(--color-pale-oak) 22%, var(--color-linen));
+  }
+
+  .gallery__arrow {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--color-panel-border);
+    border-radius: 50%;
+    background: none;
+    color: var(--color-smoky-rose);
+    cursor: pointer;
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .gallery__arrow--prev {
+    grid-area: prev;
+  }
+
+  .gallery__arrow--next {
+    grid-area: next;
+  }
+
+  .gallery__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  @media (hover: hover) {
+    .gallery__arrow:not(:disabled):hover {
+      border-color: var(--color-smoky-rose);
+    }
+  }
+
+  .gallery__arrow-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .gallery__arrow--prev .gallery__arrow-icon {
+    rotate: 180deg;
+  }
+
+  .gallery__dots {
+    grid-area: dots;
+    display: flex;
+    justify-content: center;
+    min-height: 1.5rem;
+  }
+
+  /* Small dot inside a comfortable tap target. */
+  .gallery__dots :global(.gallery__dot) {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .gallery__dots :global(.gallery__dot)::before {
+    content: '';
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--color-taupe) 55%, transparent);
+    transition: background-color var(--duration-base) var(--ease-out);
+  }
+
+  .gallery__dots :global(.gallery__dot[aria-current='true'])::before {
+    background-color: var(--color-smoky-rose);
+  }
+
+  .gallery__dots :global(.gallery__counter) {
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    align-self: center;
+  }
+
+  /* Nothing to scroll, or no JavaScript: just the photos. */
+  .gallery[data-gallery-static] .gallery__arrow,
+  .gallery[data-gallery-static] .gallery__dots {
+    visibility: hidden;
+  }
+
+  @media (scripting: none) {
+    .gallery__arrow,
+    .gallery__dots {
+      display: none;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .gallery {
+      grid-template-areas:
+        'prev track next'
+        '. dots .';
+      column-gap: var(--space-sm);
+    }
+
+    .gallery__track {
+      --gallery-per-view: 3;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .gallery__track {
+      --gallery-per-view: 4;
+    }
+  }
+</style>

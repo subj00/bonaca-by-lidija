@@ -32,6 +32,19 @@ const sr = {
   'reviews.next': 'Sledeća recenzija',
   'reviews.goTo': 'Prikaži recenziju',
   'reviews.of': 'od',
+  'services.book': 'Zakaži termin',
+  'services.onLocationCta': 'Upit za šminkanje na terenu',
+  'services.onLocationInfo': 'Za više informacija o šminkanju na terenu, pišite na:',
+  'services.galleryLabel': 'Galerija radova',
+  'services.galleryPrevious': 'Prethodne fotografije',
+  'services.galleryNext': 'Sledeće fotografije',
+  'services.galleryGoTo': 'Prikaži grupu fotografija',
+  'services.enlarge': 'otvara uvećanu fotografiju',
+  'lightbox.close': 'Zatvori',
+  'lightbox.zoom': 'Uvećaj ili umanji',
+  'lightbox.previous': 'Prethodna fotografija',
+  'lightbox.next': 'Sledeća fotografija',
+  'lightbox.of': 'od',
 } as const;
 
 export type TranslationKey = keyof typeof sr;
@@ -66,6 +79,19 @@ const en: Dictionary = {
   'reviews.next': 'Next review',
   'reviews.goTo': 'Show review',
   'reviews.of': 'of',
+  'services.book': 'Book an appointment',
+  'services.onLocationCta': 'On-location makeup inquiry',
+  'services.onLocationInfo': 'For more information about on-location makeup, contact us at:',
+  'services.galleryLabel': 'Portfolio',
+  'services.galleryPrevious': 'Previous photos',
+  'services.galleryNext': 'Next photos',
+  'services.galleryGoTo': 'Show photo group',
+  'services.enlarge': 'opens a larger photo',
+  'lightbox.close': 'Close',
+  'lightbox.zoom': 'Zoom in or out',
+  'lightbox.previous': 'Previous photo',
+  'lightbox.next': 'Next photo',
+  'lightbox.of': 'of',
 };
 
 const dictionaries: Record<Locale, Dictionary> = { sr, en };

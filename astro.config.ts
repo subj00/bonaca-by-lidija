@@ -30,8 +30,14 @@ export default defineConfig({
       fallbacks: ['sans-serif'],
     },
     {
-      // Modern, elegant display face for page headings.
-      provider: fontProviders.fontsource(),
+      /*
+       * Modern, elegant display face for page headings.
+       * Loaded from Google Fonts, not Fontsource: the Fontsource files carry
+       * TrueType hinting (VDMX/hdmx tables) that makes Windows clip the accents
+       * of capital Š, Ž, Ć, Č below about 40px. Google's build is the same
+       * typeface without that hinting, so every Serbian letter renders fully.
+       */
+      provider: fontProviders.google(),
       name: 'Tenor Sans',
       cssVariable: '--font-tenor',
       weights: ['400'],
@@ -40,12 +46,12 @@ export default defineConfig({
       fallbacks: ['sans-serif'],
     },
     {
-      // Clean, modern sans-serif for the review text (no italics loaded).
+      // Clean, modern sans-serif for the review text; italic for the services' highlight lines.
       provider: fontProviders.fontsource(),
       name: 'DM Sans',
       cssVariable: '--font-dm-sans',
       weights: ['400'],
-      styles: ['normal'],
+      styles: ['normal', 'italic'],
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['sans-serif'],
     },

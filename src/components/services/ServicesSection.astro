@@ -1,0 +1,533 @@
+---
+import { Image } from 'astro:assets';
+import ClockIcon from '@/assets/icons/clock.svg';
+import MapPinIcon from '@/assets/icons/map-pin.svg';
+import ServiceAccordion from '@/components/services/ServiceAccordion.astro';
+import ServiceGallery from '@/components/services/ServiceGallery.astro';
+import PillLink from '@/components/ui/PillLink.astro';
+import SectionTitle from '@/components/ui/SectionTitle.astro';
+import { anaService, buildMailto, lidijaService } from '@/data/serviceDetails';
+import { anaGallery, anaPortrait, lidijaGallery, lidijaPortrait } from '@/data/serviceImages';
+import { getLocale } from '@/i18n/config';
+import { useTranslations } from '@/i18n/dictionaries';
+import { sections } from '@/i18n/routes';
+
+const locale = getLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+const lidija = lidijaService;
+const ana = anaService;
+const inquiry = lidija.inquiry[locale];
+const inquiryHref = buildMailto(lidija.email, inquiry.subject, inquiry.body);
+const newTab = t('a11y.newTab');
+
+const lidijaPhoto = { image: lidijaPortrait, className: 'artist__portrait--lidija' };
+const anaPhoto = { image: anaPortrait, className: 'artist__portrait--ana' };
+const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
+---
+
+<section class="services" id={sections.services} aria-labelledby="services-title" data-section>
+  <div class="services__intro">
+    <SectionTitle id="services-title" flanked>{t('nav.services')}</SectionTitle>
+  </div>
+
+  <!--
+    Lidija. Desktop: portrait | name, service and details, then her carousel,
+    then both buttons. Phones: the same order, stacked.
+  -->
+  <article class="artist artist--lidija" aria-labelledby="services-lidija-title">
+    <div class:list={['artist__portrait', lidijaPhoto.className]}>
+      {
+        lidijaPhoto.image ? (
+          <Image
+            class="artist__portrait-image"
+            src={lidijaPhoto.image.src}
+            alt={lidijaPhoto.image.alt[locale]}
+            widths={[360, 540, 720]}
+            sizes={portraitSizes}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="artist__portrait-image artist__portrait-image--placeholder" aria-hidden="true" />
+        )
+      }
+    </div>
+
+    <div class="artist__content">
+      <p class="artist__name">{lidija.name}</p>
+      <h3 class="artist__service" id="services-lidija-title">{lidija.title[locale]}</h3>
+      <p class="artist__highlight">{lidija.highlight[locale]}</p>
+      <div class="artist__text">
+        {lidija.description[locale].map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+      <ul class="artist__facts" role="list">
+        <li>
+          <ClockIcon class="artist__fact-icon" aria-hidden="true" />
+          <span>
+            {lidija.duration.label[locale]}{' '}
+            <strong class="artist__fact-value">{lidija.duration.value[locale]}</strong>
+          </span>
+        </li>
+        <li>
+          <MapPinIcon class="artist__fact-icon" aria-hidden="true" />
+          <strong class="artist__fact-value">{lidija.onLocation[locale]}</strong>
+        </li>
+      </ul>
+    </div>
+
+    <ServiceGallery
+      class="artist__gallery"
+      images={lidijaGallery}
+      label={`${t('services.galleryLabel')}: ${lidija.fullName}`}
+    />
+
+    <div class="artist__actions">
+      <div class="artist__buttons">
+        <PillLink
+          href={lidija.instagramUrl}
+          external
+          aria-label={`${t('services.book')}: Instagram ${lidija.fullName} (${newTab})`}
+        >
+          {t('services.book')}
+        </PillLink>
+        <!-- Phones and tablets: opens the visitor's email app with a prefilled inquiry. -->
+        <div class="artist__inquiry-button">
+          <PillLink href={inquiryHref} variant="outline" mailIcon>
+            {t('services.onLocationCta')}
+          </PillLink>
+        </div>
+      </div>
+
+      <!--
+        Desktop: a quiet line with the address instead of the button (many
+        desktop browsers have no email app set up for mailto: links). The
+        address is plain, selectable text, easy to copy.
+      -->
+      <p class="artist__inquiry-note">
+        <span>{t('services.onLocationInfo')}</span>
+        <span class="artist__email">{lidija.email}</span>
+      </p>
+    </div>
+  </article>
+
+  <!--
+    Ana. Desktop: portrait | name and four treatment rows, then her one shared
+    carousel, then the booking button. Phones: portrait, name, rows, booking
+    button, and the carousel last.
+  -->
+  <article class="artist artist--ana" aria-labelledby="services-ana-title">
+    <div class:list={['artist__portrait', anaPhoto.className]}>
+      {
+        anaPhoto.image ? (
+          <Image
+            class="artist__portrait-image"
+            src={anaPhoto.image.src}
+            alt={anaPhoto.image.alt[locale]}
+            widths={[360, 540, 720]}
+            sizes={portraitSizes}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="artist__portrait-image artist__portrait-image--placeholder" aria-hidden="true" />
+        )
+      }
+    </div>
+
+    <div class="artist__content">
+      <h3 class="artist__name" id="services-ana-title">{ana.name}</h3>
+      <ServiceAccordion
+        idPrefix="services-ana"
+        headingLevel={4}
+        items={ana.treatments.map((treatment) => ({
+          id: treatment.id,
+          title: treatment.title[locale],
+          description: treatment.description[locale],
+        }))}
+      />
+      <p class="artist__note">{ana.addOnNote[locale]}</p>
+    </div>
+
+    <ServiceGallery
+      class="artist__gallery"
+      images={anaGallery}
+      label={`${t('services.galleryLabel')}: ${ana.fullName}`}
+    />
+
+    <div class="artist__actions">
+      <div class="artist__buttons">
+        <PillLink
+          href={ana.instagramUrl}
+          external
+          aria-label={`${t('services.book')}: Instagram ${ana.fullName} (${newTab})`}
+        >
+          {t('services.book')}
+        </PillLink>
+      </div>
+    </div>
+  </article>
+</section>
+
+<style>
+  .services {
+    padding: var(--space-xl) var(--frame-padding-inline) var(--space-2xl);
+    color: var(--color-ink);
+  }
+
+  .services__intro {
+    margin-block-end: clamp(2rem, 6vw, 3rem);
+  }
+
+  /*
+   * One artist block. Phones (single column): portrait → text → carousel →
+   * buttons. Ana swaps the last two (buttons before her carousel).
+   */
+  .artist {
+    --artist-portrait-width: 30%;
+    --artist-portrait-ratio: 11 / 12;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'portrait'
+      'content'
+      'gallery'
+      'actions';
+    row-gap: clamp(1.5rem, 5vw, 2.25rem);
+    max-width: 62rem;
+    margin-inline: auto;
+  }
+
+  .artist--ana {
+    --artist-portrait-width: 27%;
+    --artist-portrait-ratio: 4 / 5;
+
+    grid-template-areas:
+      'portrait'
+      'content'
+      'actions'
+      'gallery';
+  }
+
+  /* Thin separator between the two artists. */
+  .artist + .artist {
+    margin-block-start: clamp(2.5rem, 8vw, 4rem);
+    padding-block-start: clamp(2.5rem, 8vw, 4rem);
+    border-block-start: 1px solid var(--color-panel-border);
+  }
+
+  /* Phones: both portraits about 18% narrower than the full text width, centred. */
+  .artist__portrait {
+    grid-area: portrait;
+    width: min(82%, 21.5rem);
+    margin-inline: auto;
+  }
+
+  .artist__portrait-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  /* Lidija: framed from the top, so her whole head has comfortable headroom. */
+  .artist__portrait--lidija .artist__portrait-image {
+    object-position: 50% 2%;
+  }
+
+  /*
+   * Ana stands further back in her photo: a modest zoom (same frame size)
+   * centred on her head and shoulders brings her closer.
+   */
+  .artist__portrait--ana {
+    overflow: hidden;
+  }
+
+  .artist__portrait--ana .artist__portrait-image {
+    scale: 1.3;
+    transform-origin: 34% 36%;
+  }
+
+  .artist__portrait-image--placeholder {
+    background-color: color-mix(in srgb, var(--color-pale-oak) 22%, var(--color-linen));
+  }
+
+  .artist__content {
+    grid-area: content;
+    min-width: 0;
+  }
+
+  /* Shared by both artists: same font, size, weight, spacing and colour. */
+  .artist__name {
+    color: var(--color-smoky-rose);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .artist--ana .artist__name {
+    margin-block-end: var(--space-md);
+  }
+
+  .artist__service {
+    margin-block-start: var(--space-xs);
+    color: var(--color-smoky-rose);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 6.4vw, 2rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .artist__highlight {
+    margin-block-start: var(--space-md);
+    color: var(--color-smoky-rose);
+    font-family: var(--font-reading);
+    font-size: 1.125rem;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .artist__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-md);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+
+  /* Duration and on-location availability: stacked on phones. */
+  .artist__facts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-lg);
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+  }
+
+  .artist__facts li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  /* The key facts ("1h", "Mogućnost izlaska na teren") read a little stronger. */
+  .artist__fact-value {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .artist__fact-icon {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--color-smoky-rose);
+  }
+
+  .artist__note {
+    margin-block-start: var(--space-md);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    opacity: 0.85;
+  }
+
+  .artist :global(.artist__gallery) {
+    grid-area: gallery;
+  }
+
+  /*
+   * Carousel ↔ buttons: 10px closer than the other rows (both artists, every
+   * layout). Ana on phones has the buttons above her carousel, so there the
+   * carousel moves up instead.
+   */
+  .artist__actions {
+    margin-block-start: -0.625rem;
+  }
+
+  .artist--ana .artist__actions {
+    margin-block-start: 0;
+  }
+
+  .artist--ana :global(.artist__gallery) {
+    margin-block-start: -0.625rem;
+  }
+
+  .artist__actions {
+    grid-area: actions;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  /* Phones: buttons stacked, full width up to a comfortable maximum. */
+  .artist__buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+    width: min(100%, 24rem);
+  }
+
+  /*
+   * On-location inquiry: the outlined mailto: button on phones and tablets,
+   * a quiet line with the address on desktop. Only one is ever shown.
+   */
+  .artist__inquiry-button {
+    display: contents;
+  }
+
+  .artist__inquiry-note {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+
+  .artist__inquiry-note span:first-child {
+    opacity: 0.85;
+  }
+
+  /* Slightly more present than the sentence above; one click selects all of it. */
+  .artist__email {
+    font-size: 0.9375rem;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.04em;
+    user-select: all;
+  }
+
+  /*
+   * Tablet and desktop: portrait | text in two columns, then the carousel and
+   * the buttons across the full width (for both artists).
+   */
+  @media (min-width: 48rem) {
+    .artist,
+    .artist--ana {
+      grid-template-columns: var(--artist-portrait-width) minmax(0, 1fr);
+      grid-template-areas:
+        'portrait content'
+        'gallery gallery'
+        'actions actions';
+      column-gap: clamp(2rem, 4.5vw, 3.5rem);
+      row-gap: clamp(2rem, 4vw, 2.75rem);
+    }
+
+    .artist__portrait {
+      width: 100%;
+      align-self: start;
+    }
+
+    .artist__portrait-image {
+      aspect-ratio: var(--artist-portrait-ratio);
+    }
+
+    /*
+     * Lidija: portrait and text column always share one height. The portrait
+     * keeps its proportions as a minimum height; when the text needs more room
+     * (narrower desktops), the portrait grows with the row and the photo fills
+     * it (cover, framed from the top), so the bottom edges always line up.
+     */
+    .artist__portrait--lidija {
+      position: relative;
+      align-self: stretch;
+      aspect-ratio: var(--artist-portrait-ratio);
+    }
+
+    .artist__portrait--lidija .artist__portrait-image {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      aspect-ratio: auto;
+    }
+
+    .artist__content {
+      align-self: center;
+    }
+
+    /*
+     * Lidija: the text column is as tall as the portrait. Name and heading sit
+     * at the top, the description follows, and the facts row is pushed to the
+     * bottom, so its bottom edge is the portrait's bottom edge.
+     */
+    .artist--lidija .artist__content {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .artist--lidija .artist__facts {
+      margin-block-start: auto;
+      padding-block-start: var(--space-lg);
+    }
+
+    /* Ana from 48rem: carousel first, then the button (as Lidija). */
+    .artist--ana .artist__actions {
+      margin-block-start: -0.625rem;
+    }
+
+    .artist--ana :global(.artist__gallery) {
+      margin-block-start: 0;
+    }
+
+    .artist__facts {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Thin vertical divider between the two details. */
+    .artist__facts li + li {
+      margin-inline-start: var(--space-lg);
+      padding-inline-start: var(--space-lg);
+      border-inline-start: 1px solid var(--color-hairline);
+    }
+
+    .artist__buttons {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: auto;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .services {
+      padding: clamp(1.5rem, 4svh, 3rem) var(--content-inset) clamp(3rem, 8svh, 5rem);
+    }
+
+    .services__intro {
+      margin-block-end: clamp(2.5rem, 6svh, 3.5rem);
+    }
+
+    .artist__service {
+      font-size: clamp(1.75rem, 2.3vw, 2.25rem);
+    }
+
+    .artist__highlight {
+      font-size: 1.25rem;
+    }
+
+    .artist__text {
+      max-width: 36rem;
+    }
+
+    .artist__inquiry-button {
+      display: none;
+    }
+
+    .artist__inquiry-note {
+      display: flex;
+    }
+  }
+</style>

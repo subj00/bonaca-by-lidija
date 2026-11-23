@@ -1,0 +1,109 @@
+---
+import ArrowIcon from '@/assets/icons/arrow.svg';
+import MailIcon from '@/assets/icons/mail.svg';
+
+interface Props {
+  href: string;
+  /** `primary`: filled Smoky Rose. `outline`: thin Smoky Rose outline. */
+  variant?: 'primary' | 'outline';
+  /** Small mail icon before the label (email links). */
+  mailIcon?: boolean;
+  /** Opens in a new tab with safe `rel` attributes. */
+  external?: boolean;
+  'aria-label'?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  mailIcon = false,
+  external = false,
+  'aria-label': ariaLabel,
+} = Astro.props;
+---
+
+<!--
+  Pill-shaped call-to-action link, shared by every booking and inquiry button on
+  the Services section, so all of them look and behave exactly the same.
+-->
+<a
+  class:list={['pill-link', `pill-link--${variant}`]}
+  href={href}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener noreferrer' : undefined}
+  aria-label={ariaLabel}
+>
+  {mailIcon && <MailIcon class="pill-link__mail" aria-hidden="true" />}
+  <span class="pill-link__label"><slot /></span>
+  <ArrowIcon class="pill-link__arrow" aria-hidden="true" />
+</a>
+
+<style>
+  .pill-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-height: 3rem;
+    padding: var(--space-xs) var(--space-lg);
+    border: 1px solid var(--color-smoky-rose);
+    border-radius: 9999px;
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.18em;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      background-color 250ms var(--ease-out),
+      color 250ms var(--ease-out);
+  }
+
+  .pill-link--primary {
+    background-color: var(--color-smoky-rose);
+    color: var(--color-white);
+  }
+
+  .pill-link--outline {
+    background-color: transparent;
+    color: var(--color-smoky-rose);
+  }
+
+  .pill-link__mail {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .pill-link__arrow {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 0.5625rem;
+    transition: translate 250ms var(--ease-out);
+  }
+
+  /* Hover swaps fill and outline; touch screens keep the default look. */
+  @media (hover: hover) {
+    .pill-link--primary:hover {
+      background-color: transparent;
+      color: var(--color-smoky-rose);
+    }
+
+    .pill-link--outline:hover {
+      background-color: var(--color-smoky-rose);
+      color: var(--color-white);
+    }
+
+    .pill-link:hover .pill-link__arrow {
+      translate: 3px 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pill-link,
+    .pill-link__arrow {
+      transition: none;
+    }
+  }
+</style>
