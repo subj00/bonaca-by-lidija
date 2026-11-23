@@ -23,11 +23,11 @@ const newTab = t('a11y.newTab');
 
 const lidijaPhoto = { image: lidijaPortrait, className: 'artist__portrait--lidija' };
 const anaPhoto = { image: anaPortrait, className: 'artist__portrait--ana' };
-const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
+const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw';
 ---
 
 <section class="services" id={sections.services} aria-labelledby="services-title" data-section>
-  <div class="services__intro">
+  <div class="services__intro" data-reveal="services-start">
     <SectionTitle id="services-title" flanked>{t('nav.services')}</SectionTitle>
   </div>
 
@@ -35,7 +35,7 @@ const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
     Lidija. Desktop: portrait | name, service and details, then her carousel,
     then both buttons. Phones: the same order, stacked.
   -->
-  <article class="artist artist--lidija" aria-labelledby="services-lidija-title">
+  <article class="artist artist--lidija" aria-labelledby="services-lidija-title" data-reveal="services-start">
     <div class:list={['artist__portrait', lidijaPhoto.className]}>
       {
         lidijaPhoto.image ? (
@@ -43,6 +43,7 @@ const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
             class="artist__portrait-image"
             src={lidijaPhoto.image.src}
             alt={lidijaPhoto.image.alt[locale]}
+            width={720}
             widths={[360, 540, 720]}
             sizes={portraitSizes}
             loading="lazy"
@@ -116,7 +117,7 @@ const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
     carousel, then the booking button. Phones: portrait, name, rows, booking
     button, and the carousel last.
   -->
-  <article class="artist artist--ana" aria-labelledby="services-ana-title">
+  <article class="artist artist--ana" aria-labelledby="services-ana-title" data-reveal>
     <div class:list={['artist__portrait', anaPhoto.className]}>
       {
         anaPhoto.image ? (
@@ -124,6 +125,7 @@ const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
             class="artist__portrait-image"
             src={anaPhoto.image.src}
             alt={anaPhoto.image.alt[locale]}
+            width={720}
             widths={[360, 540, 720]}
             sizes={portraitSizes}
             loading="lazy"
@@ -322,7 +324,7 @@ const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
     margin-block-start: var(--space-md);
     font-size: var(--text-sm);
     line-height: 1.6;
-    opacity: 0.85;
+    opacity: 0.9;
   }
 
   .artist :global(.artist__gallery) {
@@ -382,7 +384,7 @@ const portraitSizes = '(min-width: 64rem) 18rem, (min-width: 48rem) 30vw, 92vw';
   }
 
   .artist__inquiry-note span:first-child {
-    opacity: 0.85;
+    opacity: 0.9;
   }
 
   /* Slightly more present than the sentence above; one click selects all of it. */

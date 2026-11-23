@@ -1,0 +1,121 @@
+---
+import type { Locale } from '@/i18n/config';
+import { site } from '@/config/site';
+import { contactPeople, studioAddress } from '@/data/contact';
+import { educationArtists } from '@/data/educations';
+import { anaService, lidijaService } from '@/data/serviceDetails';
+import { getPath, sections } from '@/i18n/routes';
+
+interface Props {
+  locale: Locale;
+  /** Page description, reused for the business. */
+  description: string;
+  /** Absolute URL of the link-preview image, if any. */
+  imageUrl?: string | undefined;
+}
+
+const { locale, description, imageUrl } = Astro.props;
+
+/*
+ * JSON-LD (schema.org) for the home page, built only from content that is on
+ * the page: the studio, its two artists, their services and the four courses.
+ * Deliberately left out until the studio confirms them: city and postcode,
+ * opening hours, phone, prices (except the one shown, Ana's 100 €), ratings.
+ * Google's Course rich results also need prices and course instances for every
+ * course, so these courses help Google understand the page but do not yet
+ * qualify for that special result.
+ */
+const siteUrl = Astro.site ?? Astro.url;
+const pageUrl = new URL(getPath('home', locale), siteUrl).href;
+const anchor = (id: string) => `${pageUrl}#${id}`;
+const rootUrl = new URL('/', siteUrl).href;
+
+const studioId = `${rootUrl}#studio`;
+const [lidijaContact, anaContact] = contactPeople;
+const people = [
+  { id: `${rootUrl}#lidija`, contact: lidijaContact },
+  { id: `${rootUrl}#ana`, contact: anaContact },
+];
+const lidijaId = people[0].id;
+const anaId = people[1].id;
+
+const services = [
+  {
+    name: lidijaService.title[locale],
+    description: lidijaService.description[locale].join(' '),
+    provider: lidijaId,
+  },
+  ...anaService.treatments.map((treatment) => ({
+    name: treatment.title[locale],
+    description: treatment.description[locale],
+    provider: anaId,
+  })),
+];
+
+const providerByArtist: Record<string, string> = { lidija: lidijaId, ana: anaId };
+
+const courses = educationArtists.flatMap((artist) =>
+  artist.courses.map((course) => ({
+    '@type': 'Course',
+    '@id': anchor(course.id),
+    url: anchor(course.id),
+    name: course.title[locale],
+    description: [course.subtitle[locale], ...course.description.map((p) => p[locale])].join(' '),
+    provider: { '@id': providerByArtist[artist.id] },
+    ...(course.price && {
+      offers: {
+        '@type': 'Offer',
+        price: course.price.value.replace(/[^\d.,]/g, '').replace(',', '.'),
+        priceCurrency: 'EUR',
+        url: anchor(course.id),
+      },
+    }),
+  })),
+);
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${rootUrl}#website`,
+      url: rootUrl,
+      name: site.name,
+      inLanguage: ['sr-Latn', 'en'],
+      publisher: { '@id': studioId },
+    },
+    {
+      '@type': 'BeautySalon',
+      '@id': studioId,
+      name: site.name,
+      url: pageUrl,
+      description,
+      ...(imageUrl && { image: imageUrl }),
+      address: { '@type': 'PostalAddress', streetAddress: studioAddress },
+      sameAs: contactPeople.map((person) => person.instagram.url),
+      employee: people.map((person) => ({ '@id': person.id })),
+      makesOffer: services.map((service) => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: service.name,
+          description: service.description,
+          url: anchor(sections.services),
+          provider: { '@id': service.provider },
+        },
+      })),
+    },
+    ...people.map(({ id, contact }) => ({
+      '@type': 'Person',
+      '@id': id,
+      name: contact.name,
+      email: `mailto:${contact.email}`,
+      sameAs: [contact.instagram.url],
+      worksFor: { '@id': studioId },
+    })),
+    ...courses,
+  ],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(graph)} />

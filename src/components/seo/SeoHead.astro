@@ -4,6 +4,7 @@ import { getImage } from 'astro:assets';
 import { locales, ogLocales, type Locale } from '@/i18n/config';
 import { getAlternateLinks, getPath, type RouteKey } from '@/i18n/routes';
 import { site } from '@/config/site';
+import StructuredData from '@/components/seo/StructuredData.astro';
 
 export interface Props {
   title: string;
@@ -24,8 +25,20 @@ const alternateOgLocales = locales
   .filter((item) => item !== locale)
   .map((item) => ogLocales[item]);
 
-const ogImage = image ? await getImage({ src: image, format: 'jpg' }) : undefined;
+// Link previews: a 1200px-wide JPEG (widely supported by social platforms).
+const ogImage = image
+  ? await getImage({ src: image, format: 'jpg', width: Math.min(1200, image.width), quality: 85 })
+  : undefined;
 const ogImageUrl = ogImage ? new URL(ogImage.src, siteUrl).href : undefined;
+const ogImageWidth = ogImage?.attributes.width;
+const ogImageHeight = ogImage?.attributes.height;
+
+/*
+ * Google Search Console ownership check (HTML tag method). Set
+ * PUBLIC_GOOGLE_SITE_VERIFICATION in the hosting environment (or .env) to the
+ * token Search Console shows; nothing is output while it is empty.
+ */
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 ---
 
 <meta charset="utf-8" />
@@ -49,4 +62,18 @@ const ogImageUrl = ogImage ? new URL(ogImage.src, siteUrl).href : undefined;
 <meta property="og:locale" content={ogLocales[locale]} />
 {alternateOgLocales.map((item) => <meta property="og:locale:alternate" content={item} />)}
 {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+{ogImageWidth && <meta property="og:image:width" content={String(ogImageWidth)} />}
+{ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
 {ogImageUrl && imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+
+<meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+<meta name="twitter:title" content={title} />
+{description && <meta name="twitter:description" content={description} />}
+{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+{ogImageUrl && imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
+
+{googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+
+{routeKey === 'home' && description && (
+  <StructuredData locale={locale} description={description} imageUrl={ogImageUrl} />
+)}

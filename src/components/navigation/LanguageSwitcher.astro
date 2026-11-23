@@ -22,7 +22,8 @@ const t = useTranslations(locale);
           data-language-base={getPath(currentRoute, item)}
           hreflang={languageTags[item]}
           lang={languageTags[item]}
-          aria-label={languageNames[item]}
+          // Starts with the visible code (SR / EN), so speech commands match the label.
+          aria-label={`${item.toUpperCase()}, ${languageNames[item]}`}
           aria-current={item === locale ? 'true' : undefined}
         >
           {item.toUpperCase()}

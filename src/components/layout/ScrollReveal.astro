@@ -1,0 +1,105 @@
+<!--
+  Quiet scroll reveal for whole content groups (no per-line or staggered effects).
+
+  Mark a group with `data-reveal`. Groups that belong together (a section title
+  and the first block under it) share a key, `data-reveal="services-start"`, and
+  appear together as soon as either of them comes into view.
+
+  Content is never hidden by CSS alone: this script hides only groups that are
+  still below the viewport when the page loads, so without JavaScript, with
+  reduced motion, or when arriving through an anchor link, everything is simply
+  visible. Each group is revealed once and then left untouched (the helper
+  classes are removed after the fade, so nothing keeps a transform).
+-->
+<script>
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reducedMotion && 'IntersectionObserver' in window) {
+    const elements = [...document.querySelectorAll<HTMLElement>('[data-reveal]')];
+    const groups = new Map<string, HTMLElement[]>();
+    elements.forEach((element, index) => {
+      const key = element.dataset.reveal || `reveal-${index}`;
+      groups.set(key, [...(groups.get(key) ?? []), element]);
+    });
+
+    const finish = (element: HTMLElement) => {
+      element.classList.remove('reveal', 'reveal--visible');
+    };
+
+    const reveal = (group: HTMLElement[]) => {
+      group.forEach((element) => {
+        if (!element.classList.contains('reveal')) return;
+        observer.unobserve(element);
+        element.addEventListener('transitionend', () => finish(element), { once: true });
+        // Fallback in case the transition is interrupted (e.g. tab hidden).
+        window.setTimeout(() => finish(element), 1200);
+        element.classList.add('reveal--visible');
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const key = (entry.target as HTMLElement).dataset.revealKey ?? '';
+          reveal(groups.get(key) ?? [entry.target as HTMLElement]);
+        });
+      },
+      // Starts just as the group's top edge rises a little into view.
+      { rootMargin: '0px 0px -6% 0px' },
+    );
+
+    /*
+     * Runs after the page has loaded, once the browser has applied any #anchor
+     * jump or restored scroll position, so the groups the visitor lands on are
+     * never hidden and faded in. Groups below the viewport at that moment are
+     * off screen, so hiding them is not visible.
+     */
+    const prepare = () => {
+      const viewportBottom = window.innerHeight;
+      groups.forEach((group, key) => {
+        // A group with any part already on screen (or above it) stays as it is.
+        const pending = group.every(
+          (element) => element.getBoundingClientRect().top >= viewportBottom,
+        );
+        if (!pending) return;
+        group.forEach((element) => {
+          element.dataset.revealKey = key;
+          element.classList.add('reveal');
+          observer.observe(element);
+        });
+      });
+    };
+
+    if (document.readyState === 'complete') requestAnimationFrame(prepare);
+    else window.addEventListener('load', () => requestAnimationFrame(prepare), { once: true });
+  }
+</script>
+
+<style is:global>
+  /*
+   * Opacity and a 10px rise only (no layout properties), 600ms ease-out.
+   * `translate` does not move the layout box, so anchors and scroll positions
+   * are unaffected.
+   */
+  .reveal {
+    opacity: 0;
+    translate: 0 10px;
+    transition:
+      opacity 600ms cubic-bezier(0.25, 0.6, 0.3, 1),
+      translate 600ms cubic-bezier(0.25, 0.6, 0.3, 1);
+  }
+
+  .reveal.reveal--visible {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      translate: none;
+      transition: none;
+    }
+  }
+</style>

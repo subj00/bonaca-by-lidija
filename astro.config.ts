@@ -44,6 +44,13 @@ export default defineConfig({
       styles: ['normal'],
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['sans-serif'],
+      /*
+       * The metrics Google reports for Tenor Sans make the generated fallback
+       * render at about a third of the real width, so headings flashed tiny and
+       * then jumped (layout shift) while the font loaded. Plain sans-serif is
+       * within ~8% of Tenor Sans, so it is used as is.
+       */
+      optimizedFallbacks: false,
     },
     {
       // Clean, modern sans-serif for the review text; italic for the services' highlight lines.

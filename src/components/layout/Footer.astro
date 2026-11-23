@@ -219,9 +219,13 @@ const emails = contactPeople.map((person) => person.email);
     color: color-mix(in srgb, var(--color-white) 75%, transparent);
   }
 
+  /* A fine underline tells the link apart from the sentence around it, not only its colour. */
   .site-footer__credit {
     color: var(--color-white);
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--color-white) 55%, transparent);
+    text-underline-offset: 0.25em;
     transition: opacity var(--duration-fast) var(--ease-out);
   }
 

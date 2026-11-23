@@ -16,9 +16,11 @@ interface Props {
   course: Education;
   /** Artist's full name, for the booking link's accessible label. */
   artistName: string;
+  /** Scroll-reveal group key (empty: the course appears on its own). */
+  revealGroup?: string;
 }
 
-const { course, artistName } = Astro.props;
+const { course, artistName, revealGroup = '' } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
@@ -41,7 +43,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
   description, key facts, optional detail accordions, (price) and the booking
   button. Only the detailed content sits inside the accordions.
 -->
-<article class="course" id={course.id} aria-labelledby={titleId}>
+<article class="course" id={course.id} aria-labelledby={titleId} data-reveal={revealGroup}>
   <p class="course__number" aria-hidden="true">{course.number}</p>
 
   <div class="course__content">
@@ -166,7 +168,11 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    color: var(--color-dusty-rose);
+    /*
+     * Dusty Rose deepened with a little Smoky Rose: 3.1:1 on Linen, enough for
+     * these large numbers (WCAG AA). Plain Dusty Rose was 2.35:1.
+     */
+    color: color-mix(in srgb, var(--color-dusty-rose) 65%, var(--color-smoky-rose));
     font-family: var(--font-display);
     font-size: 1.75rem;
     line-height: 1;
@@ -322,7 +328,8 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
   .detail__numbered-index {
     flex-shrink: 0;
     min-width: 1.5rem;
-    color: var(--color-dusty-rose);
+    /* Small text needs 4.5:1: mostly Smoky Rose with a hint of Dusty Rose. */
+    color: color-mix(in srgb, var(--color-dusty-rose) 20%, var(--color-smoky-rose));
     font-size: var(--text-sm);
   }
 

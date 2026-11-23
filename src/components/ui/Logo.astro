@@ -40,6 +40,9 @@ const imageStyle = [
 ].join('; ');
 
 // The image renders wider than the wrapper, so widen the `sizes` hint accordingly.
+// Largest generated width; also the `src` fallback (instead of the 4000px original).
+const widths = [320, 640, 960, 1280, 1920].filter((width) => width <= logo.width);
+
 const imageSizes = `calc((${sizes}) * ${(logo.width / artwork.width).toFixed(3)})`;
 ---
 
@@ -47,7 +50,8 @@ const imageSizes = `calc((${sizes}) * ${(logo.width / artwork.width).toFixed(3)}
   <Image
     src={logo}
     alt={site.logoText}
-    widths={[320, 640, 960, 1280, 1920].filter((width) => width <= logo.width)}
+    width={widths.at(-1)}
+    widths={widths}
     sizes={imageSizes}
     loading={loading}
     style={imageStyle}

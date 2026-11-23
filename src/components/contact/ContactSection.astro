@@ -6,7 +6,6 @@ import MapPinIcon from '@/assets/icons/map-pin.svg';
 import SectionTitle from '@/components/ui/SectionTitle.astro';
 import {
   contactPeople,
-  studioAddress,
   studioAddressLines,
   studioMapUrl,
 } from '@/data/contact';
@@ -19,7 +18,7 @@ const t = useTranslations(locale);
 ---
 
 <section class="contact" id={sections.contact} aria-labelledby="contact-title" data-section>
-  <div class="contact__intro">
+  <div class="contact__intro" data-reveal="contact">
     <SectionTitle id="contact-title" subtitle={t('contact.subtitle')}>
       {t('contact.title')}
     </SectionTitle>
@@ -29,7 +28,7 @@ const t = useTranslations(locale);
     Desktop: two columns (studio address | contact people) separated by a thin
     Pale Oak line. Mobile: one centred column with short Pale Oak dividers.
   -->
-  <address class="contact__body">
+  <address class="contact__body" data-reveal="contact">
     <div class="contact__location">
       <MapPinIcon class="contact__pin" aria-hidden="true" />
       <p class="contact__label">{t('contact.addressLabel')}</p>
@@ -39,12 +38,19 @@ const t = useTranslations(locale);
           href={studioMapUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`${studioAddress}, Google Maps (${t('a11y.newTab')})`}
+          aria-label={`${studioAddressLines.join(' ')}, Google Maps (${t('a11y.newTab')})`}
         >
           {
-            /* Always two lines (street, then block), on every screen width. */
-            studioAddressLines.map((line) => (
-              <span class="contact__address-line">{line}</span>
+            /*
+             * Always two lines (street, then block), on every screen width. The
+             * space between them is invisible (block lines) but keeps the link's
+             * text "Vojvođanska 3 Blok 63", matching its accessible name.
+             */
+            studioAddressLines.map((line, index) => (
+              <>
+                {index > 0 && ' '}
+                <span class="contact__address-line">{line}</span>
+              </>
             ))
           }
         </a>

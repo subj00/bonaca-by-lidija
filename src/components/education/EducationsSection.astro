@@ -55,7 +55,8 @@ const textures = [
     ))
   }
 
-  <div class="educations__intro">
+  <!-- Scroll reveal: the title, each artist's opener with her first course, every further course, the reviews. -->
+  <div class="educations__intro" data-reveal="education-lidija-start">
     <SectionTitle id="educations-title" flanked>{t('education.title')}</SectionTitle>
   </div>
 
@@ -63,7 +64,7 @@ const textures = [
     {
       educationArtists.map((artist) => (
         <div class="educations__artist" aria-labelledby={`education-${artist.id}-name`} role="group">
-          <header class="educations__artist-header">
+          <header class="educations__artist-header" data-reveal={`education-${artist.id}-start`}>
             <h3 class="educations__artist-name" id={`education-${artist.id}-name`}>
               {artist.name}
             </h3>
@@ -71,13 +72,17 @@ const textures = [
           </header>
 
           <div class="educations__courses">
-            {artist.courses.map((course) => (
-              <EducationCourse course={course} artistName={artist.name} />
+            {artist.courses.map((course, index) => (
+              <EducationCourse
+                course={course}
+                artistName={artist.name}
+                revealGroup={index === 0 ? `education-${artist.id}-start` : ''}
+              />
             ))}
           </div>
 
           {artist.testimonials && (
-            <div class="educations__testimonials">
+            <div class="educations__testimonials" data-reveal>
               <TestimonialSlider
                 id={`education-${artist.id}-reviews`}
                 reviews={artist.testimonials}

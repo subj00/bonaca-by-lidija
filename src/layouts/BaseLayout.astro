@@ -5,8 +5,10 @@ import '@/styles/global.css';
 
 import type { ImageMetadata } from 'astro';
 import { Font } from 'astro:assets';
+import heroPhoto from '@/assets/images/home/home-page.png';
 import Footer from '@/components/layout/Footer.astro';
 import Header from '@/components/layout/Header.astro';
+import ScrollReveal from '@/components/layout/ScrollReveal.astro';
 import SeoHead from '@/components/seo/SeoHead.astro';
 import { site } from '@/config/site';
 import { getLocale, languageTags } from '@/i18n/config';
@@ -29,7 +31,12 @@ const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
 const pageTitle = title ?? (routeKey === 'home' ? undefined : t(`nav.${routeKey}`));
-const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name}` : site.name;
+// Home: "<what the studio offers> | Bonaca by Lidija" (search terms first, brand last).
+const documentTitle = `${pageTitle ?? t('meta.title')}${site.titleSeparator}${site.name}`;
+// Defaults for search results and link previews: the studio description and the hero photograph.
+const metaDescription = description ?? t('meta.description');
+const metaImage = image ?? heroPhoto;
+const metaImageAlt = image ? imageAlt : t('home.hero.imageAlt');
 ---
 
 <!doctype html>
@@ -43,9 +50,9 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
       title={documentTitle}
       locale={locale}
       routeKey={routeKey}
-      description={description}
-      image={image}
-      imageAlt={imageAlt}
+      description={metaDescription}
+      image={metaImage}
+      imageAlt={metaImageAlt}
       noindex={noindex}
     />
     <Font cssVariable="--font-montserrat" preload={[{ subset: 'latin', weight: '400' }]} />
@@ -66,6 +73,7 @@ const documentTitle = pageTitle ? `${pageTitle}${site.titleSeparator}${site.name
     </main>
 
     <Footer />
+    <ScrollReveal />
 
     <div class="page-marker" data-page-end aria-hidden="true"></div>
   </body>
