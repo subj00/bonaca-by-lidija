@@ -99,8 +99,10 @@ const Heading = `h${headingLevel}` as const;
     gap: var(--space-xs);
   }
 
+  /* Light outlines only: Linen throughout, framed by a soft Smoky Rose line. */
   .accordion__item {
-    border: 1px solid var(--color-panel-border);
+    border: 1px solid color-mix(in srgb, var(--color-smoky-rose) 25%, transparent);
+    background-color: var(--color-linen);
   }
 
   .accordion__heading {
@@ -117,8 +119,8 @@ const Heading = `h${headingLevel}` as const;
     min-height: 2.75rem;
     padding: var(--space-xs) var(--space-md);
     border: 0;
-    /* Header: a light wash of Pale Oak over the Linen page (palette colours only). */
-    background-color: color-mix(in srgb, var(--color-pale-oak) 22%, var(--color-linen));
+    /* Very light Taupe wash (15%) over the Linen row; text and borders stay at full strength. */
+    background-color: color-mix(in srgb, var(--color-taupe) 15%, transparent);
     color: var(--color-smoky-rose);
     font-family: inherit;
     font-size: var(--text-xs);
@@ -172,13 +174,13 @@ const Heading = `h${headingLevel}` as const;
   }
 
   /*
-   * Description on the page colour, divided from the header by a hairline.
+   * Description on the same Linen, divided from the header by a fainter hairline.
    * Padding and line sit inside the clipped area, so a closed row has no leftover
    * space or line, and nothing changes colour while it animates.
    */
   .accordion__text {
     padding: var(--space-sm) var(--space-md) var(--space-md);
-    border-block-start: 1px solid var(--color-panel-border);
+    border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 15%, transparent);
     background-color: var(--color-linen);
     font-size: var(--text-sm);
     line-height: 1.7;

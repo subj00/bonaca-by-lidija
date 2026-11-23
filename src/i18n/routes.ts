@@ -31,9 +31,9 @@ export type SectionKey = keyof typeof sections;
 export const SECTION_CHANGE_EVENT = 'bonaca:section-change';
 
 /** Sections shown in the main navigation, in page order. */
+// 'about' is left out for now (the section is hidden); add it back after 'home' to restore it.
 export const navigationItems = [
   'home',
-  'about',
   'services',
   'education',
   'reviews',
