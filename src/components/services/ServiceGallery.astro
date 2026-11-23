@@ -180,13 +180,38 @@ const placeholderCount = 4;
       if (counter) counter.textContent = `${page + 1} / ${pages}`;
     };
 
+    /*
+     * Page an arrow or dot is moving to, while its smooth scroll is still on the
+     * way. Until the track arrives there, that page is the single source of
+     * truth: the in-between scroll positions would otherwise report the old
+     * page for the first half of the animation and make the indicator jump back.
+     * Any direct user scrolling (touch, wheel, trackpad) hands control back to
+     * the scroll position immediately.
+     */
+    let targetPage: number | null = null;
+    const ARRIVAL_TOLERANCE = 2;
+
+    const targetOffset = (page: number) => Math.min(pageOffset(page), maxScroll());
+
     const goTo = (page: number) => {
       const target = Math.max(0, Math.min(pages - 1, page));
-      track.scrollTo({
-        left: pageOffset(target),
-        behavior: reducedMotion.matches ? 'auto' : 'smooth',
-      });
+      const left = targetOffset(target);
+      // Already there: nothing will scroll, so nothing to wait for.
+      targetPage = Math.abs(track.scrollLeft - left) > ARRIVAL_TOLERANCE ? target : null;
+      track.scrollTo({ left, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
       render(target);
+    };
+
+    const syncWithScroll = () => {
+      if (targetPage !== null) {
+        if (Math.abs(track.scrollLeft - targetOffset(targetPage)) > ARRIVAL_TOLERANCE) return;
+        targetPage = null;
+      }
+      render(pageAtScroll());
+    };
+
+    const releaseTarget = () => {
+      targetPage = null;
     };
 
     // Dots for a few pages; a quiet "2 / 12" counter when there are many.
@@ -223,9 +248,11 @@ const placeholderCount = 4;
       }
       // Everything already visible: no controls needed.
       root.toggleAttribute('data-gallery-static', pages <= 1);
-      render(pageAtScroll());
+      if (targetPage !== null && targetPage < pages) render(targetPage);
+      else syncWithScroll();
     };
 
+    // From the pending target (if any), so rapid taps advance one page each.
     prev.addEventListener('click', () => goTo(current - 1));
     next.addEventListener('click', () => goTo(current + 1));
 
@@ -233,9 +260,29 @@ const placeholderCount = 4;
       'scroll',
       () => {
         cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => render(pageAtScroll()));
+        frame = requestAnimationFrame(syncWithScroll);
       },
       { passive: true },
+    );
+
+    /*
+     * Final reconciliation with the real position once scrolling has settled
+     * (also covers a smooth scroll that stopped short of its target). Checked a
+     * frame later, so a scroll that a quick second tap has just continued is
+     * not mistaken for the end.
+     */
+    track.addEventListener('scrollend', () => {
+      const settledAt = track.scrollLeft;
+      requestAnimationFrame(() => {
+        if (Math.abs(track.scrollLeft - settledAt) > 0.5) return;
+        targetPage = null;
+        render(pageAtScroll());
+      });
+    });
+
+    // The user takes over: follow their scrolling directly.
+    ['pointerdown', 'touchstart', 'wheel'].forEach((type) =>
+      track.addEventListener(type, releaseTarget, { passive: true }),
     );
 
     new ResizeObserver(measure).observe(track);
