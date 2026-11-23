@@ -4,7 +4,12 @@ import InstagramIcon from '@/assets/icons/instagram.svg';
 import MailIcon from '@/assets/icons/mail.svg';
 import MapPinIcon from '@/assets/icons/map-pin.svg';
 import SectionTitle from '@/components/ui/SectionTitle.astro';
-import { contactPeople, studioAddress, studioMapUrl } from '@/data/contact';
+import {
+  contactPeople,
+  studioAddress,
+  studioAddressLines,
+  studioMapUrl,
+} from '@/data/contact';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { sections } from '@/i18n/routes';
@@ -36,7 +41,12 @@ const t = useTranslations(locale);
           rel="noopener noreferrer"
           aria-label={`${studioAddress}, Google Maps (${t('a11y.newTab')})`}
         >
-          {studioAddress}
+          {
+            /* Always two lines (street, then block), on every screen width. */
+            studioAddressLines.map((line) => (
+              <span class="contact__address-line">{line}</span>
+            ))
+          }
         </a>
       </p>
       <a
@@ -157,6 +167,19 @@ const t = useTranslations(locale);
     font-family: var(--font-display);
     font-size: 1.375rem;
     letter-spacing: 0.02em;
+    /* Tight leading: the two lines read as one address. Centred on every layout. */
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  /* One clickable box around both lines. */
+  .contact__map-link {
+    display: inline-block;
+  }
+
+  .contact__address-line {
+    display: block;
+    white-space: nowrap;
   }
 
   /*

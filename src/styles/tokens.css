@@ -10,6 +10,8 @@
   --color-smoky-rose: #7D4F50;
   --color-pale-oak: #D1BE9C;
   --color-taupe: #AA998F;
+  /* White of the light logo artwork; used for text on the Smoky Rose footer. */
+  --color-white: #FFFFFF;
 
   /*
    * Text colour experiment: one primary text colour (Smoky Rose) for all text

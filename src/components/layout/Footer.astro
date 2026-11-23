@@ -1,6 +1,9 @@
 ---
+import InstagramIcon from '@/assets/icons/instagram.svg';
+import MailIcon from '@/assets/icons/mail.svg';
 import Logo from '@/components/ui/Logo.astro';
 import { site } from '@/config/site';
+import { contactPeople } from '@/data/contact';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { getSectionHref } from '@/i18n/routes';
@@ -11,25 +14,61 @@ const t = useTranslations(locale);
 const services = ['Professional make up', 'Lash & brow lift', 'Educations'];
 const credit = { label: 'Dotmind', url: 'https://subj-portfolio.vercel.app/sr' };
 const year = new Date().getFullYear();
+
+// From the contact data (Lidija first, then Ana): both Instagram profiles, then both emails.
+const instagramProfiles = contactPeople.map((person) => person.instagram);
+const emails = contactPeople.map((person) => person.email);
 ---
 
 <!--
-  Solid Smoky Rose footer: centred white logo, the studio's services between two
-  thin lines, copyright left and credit right.
+  Solid Smoky Rose footer in white.
+  Desktop: logo and services on the left, contact links on the right, then
+  copyright (left) and credit (right). Mobile: everything stacked and centred.
 -->
 <footer class="site-footer">
   <div class="site-footer__main">
-    <a class="site-footer__brand" href={getSectionHref('home', locale)}>
-      <Logo variant="light" loading="lazy" sizes="(min-width: 64rem) 15rem, 11rem" />
-    </a>
+    <div class="site-footer__identity">
+      <a class="site-footer__brand" href={getSectionHref('home', locale)}>
+        <Logo variant="light" loading="lazy" sizes="(min-width: 64rem) 15rem, 11rem" />
+      </a>
 
-    <div class="site-footer__services">
-      <span class="site-footer__line" aria-hidden="true"></span>
       <ul class="site-footer__service-list" role="list">
         {services.map((service) => <li class="site-footer__service">{service}</li>)}
       </ul>
-      <span class="site-footer__line" aria-hidden="true"></span>
     </div>
+
+    <ul class="site-footer__contact" role="list">
+      {
+        instagramProfiles.map((profile) => (
+          <li>
+            <a
+              class="site-footer__contact-link"
+              href={profile.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Instagram: ${profile.handle} (${t('a11y.newTab')})`}
+            >
+              <InstagramIcon class="site-footer__icon" aria-hidden="true" />
+              <span>{profile.handle}</span>
+            </a>
+          </li>
+        ))
+      }
+      {
+        emails.map((email) => (
+          <li>
+            <a
+              class="site-footer__contact-link"
+              href={`mailto:${email}`}
+              aria-label={`${t('contact.email')}: ${email}`}
+            >
+              <MailIcon class="site-footer__icon" aria-hidden="true" />
+              <span>{email}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 
   <div class="site-footer__bottom">
@@ -53,41 +92,39 @@ const year = new Date().getFullYear();
   .site-footer {
     padding: clamp(3rem, 7vw, 4.5rem) var(--content-inset) 0;
     background-color: var(--color-smoky-rose);
-    color: var(--color-linen);
+    color: var(--color-white);
   }
 
   /* Focus ring that stays visible on the dark background. */
   .site-footer :focus-visible {
-    outline-color: var(--color-linen);
+    outline-color: var(--color-white);
   }
 
+  /* Mobile: logo, services, contact links, stacked and centred. */
   .site-footer__main {
-    /* The services' layout depends on the space actually available here. */
+    /*
+     * The services' layout depends on the space available in the footer row
+     * (a full-width element, so the desktop columns can size to their content).
+     */
     container: footer-main / inline-size;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(1.75rem, 4vw, 2.5rem);
+    gap: clamp(2rem, 6vw, 2.5rem);
+  }
+
+  .site-footer__identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1.25rem, 4vw, 1.75rem);
+    width: 100%;
   }
 
   .site-footer__brand {
     display: block;
     width: clamp(10rem, 40vw, 11rem);
-  }
-
-  /* Services between two thin decorative lines: line | services | line. */
-  .site-footer__services {
-    display: grid;
-    grid-template-columns: minmax(0.75rem, 1fr) auto minmax(0.75rem, 1fr);
-    align-items: center;
-    gap: clamp(0.625rem, 3vw, 2rem);
-    width: 100%;
-    max-width: 62rem;
-  }
-
-  .site-footer__line {
-    border-block-start: 1px solid color-mix(in srgb, var(--color-linen) 45%, transparent);
   }
 
   /*
@@ -121,35 +158,7 @@ const year = new Date().getFullYear();
     white-space: nowrap;
   }
 
-  .site-footer__bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2xs);
-    margin-block-start: clamp(2.5rem, 6vw, 4rem);
-    padding-block: var(--space-md) var(--space-lg);
-    font-size: var(--text-xs);
-    letter-spacing: 0.04em;
-    text-align: center;
-    color: color-mix(in srgb, var(--color-linen) 85%, transparent);
-  }
-
-  .site-footer__credit {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-decoration-color: color-mix(in srgb, var(--color-linen) 45%, transparent);
-    text-underline-offset: 0.3em;
-    transition: text-decoration-color var(--duration-fast) var(--ease-out);
-  }
-
-  .site-footer__credit:hover {
-    text-decoration-color: currentColor;
-  }
-
-  /*
-   * One row (original order, thin vertical separators) as soon as the row and
-   * its two side lines fit: the row needs about 36rem at the 11px label size.
-   */
+  /* One row with thin separators as soon as it fits (about 36rem). */
   @container footer-main (min-width: 37rem) {
     .site-footer__service-list {
       flex-direction: row;
@@ -169,6 +178,97 @@ const year = new Date().getFullYear();
     }
   }
 
+  /* Contact: studio email and both Instagram profiles, one per line. */
+  .site-footer__contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
+
+  .site-footer__contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    /* Comfortable tap target; also sets the rhythm between the lines. */
+    min-height: 2.5rem;
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .site-footer__icon {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  /* Secondary information: smaller and in a softer white. */
+  .site-footer__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-block-start: clamp(2rem, 6vw, 3.5rem);
+    padding-block: var(--space-md) var(--space-lg);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: color-mix(in srgb, var(--color-white) 75%, transparent);
+  }
+
+  .site-footer__credit {
+    color: var(--color-white);
+    text-decoration: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .site-footer__contact-link:hover,
+    .site-footer__credit:hover {
+      opacity: 0.7;
+    }
+  }
+
+  /*
+   * Mobile and tablet only (the stacked layout): logo → services → a short
+   * hairline → one compact, left-aligned contact group → copyright.
+   * Visible distances (text to text): services → line → contacts ~28px each,
+   * 16px between the contact lines, ~52px from the last email to the copyright.
+   */
+  @media (width < 64rem) {
+    .site-footer__main {
+      gap: 1.25rem;
+    }
+
+    /* Subtle centred divider below the services (28px above it in total). */
+    .site-footer__identity::after {
+      content: '';
+      width: 45%;
+      margin-block-start: calc(1.75rem - clamp(1.25rem, 4vw, 1.75rem));
+      border-block-start: 1px solid color-mix(in srgb, var(--color-white) 25%, transparent);
+    }
+
+    /* The group is centred in the footer; the links inside share one left edge. */
+    .site-footer__contact {
+      align-items: flex-start;
+    }
+
+    .site-footer__contact-link {
+      min-height: 2.25rem;
+    }
+
+    .site-footer__icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .site-footer__bottom {
+      margin-block-start: 1.75rem;
+    }
+  }
+
   @media (min-width: 48rem) {
     .site-footer__bottom {
       flex-direction: row;
@@ -177,13 +277,39 @@ const year = new Date().getFullYear();
     }
   }
 
+  /*
+   * Desktop: one compact, centred composition: the brand group (logo centred
+   * above the services row) | a thin divider | the contact links. The two
+   * groups size to their content with a fixed gap, instead of being pushed to
+   * opposite edges of the footer.
+   */
   @media (min-width: 64rem) {
+    .site-footer__main {
+      --footer-column-gap: clamp(3rem, 5vw, 4.5rem);
+
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: center;
+      align-items: center;
+      column-gap: var(--footer-column-gap);
+    }
+
     .site-footer__brand {
       width: clamp(12rem, 16vw, 15rem);
     }
 
     .site-footer__service {
       font-size: var(--text-xs);
+    }
+
+    /*
+     * Subtle 1px divider: only as tall as the contact links, vertically
+     * centred on the brand group, with equal space on both sides.
+     */
+    .site-footer__contact {
+      align-items: flex-start;
+      padding-inline-start: var(--footer-column-gap);
+      border-inline-start: 1px solid color-mix(in srgb, var(--color-white) 25%, transparent);
     }
   }
 </style>

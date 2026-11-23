@@ -1,6 +1,6 @@
 /**
  * Studio contact details, exactly as provided by the studio.
- * The address is intentionally short until the precise location is confirmed.
+ * The street name is never translated, so the address is the same in SR and EN.
  */
 export interface ContactPerson {
   name: string;
@@ -11,8 +11,10 @@ export interface ContactPerson {
   };
 }
 
-export const studioAddress = 'Blok 63';
-export const studioMapUrl = 'https://maps.app.goo.gl/c9UKSf9Mx7BGVDym6';
+/** Shown as two lines (street, then block); joined with a comma where read as one line. */
+export const studioAddressLines = ['Vojvođanska 3', 'Blok 63'] as const;
+export const studioAddress = studioAddressLines.join(', ');
+export const studioMapUrl = 'https://maps.app.goo.gl/SQWa4YLCLcBmAc4BA';
 
 export const contactPeople: ContactPerson[] = [
   {
