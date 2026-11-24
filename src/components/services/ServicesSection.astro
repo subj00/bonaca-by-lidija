@@ -114,8 +114,7 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
 
   <!--
     Ana. Desktop: portrait | name and four treatment rows, then her one shared
-    carousel, then the booking button. Phones: portrait, name, rows, booking
-    button, and the carousel last.
+    carousel, then the booking button. Phones: the same order, stacked (as Lidija).
   -->
   <article class="artist artist--ana" aria-labelledby="services-ana-title" data-reveal>
     <div class:list={['artist__portrait', anaPhoto.className]}>
@@ -183,7 +182,7 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
 
   /*
    * One artist block. Phones (single column): portrait → text → carousel →
-   * buttons. Ana swaps the last two (buttons before her carousel).
+   * buttons, for both artists.
    */
   .artist {
     --artist-portrait-width: 30%;
@@ -204,12 +203,6 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
   .artist--ana {
     --artist-portrait-width: 27%;
     --artist-portrait-ratio: 4 / 5;
-
-    grid-template-areas:
-      'portrait'
-      'content'
-      'actions'
-      'gallery';
   }
 
   /* Thin separator between the two artists. */
@@ -331,20 +324,8 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
     grid-area: gallery;
   }
 
-  /*
-   * Carousel ↔ buttons: 10px closer than the other rows (both artists, every
-   * layout). Ana on phones has the buttons above her carousel, so there the
-   * carousel moves up instead.
-   */
+  /* Carousel ↔ buttons: 10px closer than the other rows (both artists, every layout). */
   .artist__actions {
-    margin-block-start: -0.625rem;
-  }
-
-  .artist--ana .artist__actions {
-    margin-block-start: 0;
-  }
-
-  .artist--ana :global(.artist__gallery) {
     margin-block-start: -0.625rem;
   }
 
@@ -458,15 +439,6 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
     .artist--lidija .artist__facts {
       margin-block-start: auto;
       padding-block-start: var(--space-lg);
-    }
-
-    /* Ana from 48rem: carousel first, then the button (as Lidija). */
-    .artist--ana .artist__actions {
-      margin-block-start: -0.625rem;
-    }
-
-    .artist--ana :global(.artist__gallery) {
-      margin-block-start: 0;
     }
 
     .artist__facts {
