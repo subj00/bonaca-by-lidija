@@ -1,0 +1,48 @@
+<!--
+  Second half of the language switch (the first is in LanguageSwitcher.astro):
+  puts the element the visitor was reading back at the same distance from the
+  top of the window. Inline and placed at the end of <body>, so it runs before
+  the first paint, without a visible jump or scroll animation. It repeats the
+  correction once fonts and images have loaded (they can change text heights),
+  unless the visitor has started scrolling in the meantime.
+-->
+<script is:inline>
+  (() => {
+    const STORAGE_KEY = 'bonaca:language-scroll';
+    let saved;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? 'null');
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch {
+      return;
+    }
+    if (!saved || saved.pathname !== location.pathname || Date.now() - saved.time > 15000) return;
+
+    const findElement = () =>
+      saved.path.reduce((node, index) => node?.children[index], document.body);
+
+    let cancelled = false;
+    const restore = () => {
+      const element = findElement();
+      if (cancelled || !element) return;
+      const difference = element.getBoundingClientRect().top - saved.offset;
+      if (Math.abs(difference) > 0.5) {
+        window.scrollTo({ top: window.scrollY + difference, behavior: 'instant' });
+      }
+    };
+
+    const cancel = () => {
+      cancelled = true;
+    };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((type) =>
+      window.addEventListener(type, cancel, { once: true, passive: true }),
+    );
+
+    restore();
+    document.fonts?.ready.then(restore);
+    window.addEventListener('load', restore, { once: true });
+
+    // Show the section in the address bar again, without scrolling.
+    if (saved.hash) history.replaceState(history.state, '', location.pathname + saved.hash);
+  })();
+</script>

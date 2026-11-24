@@ -8,6 +8,7 @@ import { Font } from 'astro:assets';
 import heroPhoto from '@/assets/images/home/home-page.png';
 import Footer from '@/components/layout/Footer.astro';
 import Header from '@/components/layout/Header.astro';
+import LanguageScrollRestore from '@/components/navigation/LanguageScrollRestore.astro';
 import ScrollReveal from '@/components/layout/ScrollReveal.astro';
 import SeoHead from '@/components/seo/SeoHead.astro';
 import { site } from '@/config/site';
@@ -76,6 +77,7 @@ const metaImageAlt = image ? imageAlt : t('home.hero.imageAlt');
     <ScrollReveal />
 
     <div class="page-marker" data-page-end aria-hidden="true"></div>
+    <LanguageScrollRestore />
   </body>
 </html>
 

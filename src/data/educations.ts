@@ -12,7 +12,15 @@ type Localized = Record<Locale, string>;
 const [lidijaContact, anaContact] = contactPeople;
 
 /** Small outline icon shown before a key fact. */
-export type EducationIcon = 'clock' | 'calendar' | 'users' | 'user' | 'lessons' | 'repeat' | 'spark';
+export type EducationIcon =
+  | 'clock'
+  | 'calendar'
+  | 'users'
+  | 'user'
+  | 'lessons'
+  | 'repeat'
+  | 'spark'
+  | 'notes';
 
 export interface EducationFact {
   icon: EducationIcon;
@@ -351,6 +359,10 @@ export const anaEducations: EducationArtist = {
         {
           icon: 'users',
           text: { sr: 'Individualno ili poluindividualno', en: 'Individual or semi-private' },
+        },
+        {
+          icon: 'notes',
+          text: { sr: 'Uključena personalizovana skripta', en: 'Personalized course notes included' },
         },
       ],
       details: [],
