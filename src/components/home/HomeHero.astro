@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import ArrowIcon from '@/assets/icons/arrow.svg';
 import heroPhoto from '@/assets/images/home/home-page.png';
-import Logo from '@/components/ui/Logo.astro';
+import { site } from '@/config/site';
 import { studioServices } from '@/data/services';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
@@ -30,14 +30,15 @@ const actions = [
   />
 
   <!--
-    Mobile: the large logo below the photograph. Desktop: the logo stays in the
-    header only, so this heading is kept for assistive technology but hidden.
+    The logo is shown in the header on every screen size, so the page heading is
+    kept for assistive technology and search engines but not shown.
   -->
-  <h1 class="hero__title">
-    <Logo sizes="(min-width: 64rem) 1px, min(61vw, 20rem)" />
-  </h1>
+  <h1 class="hero__title">{site.name}</h1>
 
-  <!-- Desktop only: the three services and the calls to action. -->
+  <!--
+    The three services (phones and desktop) and the calls to action (desktop
+    only). Phones: the services below the photograph, in place of a second logo.
+  -->
   <div class="hero__intro">
     <ul class="hero__services" role="list">
       {studioServices.map((service) => <li class="hero__service">{service}</li>)}
@@ -64,36 +65,36 @@ const actions = [
    * (small) viewport height:
    *   photo top    = header height + a very small gap
    *   photo height = remaining screen height, capped so faces are never cropped
-   *   logo         = centred in the space between the end of the photograph's
-   *                  fade and the bottom of the first screen (at least 1rem
-   *                  below the fade), so the gaps above and below stay balanced
+   *   services     = a little below the end of the photograph's fade (part of
+   *                  the free space below it, so the gap stays modest)
    *   hero height  = at least one full screen (100svh)
    */
   .hero {
     --photo-top: calc(var(--header-height-mobile) + var(--space-2xs));
-    /* Hero logo about 18% smaller than the original min(74vw, 24rem). */
-    --title-width: min(61vw, 20rem);
-    --title-height: calc(var(--title-width) * var(--logo-aspect));
     /*
-     * Space reserved below the photograph when sizing it. Kept independent of
-     * the logo size and position, so changing the logo never resizes the photograph.
+     * Space reserved below the photograph when sizing it (unchanged, so the
+     * photograph keeps exactly its previous size and position).
      */
     --photo-reserve: calc(min(74vw, 24rem) * var(--logo-aspect) * 0.4 + 4rem);
     --photo-height: clamp(18rem, 100svh - var(--photo-top) - var(--photo-reserve), 125vw);
     /* Where the photograph's fade ends (matches the last stop of its mask). */
     --photo-fade-end: calc(var(--photo-top) + var(--photo-height) * 0.99);
-    --title-bottom-space: 2rem;
-    --title-free-space: calc(
-      100svh - var(--title-bottom-space) - var(--title-height) - var(--photo-fade-end)
+    /* Service labels on phones: three lines of Tenor Sans with small gaps. */
+    --service-size: clamp(1rem, 4.4vw, 1.25rem);
+    --service-gap: 0.625rem;
+    --intro-height: calc(var(--service-size) * 1.25 * 3 + var(--service-gap) * 2);
+    --intro-bottom-space: 2rem;
+    --intro-free-space: calc(
+      100svh - var(--intro-bottom-space) - var(--intro-height) - var(--photo-fade-end)
     );
-    --title-top: calc(
-      var(--photo-fade-end) + max(var(--space-md), var(--title-free-space) * 0.5)
+    --intro-top: calc(
+      var(--photo-fade-end) + clamp(var(--space-md), var(--intro-free-space) * 0.35, 3.5rem)
     );
 
     position: relative;
     isolation: isolate;
     min-height: 100svh;
-    height: calc(var(--title-top) + var(--title-height) + var(--space-lg));
+    height: calc(var(--intro-top) + var(--intro-height) + var(--space-lg));
     overflow: hidden;
   }
 
@@ -125,17 +126,52 @@ const actions = [
     );
   }
 
+  /* Visually hidden page heading (the logo is in the header). */
   .hero__title {
     position: absolute;
-    inset-block-start: var(--title-top);
-    inset-inline-start: 50%;
-    width: var(--title-width);
-    translate: -50% 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
-  /* Services and calls to action exist on desktop only. */
-  .hero__intro {
-    display: none;
+  /*
+   * Phones: the three service labels, centred below the photograph, in the
+   * same Tenor Sans, uppercase and spacing as on desktop (no hairlines).
+   * The calls to action are desktop only.
+   */
+  @media (width < 64rem) {
+    .hero__intro {
+      position: absolute;
+      inset-block-start: var(--intro-top);
+      inset-inline: var(--frame-padding-inline);
+    }
+
+    .hero__services {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--service-gap);
+      padding: 0;
+    }
+
+    .hero__service {
+      font-family: var(--font-display);
+      font-size: var(--service-size);
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: 0.14em;
+      /* Balances the trailing letter-spacing so each label is optically centred. */
+      padding-inline-start: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--color-smoky-rose);
+    }
+
+    .hero__actions {
+      display: none;
+    }
   }
 
   /*
@@ -205,16 +241,6 @@ const actions = [
         rgb(0 0 0 / 0.06) calc(var(--photo-visible) * 0.97),
         transparent calc(var(--photo-visible) * 0.99)
       );
-    }
-
-    /* The logo lives in the header on desktop; the heading stays for screen readers. */
-    .hero__title {
-      inset: auto;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
     }
 
     /*
