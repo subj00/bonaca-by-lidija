@@ -20,14 +20,20 @@ const actions = [
 ---
 
 <section class="hero" id={sections.home} data-section>
-  <Image
-    class="hero__photo"
-    src={heroPhoto}
-    alt={t('home.hero.imageAlt')}
-    widths={[480, 720, 1040, 1312]}
-    sizes="(min-width: 64rem) 62vw, 140vw"
-    priority
-  />
+  <!--
+    Phones: the box the photograph fills (it takes the height left over by the
+    header and the labels). Desktop: no box of its own (display: contents).
+  -->
+  <div class="hero__media">
+    <Image
+      class="hero__photo"
+      src={heroPhoto}
+      alt={t('home.hero.imageAlt')}
+      widths={[480, 720, 1040, 1312]}
+      sizes="(min-width: 64rem) 62vw, 140vw"
+      priority
+    />
+  </div>
 
   <!--
     The logo is shown in the header on every screen size, so the page heading is
@@ -60,72 +66,16 @@ const actions = [
 </section>
 
 <style>
-  /*
-   * Mobile layout, derived from the real header height and the initial
-   * (small) viewport height:
-   *   photo top    = header height + a very small gap
-   *   photo height = remaining screen height, capped so faces are never cropped
-   *   services     = a little below the end of the photograph's fade (part of
-   *                  the free space below it, so the gap stays modest)
-   *   hero height  = at least one full screen (100svh)
-   */
   .hero {
-    --photo-top: calc(var(--header-height-mobile) + var(--space-2xs));
-    /*
-     * Space reserved below the photograph when sizing it (unchanged, so the
-     * photograph keeps exactly its previous size and position).
-     */
-    --photo-reserve: calc(min(74vw, 24rem) * var(--logo-aspect) * 0.4 + 4rem);
-    --photo-height: clamp(18rem, 100svh - var(--photo-top) - var(--photo-reserve), 125vw);
-    /* Where the photograph's fade ends (matches the last stop of its mask). */
-    --photo-fade-end: calc(var(--photo-top) + var(--photo-height) * 0.99);
-    /* Service labels on phones: three lines of Tenor Sans with small gaps. */
-    --service-size: clamp(1rem, 4.4vw, 1.25rem);
-    --service-gap: 0.625rem;
-    --intro-height: calc(var(--service-size) * 1.25 * 3 + var(--service-gap) * 2);
-    --intro-bottom-space: 2rem;
-    --intro-free-space: calc(
-      100svh - var(--intro-bottom-space) - var(--intro-height) - var(--photo-fade-end)
-    );
-    /* The last 1.5rem is extra breathing room between the photograph and the labels. */
-    --intro-top: calc(
-      var(--photo-fade-end) + clamp(var(--space-md), var(--intro-free-space) * 0.35, 3.5rem) +
-        1.5rem
-    );
-
     position: relative;
     isolation: isolate;
-    min-height: 100svh;
-    height: calc(var(--intro-top) + var(--intro-height) + var(--space-lg));
-    overflow: hidden;
   }
 
-  /*
-   * The photograph is a transparent cut-out, so it is sized by height and
-   * centred horizontally: both women stay visible and nothing is stretched.
-   * Only the lower edge fades, straight into the Linen page behind it (no
-   * overlay). The eased mask keeps the photo fully opaque down to 66% and
-   * then dissolves gradually, so the fade has no visible edge.
-   */
+  /* Shared by both layouts; sizes and position are set per layout below. */
   .hero__photo {
     position: absolute;
     z-index: -1;
-    inset-block-start: var(--photo-top);
-    inset-inline-start: 50%;
-    width: auto;
     max-width: none;
-    height: var(--photo-height);
-    translate: -50% 0;
-    mask-image: linear-gradient(
-      to bottom,
-      black 66%,
-      rgb(0 0 0 / 0.92) 73%,
-      rgb(0 0 0 / 0.74) 80%,
-      rgb(0 0 0 / 0.48) 87%,
-      rgb(0 0 0 / 0.22) 93%,
-      rgb(0 0 0 / 0.06) 97%,
-      transparent 99%
-    );
   }
 
   /* Visually hidden page heading (the logo is in the header). */
@@ -139,15 +89,84 @@ const actions = [
   }
 
   /*
-   * Phones: the three service labels, centred below the photograph, in the
-   * same Tenor Sans, uppercase and spacing as on desktop (no hairlines).
-   * The calls to action are desktop only.
+   * Phones: a column of header space, photograph and the three service labels
+   * that fits the smallest visible viewport height (100svh, browser toolbars
+   * shown), so the labels are on the first screen in every browser:
+   *   - the labels and the spaces around them keep their natural size;
+   *   - the photograph takes whatever height is left (never less than
+   *     --photo-min, never more than 125vw, so faces are never cropped).
+   * The hero itself is 100lvh tall (toolbars hidden): the difference to 100svh
+   * is extra space below the labels, so the next section never shows on the
+   * first screen, even where the page is visible behind translucent toolbars.
+   * If the content cannot fit (very short screens, enlarged text), the hero
+   * simply grows and the page scrolls; nothing is clipped vertically.
    */
   @media (width < 64rem) {
+    .hero {
+      --photo-top: calc(var(--header-height-mobile) + var(--space-2xs));
+      --photo-min: 11rem;
+      /* Service labels: three lines of Tenor Sans with small gaps. */
+      --service-size: clamp(1rem, 4.4vw, 1.25rem);
+      --service-gap: 0.625rem;
+      /* From the end of the photograph's fade to the first label. */
+      --intro-gap: clamp(1.5rem, 8svh - 0.5rem, 4.5rem);
+      /* Below the last label, within the first screen. */
+      --intro-bottom-space: clamp(1.5rem, 5svh, 3rem);
+
+      display: flex;
+      flex-direction: column;
+      /* Spare height (only when the photograph is at its maximum) is shared above and below. */
+      justify-content: center;
+      box-sizing: border-box;
+      min-height: 100svh;
+      min-height: 100lvh;
+      padding-block: var(--photo-top) var(--intro-bottom-space);
+      padding-block-end: calc(var(--intro-bottom-space) + 100lvh - 100svh);
+      /* The photograph is wider than the screen; only its sides are cut. */
+      overflow-x: clip;
+    }
+
+    .hero__media {
+      position: relative;
+      flex: 1 1 0;
+      min-height: var(--photo-min);
+      max-height: 125vw;
+    }
+
+    /*
+     * The photograph is a transparent cut-out, sized by the height of its box
+     * and centred horizontally: both women stay visible and nothing is
+     * stretched. Only the lower edge fades, straight into the Linen page
+     * behind it (no overlay). The eased mask keeps the photo fully opaque down
+     * to 66% and then dissolves gradually, so the fade has no visible edge.
+     */
+    .hero__photo {
+      inset-block-start: 0;
+      inset-inline-start: 50%;
+      width: auto;
+      height: 100%;
+      translate: -50% 0;
+      mask-image: linear-gradient(
+        to bottom,
+        black 66%,
+        rgb(0 0 0 / 0.92) 73%,
+        rgb(0 0 0 / 0.74) 80%,
+        rgb(0 0 0 / 0.48) 87%,
+        rgb(0 0 0 / 0.22) 93%,
+        rgb(0 0 0 / 0.06) 97%,
+        transparent 99%
+      );
+    }
+
+    /*
+     * The three service labels, centred below the photograph, in the same
+     * Tenor Sans, uppercase and spacing as on desktop (no hairlines). The
+     * calls to action are desktop only.
+     */
     .hero__intro {
-      position: absolute;
-      inset-block-start: var(--intro-top);
-      inset-inline: var(--frame-padding-inline);
+      flex: none;
+      padding-block-start: var(--intro-gap);
+      padding-inline: var(--frame-padding-inline);
     }
 
     .hero__services {
@@ -221,6 +240,12 @@ const actions = [
 
       height: 100svh;
       min-height: 38rem;
+      overflow: hidden;
+    }
+
+    /* The photograph is positioned against the hero itself. */
+    .hero__media {
+      display: contents;
     }
 
     .hero__photo {
