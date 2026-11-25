@@ -1,7 +1,7 @@
 ---
 import type { Locale } from '@/i18n/config';
 import { site } from '@/config/site';
-import { contactPeople, studioAddress } from '@/data/contact';
+import { contactPeople, studioMapUrl, studioSeoLocation as location } from '@/data/contact';
 import { educationArtists } from '@/data/educations';
 import { anaService, lidijaService } from '@/data/serviceDetails';
 import { getPath, sections } from '@/i18n/routes';
@@ -19,8 +19,10 @@ const { locale, description, imageUrl } = Astro.props;
 /*
  * JSON-LD (schema.org) for the home page, built only from content that is on
  * the page: the studio, its two artists, their services and the four courses.
- * Deliberately left out until the studio confirms them: city and postcode,
- * opening hours, phone, prices (except the one shown, Ana's 100 €), ratings.
+ * The full postal address (data/contact.ts, studioSeoLocation) is used here
+ * only, not on the page. Deliberately left out until the studio confirms them:
+ * coordinates, opening hours, phone, prices (except the one shown, Ana's
+ * 100 €), ratings.
  * Google's Course rich results also need prices and course instances for every
  * course, so these courses help Google understand the page but do not yet
  * qualify for that special result.
@@ -31,6 +33,7 @@ const anchor = (id: string) => `${pageUrl}#${id}`;
 const rootUrl = new URL('/', siteUrl).href;
 
 const studioId = `${rootUrl}#studio`;
+const cityId = `${rootUrl}#city`;
 const [lidijaContact, anaContact] = contactPeople;
 const people = [
   { id: `${rootUrl}#lidija`, contact: lidijaContact },
@@ -91,8 +94,41 @@ const graph = {
       url: pageUrl,
       description,
       ...(imageUrl && { image: imageUrl }),
-      address: { '@type': 'PostalAddress', streetAddress: studioAddress },
-      sameAs: contactPeople.map((person) => person.instagram.url),
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: `${location.street}, ${location.neighborhood}`,
+        addressLocality: location.municipality,
+        addressRegion: location.city,
+        postalCode: location.postalCode,
+        addressCountry: location.countryCode,
+      },
+      hasMap: studioMapUrl,
+      // The neighbourhood and the wider city the studio serves (not addresses).
+      areaServed: [
+        {
+          '@type': 'Place',
+          name: `${location.neighborhood}, ${location.municipality}`,
+        },
+        {
+          '@type': 'AdministrativeArea',
+          name: location.municipality,
+          containedInPlace: { '@id': cityId },
+        },
+        {
+          '@type': 'City',
+          '@id': cityId,
+          name: location.city,
+          // The city's general postal code (11000 Beograd), as a reference only.
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: location.city,
+            postalCode: location.cityPostalCode,
+            addressCountry: location.countryCode,
+          },
+          containedInPlace: { '@type': 'Country', name: 'Srbija', identifier: location.countryCode },
+        },
+      ],
+      sameAs: [...contactPeople.map((person) => person.instagram.url), studioMapUrl],
       employee: people.map((person) => ({ '@id': person.id })),
       makesOffer: services.map((service) => ({
         '@type': 'Offer',

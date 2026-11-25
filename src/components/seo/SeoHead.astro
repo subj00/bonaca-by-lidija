@@ -4,6 +4,7 @@ import { getImage } from 'astro:assets';
 import { locales, ogLocales, type Locale } from '@/i18n/config';
 import { getAlternateLinks, getPath, type RouteKey } from '@/i18n/routes';
 import { site } from '@/config/site';
+import { studioSeoLocation } from '@/data/contact';
 import StructuredData from '@/components/seo/StructuredData.astro';
 
 export interface Props {
@@ -39,6 +40,9 @@ const ogImageHeight = ogImage?.attributes.height;
  * token Search Console shows; nothing is output while it is empty.
  */
 const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
+
+/** Favicon file version (the "B" monogram). */
+const faviconVersion = 2;
 ---
 
 <meta charset="utf-8" />
@@ -47,6 +51,16 @@ const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 {description && <meta name="description" content={description} />}
 {noindex && <meta name="robots" content="noindex" />}
 <meta name="generator" content={Astro.generator} />
+
+{/*
+  Favicons (public/), generated from src/assets/favicon/bonaca-favicon.png.
+  Raise faviconVersion whenever the icon changes, so browsers fetch the new
+  files instead of a cached copy.
+*/}
+<link rel="icon" href={`/favicon.ico?v=${faviconVersion}`} sizes="16x16 32x32 48x48" />
+<link rel="icon" type="image/png" href={`/favicon-32x32.png?v=${faviconVersion}`} sizes="32x32" />
+<link rel="icon" type="image/png" href={`/favicon-192x192.png?v=${faviconVersion}`} sizes="192x192" />
+<link rel="apple-touch-icon" href={`/apple-touch-icon.png?v=${faviconVersion}`} sizes="180x180" />
 
 <link rel="canonical" href={canonicalUrl} />
 {alternateLinks.map(({ hreflang, href }) => (
@@ -72,7 +86,14 @@ const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
 {ogImageUrl && imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
 
-{googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+{/* Studio location for local search (no coordinates until the studio confirms them). */}
+<meta name="geo.region" content={studioSeoLocation.regionCode} />
+<meta
+  name="geo.placename"
+  content={`${studioSeoLocation.municipality}, ${studioSeoLocation.city}`}
+/>
+
+{googleVerification &&<meta name="google-site-verification" content={googleVerification} />}
 
 {routeKey === 'home' && description && (
   <StructuredData locale={locale} description={description} imageUrl={ogImageUrl} />

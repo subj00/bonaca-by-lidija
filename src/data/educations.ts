@@ -1,6 +1,6 @@
 import type { Locale } from '@/i18n/config';
 import { contactPeople } from '@/data/contact';
-import { reviews, type Review } from '@/data/reviews';
+import { anaReviews, reviews, type Review } from '@/data/reviews';
 
 /**
  * Content of the Educations section: Lidija's three courses and Ana's course.
@@ -63,7 +63,7 @@ export interface EducationArtist {
   /** Short introductory line under the artist's name. */
   subtitle: Localized;
   courses: Education[];
-  /** Student testimonials shown after the artist's courses (Lidija only, for now). */
+  /** Student testimonials shown after the artist's courses (only her own students). */
   testimonials?: Review[];
   /** Small line under the testimonials heading. */
   testimonialsSubtitle?: Localized;
@@ -370,6 +370,12 @@ export const anaEducations: EducationArtist = {
       instagramUrl: anaContact.instagram.url,
     },
   ],
+  // Reviews of Ana's course only.
+  testimonials: anaReviews,
+  testimonialsSubtitle: {
+    sr: 'Iskustva sa Aninog kursa „Našminkaj se sama“',
+    en: 'Experiences from Ana’s self-makeup course',
+  },
 };
 
 export const educationArtists = [lidijaEducations, anaEducations];

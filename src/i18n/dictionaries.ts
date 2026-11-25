@@ -6,8 +6,8 @@ import type { Locale } from './config';
  */
 const sr = {
   'skipLink': 'Preskoči na sadržaj',
-  'meta.title': 'Šminkanje, kursevi šminkanja, lash i brow lift',
-  'meta.description': 'Profesionalno šminkanje za venčanja i proslave, lash lift i brow lift. Kursevi šminkanja za početnike, šminkere i samostalno šminkanje.',
+  'meta.title': 'Šminkanje i kursevi šminkanja, Novi Beograd',
+  'meta.description': 'Šminkanje za venčanja i proslave, lash lift i brow lift u Novom Beogradu (Blok 63, Beograd). Kursevi šminkanja za početnike, šminkere i samostalno šminkanje.',
   'nav.label': 'Glavna navigacija',
   'nav.home': 'Početna',
   'nav.about': 'O nama',
@@ -58,8 +58,8 @@ type Dictionary = Record<TranslationKey, string>;
 
 const en: Dictionary = {
   'skipLink': 'Skip to content',
-  'meta.title': 'Makeup artist, makeup courses, lash & brow lift',
-  'meta.description': 'Professional makeup for weddings and celebrations, lash lift and brow lift. Makeup courses for beginners, makeup artists and doing your own makeup.',
+  'meta.title': 'Makeup artist & makeup courses in Belgrade',
+  'meta.description': 'Makeup for weddings and celebrations, lash and brow lift in Novi Beograd, Belgrade. Makeup courses for beginners, makeup artists and doing your own makeup.',
   'nav.label': 'Main navigation',
   'nav.home': 'Home',
   'nav.about': 'About',
