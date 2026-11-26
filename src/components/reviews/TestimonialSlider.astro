@@ -48,7 +48,7 @@ const pad = (value: number) => String(value).padStart(2, '0');
         >
           <figure class="testimonials__card">
             <blockquote class="testimonials__quote">
-              <p>{review.text[locale]}</p>
+              <p class="text-justify">{review.text[locale]}</p>
             </blockquote>
             <figcaption class="testimonials__name">{review.name}</figcaption>
           </figure>
@@ -303,6 +303,7 @@ const pad = (value: number) => String(value).padStart(2, '0');
 
   .testimonials__quote {
     margin: 0;
+    color: var(--color-text-body);
     font-family: var(--font-reading);
     font-size: 1rem;
     letter-spacing: 0.01em;

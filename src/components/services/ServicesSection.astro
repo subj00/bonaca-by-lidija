@@ -10,7 +10,7 @@ import { anaService, buildMailto, lidijaService } from '@/data/serviceDetails';
 import { anaGallery, anaPortrait, lidijaGallery, lidijaPortrait } from '@/data/serviceImages';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
-import { sections } from '@/i18n/routes';
+import { sections, serviceAnchors } from '@/i18n/routes';
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -35,7 +35,12 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
     Lidija. Desktop: portrait | name, service and details, then her carousel,
     then both buttons. Phones: the same order, stacked.
   -->
-  <article class="artist artist--lidija" aria-labelledby="services-lidija-title" data-reveal="services-start">
+  <article
+    class="artist artist--lidija"
+    id={serviceAnchors.lidija}
+    aria-labelledby="services-lidija-title"
+    data-reveal="services-start"
+  >
     <div class:list={['artist__portrait', lidijaPhoto.className]}>
       {
         lidijaPhoto.image ? (
@@ -59,7 +64,7 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
       <p class="artist__name">{lidija.name}</p>
       <h3 class="artist__service" id="services-lidija-title">{lidija.title[locale]}</h3>
       <p class="artist__highlight">{lidija.highlight[locale]}</p>
-      <div class="artist__text">
+      <div class="artist__text text-justify">
         {lidija.description[locale].map((paragraph) => <p>{paragraph}</p>)}
       </div>
       <ul class="artist__facts" role="list">
@@ -116,7 +121,7 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
     Ana. Desktop: portrait | name and four treatment rows, then her one shared
     carousel, then the booking button. Phones: the same order, stacked (as Lidija).
   -->
-  <article class="artist artist--ana" aria-labelledby="services-ana-title" data-reveal>
+  <article class="artist artist--ana" id={serviceAnchors.ana} aria-labelledby="services-ana-title" data-reveal>
     <div class:list={['artist__portrait', anaPhoto.className]}>
       {
         anaPhoto.image ? (
@@ -145,9 +150,10 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
           id: treatment.id,
           title: treatment.title[locale],
           description: treatment.description[locale],
+          // The brow lift row starts the lash & brow lift rows (navigation target).
+          anchorId: treatment.id === 'brow-lift' ? serviceAnchors.lashBrowLift : undefined,
         }))}
       />
-      <p class="artist__note">{ana.addOnNote[locale]}</p>
     </div>
 
     <ServiceGallery
@@ -203,6 +209,22 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
   .artist--ana {
     --artist-portrait-width: 27%;
     --artist-portrait-ratio: 4 / 5;
+  }
+
+  /*
+   * Reached through the Services submenu (each artist, Ana's brow & lash lift
+   * rows): stops a little below the fixed header.
+   */
+  .artist,
+  .artist :global(.accordion__item) {
+    scroll-margin-top: calc(var(--header-height-mobile) + var(--space-md));
+  }
+
+  @media (min-width: 64rem) {
+    .artist,
+    .artist :global(.accordion__item) {
+      scroll-margin-top: calc(var(--header-height-desktop) + var(--space-md));
+    }
   }
 
   /* Thin separator between the two artists. */
@@ -283,6 +305,7 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
     margin-block-start: var(--space-md);
     font-size: 0.9375rem;
     line-height: 1.7;
+    color: var(--color-text-body);
   }
 
   /* Duration and on-location availability: stacked on phones. */
@@ -311,13 +334,6 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
     width: 1.125rem;
     height: 1.125rem;
     color: var(--color-smoky-rose);
-  }
-
-  .artist__note {
-    margin-block-start: var(--space-md);
-    font-size: var(--text-sm);
-    line-height: 1.6;
-    opacity: 0.9;
   }
 
   .artist :global(.artist__gallery) {

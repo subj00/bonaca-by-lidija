@@ -52,7 +52,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     <h4 class="course__title" id={titleId}>{course.title[locale]}</h4>
     <p class="course__subtitle">{course.subtitle[locale]}</p>
 
-    <div class="course__text">
+    <div class="course__text text-justify">
       {course.description.map((paragraph) => <p>{paragraph[locale]}</p>)}
     </div>
 
@@ -83,7 +83,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
                 switch (block.type) {
                   case 'paragraphs':
                     return (
-                      <div class="detail__paragraphs">
+                      <div class="detail__paragraphs text-justify">
                         {block.items.map((item) => <p>{item[locale]}</p>)}
                       </div>
                     );
@@ -221,6 +221,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     margin-block-start: var(--space-md);
     font-size: 0.9375rem;
     line-height: 1.75;
+    color: var(--color-text-body);
   }
 
   /* Key facts: a quiet metadata strip between two hairlines; items wrap freely. */
@@ -234,6 +235,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     border-block: 1px solid color-mix(in srgb, var(--color-smoky-rose) 18%, transparent);
     font-size: var(--text-sm);
     letter-spacing: 0.02em;
+    color: var(--color-text-body);
   }
 
   .course__fact {
@@ -317,9 +319,9 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     align-items: baseline;
     gap: var(--space-md);
     padding-block: var(--space-xs);
-    color: var(--color-smoky-rose);
+    color: var(--color-text-body);
     font-family: var(--font-display);
-    font-size: 1rem;
+    font-size: 1.125rem;
     letter-spacing: 0.04em;
   }
 
@@ -332,7 +334,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     min-width: 1.5rem;
     /* Small text needs 4.5:1: mostly Smoky Rose with a hint of Dusty Rose. */
     color: color-mix(in srgb, var(--color-dusty-rose) 20%, var(--color-smoky-rose));
-    font-size: var(--text-sm);
+    font-size: 0.9375rem;
   }
 
   .detail__note {
@@ -342,6 +344,11 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     margin-block-start: var(--space-md);
     padding-block-start: var(--space-sm);
     border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
+  }
+
+  /* Labels keep the heading colour inside the darker accordion text. */
+  .detail__note-label {
+    color: var(--color-smoky-rose);
   }
 
   .detail__note-label,
@@ -357,7 +364,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     padding-block-start: var(--space-sm);
     border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 12%, transparent);
     font-family: var(--font-reading);
-    font-size: 0.9375rem;
+    font-size: 1.0625rem;
     font-style: italic;
     line-height: 1.6;
   }

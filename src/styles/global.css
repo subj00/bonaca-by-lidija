@@ -52,3 +52,19 @@ a {
   outline: 1px solid var(--color-text);
   outline-offset: 4px;
 }
+
+/*
+ * Longer reading paragraphs (service and course descriptions, longer
+ * accordion paragraphs, testimonial quotes): justified for an even right
+ * edge, on every screen size. Applied to specific containers only, never
+ * globally. Hyphenation follows the page language (lang="sr-Latn" / "en")
+ * where the browser supports it and only splits longer words, which keeps word
+ * gaps smaller on phones; `text-wrap: pretty` avoids short last lines.
+ */
+.text-justify {
+  text-align: justify;
+  text-wrap: pretty;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  hyphenate-limit-chars: 6 3 2;
+}

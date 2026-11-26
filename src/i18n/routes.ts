@@ -24,6 +24,16 @@ export const sections = {
 export type SectionKey = keyof typeof sections;
 
 /**
+ * Anchor ids inside the Services section (identical in every language), used by
+ * the Services submenu: each artist's block and Ana's brow & lash lift rows.
+ */
+export const serviceAnchors = {
+  lidija: 'usluge-lidija',
+  ana: 'usluge-ana',
+  lashBrowLift: 'usluge-lash-brow-lift',
+} as const;
+
+/**
  * Browser event dispatched on `document` whenever the section in view changes.
  * `detail` is the section's anchor id (e.g. `usluge`).
  */

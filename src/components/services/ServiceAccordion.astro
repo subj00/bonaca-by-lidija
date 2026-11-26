@@ -5,6 +5,8 @@ interface Item {
   id: string;
   title: string;
   description: string;
+  /** Optional in-page anchor on the row (a navigation target). */
+  anchorId?: string | undefined;
 }
 
 interface Props {
@@ -26,11 +28,12 @@ const { idPrefix, items, openIndex = 0, headingLevel = 3 } = Astro.props;
     items.map((item, index) => (
       <AccordionItem
         id={`${idPrefix}-${item.id}`}
+        anchorId={item.anchorId}
         title={item.title}
         open={index === openIndex}
         headingLevel={headingLevel}
       >
-        <p>{item.description}</p>
+        <p class="text-justify">{item.description}</p>
       </AccordionItem>
     ))
   }

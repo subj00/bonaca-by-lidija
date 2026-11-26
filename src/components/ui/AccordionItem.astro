@@ -9,9 +9,11 @@ interface Props {
   open?: boolean;
   /** Level of the row heading, one below the heading it sits under. */
   headingLevel?: 3 | 4 | 5;
+  /** Optional in-page anchor on the whole row (e.g. a navigation target). */
+  anchorId?: string | undefined;
 }
 
-const { id, title, open = false, headingLevel = 3 } = Astro.props;
+const { id, title, open = false, headingLevel = 3, anchorId } = Astro.props;
 const Heading = `h${headingLevel}` as const;
 const buttonId = `${id}-button`;
 const panelId = `${id}-panel`;
@@ -23,7 +25,7 @@ const panelId = `${id}-panel`;
   `data-open`, animated); rows open and close independently.
   Without JavaScript the content is always shown.
 -->
-<div class="accordion__item">
+<div class="accordion__item" id={anchorId}>
   <Heading class="accordion__heading">
     <button
       class="accordion__trigger"
@@ -164,9 +166,10 @@ const panelId = `${id}-panel`;
     padding: var(--space-sm) var(--space-md) var(--space-md);
     border-block-start: 1px solid color-mix(in srgb, var(--color-smoky-rose) 15%, transparent);
     background-color: var(--color-linen);
-    font-size: var(--text-sm);
+    /* 15px reading size (was 13px); line height stays 1.7 of it. */
+    font-size: 0.9375rem;
     line-height: 1.7;
-    color: var(--color-ink);
+    color: var(--color-text-body);
   }
 
   /* Without JavaScript the rows cannot open, so all content is shown. */

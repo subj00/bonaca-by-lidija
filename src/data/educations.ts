@@ -338,7 +338,7 @@ export const anaEducations: EducationArtist = {
     {
       id: 'nasminkaj-se-sama',
       number: '04',
-      title: { sr: 'Našminkaj se sama', en: 'Learn to Do Your Own Makeup' },
+      title: { sr: 'Našminkaj se sama', en: 'Do Your Own Makeup' },
       subtitle: {
         sr: 'Nauči da samostalno kreiraš dnevni i svečani makeup.',
         en: 'Learn to create your own everyday and special-occasion makeup.',
@@ -346,11 +346,11 @@ export const anaEducations: EducationArtist = {
       // Short enough to stay fully visible: no accordions for this course.
       description: [
         {
-          sr: 'Kurs Našminkaj se sama je kurs šminkanja namenjen osobama bez ikakvog predznanja o šminkanju, ali i svima koji žele da unaprede svoje znanje. Kroz ovaj kurs ćete savladati korak po korak jedan dnevni makeup i jedan makeup za svečane proslave.',
-          en: 'The Learn to Do Your Own Makeup course is designed for complete beginners, as well as anyone who wants to improve their makeup skills. Step by step, you’ll learn how to create one everyday makeup look and one look for special occasions.',
+          sr: 'Kurs Našminkaj se sama je kurs šminkanja namenjen osobama bez ikakvog predznanja o šminkanju, ali i svima koji žele da unaprede svoje znanje. Kroz ovaj kurs ćeš savladati korak po korak jedan dnevni makeup i jedan makeup za svečane proslave.',
+          en: 'The Do Your Own Makeup course is designed for complete beginners, as well as anyone who wants to improve their makeup skills. Step by step, you’ll learn how to create one everyday makeup look and one look for special occasions.',
         },
         {
-          sr: 'Zajedno prolazimo kroz proizvode, tehnike i trikove uz koje ćete naučiti da se samostalno šminkate i izvučete maksimum iz svoje makeup rutine. Kurs može biti individualan ili poluindividualan.',
+          sr: 'Zajedno prolazimo kroz proizvode, tehnike i trikove uz koje ćeš naučiti da se samostalno šminkaš i izvučeš maksimum iz svoje makeup rutine. Kurs može biti individualan ili poluindividualan.',
           en: 'Together, we’ll explore products, techniques, and practical tips that will help you apply your own makeup confidently and get the most out of your makeup routine. The course is available individually or in a semi-private format.',
         },
       ],
@@ -374,7 +374,7 @@ export const anaEducations: EducationArtist = {
   testimonials: anaReviews,
   testimonialsSubtitle: {
     sr: 'Iskustva sa Aninog kursa „Našminkaj se sama“',
-    en: 'Experiences from Ana’s self-makeup course',
+    en: 'Experiences from Ana’s “Do Your Own Makeup” course',
   },
 };
 

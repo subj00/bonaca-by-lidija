@@ -3,13 +3,19 @@ import { Image } from 'astro:assets';
 import ArrowIcon from '@/assets/icons/arrow.svg';
 import heroPhoto from '@/assets/images/home/home-page.png';
 import { site } from '@/config/site';
-import { studioServices } from '@/data/services';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { getSectionHref, sections } from '@/i18n/routes';
 
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
+
+// The three services, in the hero order (translated per language).
+const services = [
+  t('home.hero.serviceMakeup'),
+  t('home.hero.serviceCourses'),
+  t('home.hero.serviceLashBrow'),
+];
 
 // Desktop calls to action (three identical buttons).
 const actions = [
@@ -47,7 +53,7 @@ const actions = [
   -->
   <div class="hero__intro">
     <ul class="hero__services" role="list">
-      {studioServices.map((service) => <li class="hero__service">{service}</li>)}
+      {services.map((service) => <li class="hero__service">{service}</li>)}
     </ul>
 
     <ul class="hero__actions" role="list">
@@ -108,6 +114,21 @@ const actions = [
       /* Service labels: three lines of Tenor Sans with small gaps. */
       --service-size: clamp(1rem, 4.4vw, 1.25rem);
       --service-gap: 0.625rem;
+    }
+
+    /*
+     * Serbian: "PROFESIONALNO ŠMINKANJE" is ~19.3em wide, so on the narrowest
+     * phones (under ~350px) the size also stays small enough for the label to
+     * fit on one line inside the side gutters. Elsewhere the size is unchanged.
+     */
+    .hero:lang(sr) {
+      --service-size: min(
+        clamp(1rem, 4.4vw, 1.25rem),
+        (100vw - 2 * var(--frame-padding-inline)) / 19.5
+      );
+    }
+
+    .hero {
       /* From the end of the photograph's fade to the first label. */
       --intro-gap: clamp(1.5rem, 8svh - 0.5rem, 4.5rem);
       /* Below the last label, within the first screen. */
@@ -234,7 +255,7 @@ const actions = [
       --intro-width: calc(100vw - 2 * var(--content-inset) - var(--photo-width));
       /*
        * Service labels: about 18% smaller than the largest size the column
-       * allows (the longest label, "PROFESSIONAL MAKE UP", is ~16em wide).
+       * allows (the longest label, "PROFESSIONAL MAKEUP", is ~16em wide).
        */
       --service-size: clamp(1rem, (var(--intro-width) - 3rem) / 16 * 0.82, 1.625rem);
 

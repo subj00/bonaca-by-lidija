@@ -3,7 +3,14 @@ import ChevronDownIcon from '@/assets/icons/chevron-down.svg';
 import { educationArtists } from '@/data/educations';
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
-import { getPath, getSectionHref, navigationItems, sections } from '@/i18n/routes';
+import {
+  getPath,
+  getSectionHref,
+  navigationItems,
+  sections,
+  serviceAnchors,
+  type SectionKey,
+} from '@/i18n/routes';
 
 interface Props {
   locale: Locale;
@@ -11,15 +18,40 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
+const pagePath = getPath('home', locale);
 
-/* The four education courses, in page order, for the Educations submenu. */
-const educationCourses = educationArtists.flatMap((artist) =>
-  artist.courses.map((course) => ({
-    title: course.title[locale],
-    href: `${getPath('home', locale)}#${course.id}`,
-  })),
-);
-const submenuId = 'navigation-education-submenu';
+interface Submenu {
+  id: string;
+  /** Accessible name of the chevron button. */
+  label: string;
+  links: { title: string; href: string }[];
+}
+
+/*
+ * Items with a submenu: Services (both artists' makeup and Ana's lash & brow
+ * lift) and Educations (the four courses, in page order).
+ */
+const submenus: Partial<Record<SectionKey, Submenu>> = {
+  services: {
+    id: 'navigation-services-submenu',
+    label: t('nav.servicesList'),
+    links: [
+      { title: t('nav.servicesLidija'), href: `${pagePath}#${serviceAnchors.lidija}` },
+      { title: t('nav.servicesAna'), href: `${pagePath}#${serviceAnchors.ana}` },
+      { title: t('nav.servicesLashBrow'), href: `${pagePath}#${serviceAnchors.lashBrowLift}` },
+    ],
+  },
+  education: {
+    id: 'navigation-education-submenu',
+    label: t('nav.educationCourses'),
+    links: educationArtists.flatMap((artist) =>
+      artist.courses.map((course) => ({
+        title: course.title[locale],
+        href: `${pagePath}#${course.id}`,
+      })),
+    ),
+  },
+};
 ---
 
 <!--
@@ -27,14 +59,15 @@ const submenuId = 'navigation-education-submenu';
   (smooth scrolling and the URL hash are handled by the browser).
   The script below marks the link of the section currently in view.
 
-  Educations has a submenu with links to its four courses. The label stays a
-  normal link to the section; a separate chevron button opens the submenu
-  (a dropdown on desktop, an expandable list inside the mobile menu).
+  Services and Educations have a submenu. The label stays a normal link to the
+  section; a separate chevron button opens the submenu (a dropdown on desktop,
+  an expandable list inside the mobile menu). Only one submenu is open at a time.
 -->
 <nav class="navigation" aria-label={t('nav.label')}>
   <ul class="navigation__list" role="list">
-    {navigationItems.map((sectionKey) =>
-      sectionKey === 'education' ? (
+    {navigationItems.map((sectionKey) => {
+      const submenu = submenus[sectionKey];
+      return submenu ? (
         <li class="navigation__item navigation__item--submenu" data-submenu>
           <div class="navigation__row">
             <a
@@ -48,20 +81,20 @@ const submenuId = 'navigation-education-submenu';
               class="navigation__submenu-toggle"
               type="button"
               aria-expanded="false"
-              aria-controls={submenuId}
-              aria-label={t('nav.educationCourses')}
+              aria-controls={submenu.id}
+              aria-label={submenu.label}
               data-submenu-toggle
             >
               <ChevronDownIcon class="navigation__chevron" aria-hidden="true" />
             </button>
           </div>
-          <div class="navigation__dropdown" id={submenuId} data-submenu-panel>
+          <div class="navigation__dropdown" id={submenu.id} data-submenu-panel>
             <div class="navigation__dropdown-inner">
               <ul class="navigation__submenu" role="list">
-                {educationCourses.map((course) => (
+                {submenu.links.map((link) => (
                   <li>
-                    <a class="navigation__sublink" href={course.href}>
-                      {course.title}
+                    <a class="navigation__sublink" href={link.href}>
+                      {link.title}
                     </a>
                   </li>
                 ))}
@@ -80,8 +113,8 @@ const submenuId = 'navigation-education-submenu';
             {t(`nav.${sectionKey}`)}
           </a>
         </li>
-      ),
-    )}
+      );
+    })}
   </ul>
 </nav>
 
@@ -145,13 +178,15 @@ const submenuId = 'navigation-education-submenu';
   }
 
   /*
-   * Educations submenu. The chevron button toggles it (`aria-expanded` on the
-   * button, `data-open` on the item; CSS animates). Desktop only: it also opens
-   * on mouse hover and closes on Escape, an outside click or when focus leaves.
-   * Choosing a course closes it; the mobile menu closes itself on any link.
+   * Services and Educations submenus. The chevron button toggles one
+   * (`aria-expanded` on the button, `data-open` on the item; CSS animates).
+   * Opening one closes the other. Desktop only: a submenu also opens on mouse
+   * hover and closes on Escape, an outside click or when focus leaves.
+   * Choosing a link closes it; the mobile menu closes itself on any link.
    */
   const DESKTOP_QUERY = window.matchMedia('(min-width: 64rem)');
   const HOVER_CLOSE_DELAY = 150;
+  const closers: Array<(except: HTMLElement) => void> = [];
 
   document.querySelectorAll<HTMLElement>('[data-submenu]').forEach((item) => {
     const toggle = item.querySelector<HTMLButtonElement>('[data-submenu-toggle]');
@@ -165,9 +200,13 @@ const submenuId = 'navigation-education-submenu';
     const setOpen = (open: boolean) => {
       window.clearTimeout(closeTimer);
       if (!open) openedByHover = false;
+      else closers.forEach((close) => close(item));
       item.toggleAttribute('data-open', open);
       toggle.setAttribute('aria-expanded', String(open));
     };
+    closers.push((except) => {
+      if (except !== item && isOpen()) setOpen(false);
+    });
 
     toggle.addEventListener('click', () => {
       if (openedByHover) openedByHover = false;
@@ -245,7 +284,7 @@ const submenuId = 'navigation-education-submenu';
     text-decoration-color: currentColor;
   }
 
-  /* ---- Educations submenu: phones (inside the mobile menu) ---- */
+  /* ---- Submenus (Services, Educations): phones (inside the mobile menu) ---- */
 
   .navigation__item--submenu {
     display: flex;
@@ -336,6 +375,8 @@ const submenuId = 'navigation-education-submenu';
     font-size: 0.875rem;
     letter-spacing: 0.04em;
     text-decoration: none;
+    /* Reading text colour, at full strength in every state. */
+    color: var(--color-text-body);
   }
 
   /* ---- Desktop: a compact Linen dropdown under the label ---- */
@@ -430,17 +471,13 @@ const submenuId = 'navigation-education-submenu';
       border-radius: 0.3125rem;
       font-size: var(--text-sm);
       white-space: nowrap;
-      opacity: 0.9;
-      transition:
-        background-color 180ms var(--ease-out),
-        opacity 180ms var(--ease-out);
+      transition: background-color 180ms var(--ease-out);
     }
 
-    /* Hover: full-strength text and a barely-there Taupe tint. */
+    /* Hover: a barely-there Taupe tint. */
     .navigation__sublink:hover,
     .navigation__sublink:focus-visible {
       background-color: color-mix(in srgb, var(--color-taupe) 10%, transparent);
-      opacity: 1;
     }
 
     .navigation__sublink:focus-visible {

@@ -410,14 +410,15 @@ const placeholderCount = 4;
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
-    border: 1px solid var(--color-panel-border);
+    /* Smoky Rose ring and chevron on a faint Smoky Rose tint. */
+    border: 1.5px solid var(--color-smoky-rose);
     border-radius: 50%;
-    background: none;
+    background-color: color-mix(in srgb, var(--color-smoky-rose) 10%, transparent);
     color: var(--color-smoky-rose);
     cursor: pointer;
     transition:
       opacity var(--duration-fast) var(--ease-out),
-      border-color var(--duration-fast) var(--ease-out);
+      background-color 250ms var(--ease-out);
   }
 
   .gallery__arrow--prev {
@@ -434,14 +435,17 @@ const placeholderCount = 4;
   }
 
   @media (hover: hover) {
+    /* Hover: a slightly stronger tint (never a solid fill). */
     .gallery__arrow:not(:disabled):hover {
-      border-color: var(--color-smoky-rose);
+      background-color: color-mix(in srgb, var(--color-smoky-rose) 18%, transparent);
     }
   }
 
+  /* 18px chevron; stroke 2.2 of 24 units ≈ 1.65px at this size. */
   .gallery__arrow-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    stroke-width: 2.2;
   }
 
   .gallery__arrow--prev .gallery__arrow-icon {

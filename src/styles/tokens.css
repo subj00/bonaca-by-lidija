@@ -22,6 +22,12 @@
    *   --color-hairline: color-mix(in srgb, var(--color-taupe) 60%, transparent);
    */
   --color-text-primary: var(--color-smoky-rose);
+  /*
+   * Longer reading text only (paragraphs, descriptions, accordion content,
+   * testimonial quotes): a deeper Smoky Rose for readability. Headings,
+   * subtitles, labels and navigation keep --color-text-primary.
+   */
+  --color-text-body: #593637;
 
   /* Semantic colors (derived from the brand palette) */
   --color-text: var(--color-text-primary); /* navigation, SR | EN, icons, body text */

@@ -91,7 +91,7 @@ export const anaService = {
       id: 'brow-lift',
       title: { sr: 'Brow lift', en: 'Brow lift' },
       description: {
-        sr: 'Brow lift je tretman oblikovanja i podizanja obrva koji će naglasiti njihov prirodan oblik. Uz brow lift dobijate uredniji izgled i vizuelno veću punoću, uz manje potrebe za svakodnevnim popunjavanjem olovkom ili drugim proizvodima. Efekat traje od 6 do 8 nedelja, u zavisnosti od same dlake.',
+        sr: 'Brow lift je tretman oblikovanja i podizanja obrva koji će naglasiti njihov prirodan oblik. Uz brow lift dobijaš uredniji izgled i vizuelno veću punoću, uz manje potrebe za svakodnevnim popunjavanjem olovkom ili drugim proizvodima. Efekat traje od 6 do 8 nedelja, u zavisnosti od same dlake.',
         en: 'Brow lift is a treatment that shapes and lifts your eyebrows to enhance their natural appearance. It creates a neater, fuller-looking brow, reducing the need for daily filling with pencils or other brow products. Results typically last 6 to 8 weeks, depending on your individual brow hairs.',
       },
     },
@@ -99,7 +99,7 @@ export const anaService = {
       id: 'lash-lift',
       title: { sr: 'Lash lift', en: 'Lash lift' },
       description: {
-        sr: 'Lash lift je tretman podizanja i uvijanja trepavica koji će maksimalno otvoriti i naglasiti vaše oči. Dobijate lepo podignute i uvijene prirodne trepavice, bez potrebe za svakodnevnim korišćenjem uvijača. Efekat traje od 6 do 8 nedelja. Trepavice se postepeno vraćaju u svoj prirodni oblik, nakon čega se po želji može ponoviti tretman.',
+        sr: 'Lash lift je tretman podizanja i uvijanja trepavica koji će maksimalno otvoriti i naglasiti tvoje oči. Dobijaš lepo podignute i uvijene prirodne trepavice, bez potrebe za svakodnevnim korišćenjem uvijača. Efekat traje od 6 do 8 nedelja. Trepavice se postepeno vraćaju u svoj prirodni oblik, nakon čega se po želji može ponoviti tretman.',
         en: 'Lash lift is a treatment that lifts and curls your natural lashes, making your eyes appear more open and defined. It gives your lashes a beautifully lifted and curled appearance without the need for daily use of an eyelash curler. Results typically last 6 to 8 weeks. Your lashes gradually return to their natural shape, after which the treatment can be repeated if desired.',
       },
     },
@@ -112,10 +112,6 @@ export const anaService = {
       },
     },
   ] satisfies { id: string; title: Localized; description: Localized }[],
-  addOnNote: {
-    sr: 'Brow Lift, Lash Lift i farbanje trepavica i obrva mogu se zakazati kao samostalni tretmani ili kao dodatak profesionalnom šminkanju.',
-    en: 'Brow Lift, Lash Lift, and eyelash and eyebrow tinting can be booked as standalone treatments or as add-ons to professional makeup.',
-  } satisfies Localized,
 };
 
 /** `mailto:` link with an encoded subject and body (lines joined with CRLF). */
