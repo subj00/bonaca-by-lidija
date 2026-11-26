@@ -5,9 +5,10 @@ import type { Locale } from './config';
  * every other locale must provide exactly the same keys.
  */
 const sr = {
-  'skipLink': 'Preskoči na sadržaj',
+  skipLink: 'Preskoči na sadržaj',
   'meta.title': 'Šminkanje i kursevi šminkanja, Novi Beograd',
-  'meta.description': 'Profesionalno šminkanje za venčanja i proslave u Novom Beogradu, na terenu i van Beograda. Kursevi šminkanja uživo, na srpskom i engleskom. Lash i brow lift.',
+  'meta.description':
+    'Profesionalno šminkanje za venčanja i proslave na Novom Beogradu, na terenu i van Beograda. Kursevi šminkanja uživo, na srpskom i engleskom. Lash i brow lift.',
   'meta.imageAlt': 'Logo studija Bonaca by Lidija',
   'nav.label': 'Glavna navigacija',
   'nav.home': 'Početna',
@@ -18,7 +19,8 @@ const sr = {
   'menu.open': 'Otvori meni',
   'menu.close': 'Zatvori meni',
   'languageSwitcher.label': 'Izbor jezika',
-  'home.hero.heading': 'Bonaca by Lidija – profesionalno šminkanje i kursevi šminkanja u Novom Beogradu',
+  'home.hero.heading':
+    'Bonaca by Lidija – profesionalno šminkanje i kursevi šminkanja na Novom Beogradu',
   'home.hero.imageAlt': 'Dve žene sa četkicama za šminku u rukama',
   'home.hero.ctaServices': 'Istraži usluge',
   'home.hero.ctaEducation': 'Istraži edukacije',
@@ -40,7 +42,8 @@ const sr = {
   'reviews.of': 'od',
   'services.book': 'Zakaži termin',
   'services.onLocationCta': 'Upit za šminkanje na terenu',
-  'services.onLocationInfo': 'Za više informacija o šminkanju na terenu, piši na:',
+  'services.onLocationInfo':
+    'Za više informacija o šminkanju na terenu, piši na:',
   'services.galleryLabel': 'Galerija radova',
   'services.galleryPrevious': 'Prethodne fotografije',
   'services.galleryNext': 'Sledeće fotografije',
@@ -69,9 +72,10 @@ export type TranslationKey = keyof typeof sr;
 type Dictionary = Record<TranslationKey, string>;
 
 const en: Dictionary = {
-  'skipLink': 'Skip to content',
+  skipLink: 'Skip to content',
   'meta.title': 'Makeup artist & makeup courses in Belgrade',
-  'meta.description': 'Professional makeup for weddings and events in New Belgrade, on location and outside Belgrade. In-person makeup courses in Serbian & English. Lash & brow lift.',
+  'meta.description':
+    'Professional makeup for weddings and events in New Belgrade, on location and outside Belgrade. In-person makeup courses in Serbian & English. Lash & brow lift.',
   'meta.imageAlt': 'Bonaca by Lidija studio logo',
   'nav.label': 'Main navigation',
   'nav.home': 'Home',
@@ -82,7 +86,8 @@ const en: Dictionary = {
   'menu.open': 'Open menu',
   'menu.close': 'Close menu',
   'languageSwitcher.label': 'Language selection',
-  'home.hero.heading': 'Bonaca by Lidija – professional makeup and makeup courses in Belgrade',
+  'home.hero.heading':
+    'Bonaca by Lidija – professional makeup and makeup courses in Belgrade',
   'home.hero.imageAlt': 'Two women holding makeup brushes',
   'home.hero.ctaServices': 'Explore services',
   'home.hero.ctaEducation': 'Explore courses',
@@ -104,7 +109,8 @@ const en: Dictionary = {
   'reviews.of': 'of',
   'services.book': 'Book an appointment',
   'services.onLocationCta': 'On-location makeup inquiry',
-  'services.onLocationInfo': 'For more information about on-location makeup, contact us at:',
+  'services.onLocationInfo':
+    'For more information about on-location makeup, contact us at:',
   'services.galleryLabel': 'Portfolio',
   'services.galleryPrevious': 'Previous photos',
   'services.galleryNext': 'Next photos',
@@ -124,7 +130,8 @@ const en: Dictionary = {
   'lightbox.next': 'Next photo',
   'lightbox.of': 'of',
   'notFound.title': 'Page not found',
-  'notFound.text': 'The page you are looking for does not exist or has been moved.',
+  'notFound.text':
+    'The page you are looking for does not exist or has been moved.',
   'notFound.home': 'Back to home',
 };
 

@@ -15,16 +15,16 @@ Sajt je već imao dobru osnovu:
 
 ## 2. Pronađeni problemi
 
-| # | Problem | Uticaj |
-|---|---|---|
-| 1 | `site` je bio `https://example.com`, pa su canonical, hreflang, sitemap i og:image pokazivali na pogrešan domen | kritično |
-| 2 | Deploy preview i branch deploy na Netlify-ju su mogli da budu indeksirani | visok |
-| 3 | Srpski jezik je bio označen kao `sr-Latn`, bez regiona (`sr-Latn-RS`) | srednji |
-| 4 | Nije postojala Netlify konfiguracija; ostao je `vercel.json` za drugi hosting | srednji |
-| 5 | Meta opis je stavljao lash & brow lift ispred kurseva, a usluge nisu bile poređane po prioritetu | srednji |
-| 6 | JSON-LD: nema `WebPage` ni `logo`; Instagram profili umetnica su bili navedeni kao profili firme; e-mail je bio u obliku `mailto:`; usluge su vodile na opštu sekciju umesto na tačan deo strane | srednji |
-| 7 | Nije postojala posebna 404 stranica (Netlify prikazuje svoju, sa ispravnim statusom 404) | nizak |
-| 8 | Slika za deljenje je 1200×1097; idealan format je 1200×630 | nizak |
+| #   | Problem                                                                                                                                                                                          | Uticaj   |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 1   | `site` je bio `https://example.com`, pa su canonical, hreflang, sitemap i og:image pokazivali na pogrešan domen                                                                                  | kritično |
+| 2   | Deploy preview i branch deploy na Netlify-ju su mogli da budu indeksirani                                                                                                                        | visok    |
+| 3   | Srpski jezik je bio označen kao `sr-Latn`, bez regiona (`sr-Latn-RS`)                                                                                                                            | srednji  |
+| 4   | Nije postojala Netlify konfiguracija; ostao je `vercel.json` za drugi hosting                                                                                                                    | srednji  |
+| 5   | Meta opis je stavljao lash & brow lift ispred kurseva, a usluge nisu bile poređane po prioritetu                                                                                                 | srednji  |
+| 6   | JSON-LD: nema `WebPage` ni `logo`; Instagram profili umetnica su bili navedeni kao profili firme; e-mail je bio u obliku `mailto:`; usluge su vodile na opštu sekciju umesto na tačan deo strane | srednji  |
+| 7   | Nije postojala posebna 404 stranica (Netlify prikazuje svoju, sa ispravnim statusom 404)                                                                                                         | nizak    |
+| 8   | Slika za deljenje je 1200×1097; idealan format je 1200×630                                                                                                                                       | nizak    |
 
 ## 3. Šta je urađeno
 
@@ -64,7 +64,7 @@ Sajt je već imao dobru osnovu:
 Podaci potvrđeni od studija: šminkanje na terenu i van Beograda; kursevi uživo u studiju, na srpskom i engleskom, termini po dogovoru; Bonaca nema svoj Instagram.
 
 - **Meta opisi** (oko 155 znakova, da ih Google ne seče):
-  - SR: „Profesionalno šminkanje za venčanja i proslave u Novom Beogradu, na terenu i van Beograda. Kursevi šminkanja uživo, na srpskom i engleskom. Lash i brow lift.“
+  - SR: „Profesionalno šminkanje za venčanja i proslave na Novom Beogradu, na terenu i van Beograda. Kursevi šminkanja uživo, na srpskom i engleskom. Lash i brow lift.“
   - EN: „Professional makeup for weddings and events in New Belgrade, on location and outside Belgrade. In-person makeup courses in Serbian & English. Lash & brow lift.“
 - **Šminkanje na terenu** je dodato kao posebna usluga (`Service`, izvođač Lidija): „u Beogradu i u drugim gradovima, po dogovoru“. `areaServed` namerno nije postavljen, jer gradovi nisu navedeni; samo Beograd bi bilo netačno. Oblast studija (Blok 63, Novi Beograd, Beograd) ostaje kakva je.
 - **Kursevi** (`Course`):
@@ -103,22 +103,22 @@ Podaci potvrđeni od studija: šminkanje na terenu i van Beograda; kursevi uživ
 
 ## 5. Naslovi i opisi po stranicama
 
-| Stranica | Title | Meta description |
-|---|---|---|
-| `/` (SR) | Šminkanje i kursevi šminkanja, Novi Beograd \| Bonaca by Lidija | Profesionalno šminkanje za venčanja, proslave i fotografisanje u Novom Beogradu (Blok 63). Kursevi šminkanja za početnike, šminkere i samostalno šminkanje. Lash i brow lift. |
-| `/en/` (EN) | Makeup artist & makeup courses in Belgrade \| Bonaca by Lidija | Professional makeup for weddings, celebrations and photoshoots in New Belgrade (Novi Beograd). Makeup courses for beginners, makeup artists and self-makeup. Lash & brow lift. |
+| Stranica    | Title                                                           | Meta description                                                                                                                                                               |
+| ----------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/` (SR)    | Šminkanje i kursevi šminkanja, Novi Beograd \| Bonaca by Lidija | Profesionalno šminkanje za venčanja, proslave i fotografisanje na Novom Beogradu (Blok 63). Kursevi šminkanja za početnike, šminkere i samostalno šminkanje. Lash i brow lift. |
+| `/en/` (EN) | Makeup artist & makeup courses in Belgrade \| Bonaca by Lidija  | Professional makeup for weddings, celebrations and photoshoots in New Belgrade (Novi Beograd). Makeup courses for beginners, makeup artists and self-makeup. Lash & brow lift. |
 
 Naslovi su ostali isti, jer su već bili dobri: ključni pojam je na početku, a brend na kraju, i dužina je oko 60 znakova.
 
 ## 6. Strukturirani podaci
 
-| Tip | Opis |
-|---|---|
-| `WebSite` | Naziv sajta i jezici |
-| `WebPage` | Po jedan za svaki jezik |
-| `BeautySalon` | `LocalBusiness`, a time i `Organization`: adresa, oblast usluga, mapa, logo |
-| `Person` | Lidija Vukmirović i Ana Perić |
-| `Service` | 6 usluga, kao `makesOffer` (uključujući šminkanje na terenu) |
+| Tip                                      | Opis                                                                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `WebSite`                                | Naziv sajta i jezici                                                                                                                      |
+| `WebPage`                                | Po jedan za svaki jezik                                                                                                                   |
+| `BeautySalon`                            | `LocalBusiness`, a time i `Organization`: adresa, oblast usluga, mapa, logo                                                               |
+| `Person`                                 | Lidija Vukmirović i Ana Perić                                                                                                             |
+| `Service`                                | 6 usluga, kao `makesOffer` (uključujući šminkanje na terenu)                                                                              |
 | `ItemList` + `Course` + `CourseInstance` | 4 kursa, svaki sa svojim URL-om, jezikom, načinom izvođenja (uživo) i trajanjem gde je navedeno; cena samo za „Našminkaj se sama“ (100 €) |
 
 - **Namerno izostavljeno:** telefon, radno vreme, koordinate, cene koje nisu na sajtu, ocene i recenzije (rating), godine iskustva i kvalifikacije.
@@ -130,12 +130,14 @@ Naslovi su ostali isti, jer su već bili dobri: ključni pojam je na početku, a
 Ovo su **predlozi zasnovani na sadržaju sajta, bez podataka o broju pretraga.** Obim pretrage i konkurenciju treba proveriti u Google Keyword Planner-u ili Search Console-u (posle 4–8 nedelja rada sajta). Google uglavnom sam izjednačava reči sa i bez dijakritika (npr. „sminkanje“ i „šminkanje“). Zato se piše pravilno, sa dijakriticima, bez ponavljanja varijanti.
 
 Pregled javnih rezultata pretrage (oglasi, katalozi salona kao PlanPlus i Halo oglasi) pokazuje kako konkurencija i klijenti opisuju usluge:
+
 - **„profesionalno šminkanje“** je najčešći naziv usluge; ovaj sajt ga već koristi kao glavni.
 - **„dolazak na adresu“** se u oglasima koristi češće od „šminkanje na terenu“. Na sajtu stoji „na terenu“; „dolazak na adresu“ je dobar kandidat za jednu vidljivu rečenicu (predlog u delu 8).
 - Katalozi grupišu šminkere **po opštinama** (npr. Novi Beograd, Vračar, Voždovac, Zemun). Za studio u Bloku 63 prirodna lokalna oznaka je **Novi Beograd**, a šira **Beograd**.
 - Ponuda kurseva je u rezultatima slabo zastupljena, pa je konkurencija za „kurs šminkanja Beograd“ verovatno manja nego za usluge šminkanja. To je dobra prilika za ovaj sajt.
 
 **Srpski (`/`)**
+
 - **Primarne:** profesionalno šminkanje, šminkanje Novi Beograd, šminkanje Beograd, kurs šminkanja Beograd, kursevi šminkanja.
 - **Usluge:** šminkanje za venčanje, šminkanje mlade / svadbena šminka, šminkanje za proslave i svečanosti, večernja šminka, šminkanje na terenu / dolazak na adresu.
 - **Kursevi:** kurs šminkanja za početnike, kurs šminkanja za sebe / kurs samošminkanja, individualni kurs šminkanja, individualni časovi šminkanja, edukacija za šminkere, usavršavanje za šminkere.
@@ -143,11 +145,13 @@ Pregled javnih rezultata pretrage (oglasi, katalozi salona kao PlanPlus i Halo o
 - **„Škola šminkanja“:** samo ako studio sebe tako predstavlja (jedna recenzija ga koristi, ali sajt ne).
 
 **Engleski (`/en/`)**
+
 - **Primarne:** makeup artist Belgrade, makeup courses Belgrade, professional makeup Belgrade.
 - **Sekundarne:** bridal makeup Belgrade, wedding makeup artist Belgrade, on-location makeup Serbia, makeup course in English Belgrade, private makeup lessons, self-makeup course, makeup artist training, lash lift Belgrade, brow lift Belgrade.
 - Engleska verzija ima dobru priliku kod stranaca koji žive u Beogradu, jer su kursevi dostupni na engleskom. Ovo vredi istaći vidljivo (predlog u delu 8).
 
 **Delovi Beograda i drugi gradovi**
+
 - Optimizacija ostaje na **Novom Beogradu i Beogradu**. Za druge opštine ne treba praviti posebne stranice niti nabrajati delove grada u tekstu, jer bi to bilo ponavljanje bez stvarnog sadržaja, a Google lokalne rezultate ionako vezuje za Google Business Profile i udaljenost.
 - Za druge gradove: kada studio navede gradove u kojima najčešće radi (npr. za venčanja), mogu se jednom prirodno pomenuti u tekstu i dodati u `areaServed`. Do tada ostaje opšte „i van Beograda“.
 - Izvan sajta najviše pomaže: redovne fotografije i odgovori na recenzije na Google Business Profile-u, kategorije profila (npr. šminker, kozmetički salon) i isti naziv i adresa u katalozima kao PlanPlus.
@@ -155,6 +159,7 @@ Pregled javnih rezultata pretrage (oglasi, katalozi salona kao PlanPlus i Halo o
 ## 8. Podaci koji nedostaju
 
 Već postoji u projektu:
+
 - naziv i brend
 - adresa (Vojvođanska 3, Blok 63, Novi Beograd, 11073)
 - Google Business Profile link
@@ -164,25 +169,18 @@ Već postoji u projektu:
 - naslovna fotografija
 
 **1. Potrebno za završetak ove implementacije**
+
 1. ~~Tačan naziv na Google Business Profile-u~~ – potvrđeno: „Bonaca by Lidija“. JSON-LD je usklađen.
 2. ~~Instagram studija~~ – potvrđeno: Bonaca nema svoj profil, zvanični su `@lidija.vukmirovic` i `@artswithana`. JSON-LD već tako stoji.
 3. ~~404 stranica~~ – urađena (vidi deo 3a).
 
-**2. Preporučeno za lokalni SEO**
-4. ~~Teren van Beograda~~ – potvrđeno. Ostaje: koji gradovi najčešće (opciono, za `areaServed`).
-5. ~~Mesto, jezik i termini kurseva~~ – potvrđeno (uživo u studiju, SR i EN, po dogovoru). Ostaje: cene tri Lidijina kursa, kada budu mogle da se objave, i potvrda za Master the Basics (dva termina godišnje ili po dogovoru?).
-6. Iskustvo i kvalifikacije Lidije i Ane, sa godinama rada (samo ono što žele da objave). Zasad ništa nije dodato.
-7. ~~Slika za deljenje~~ – urađena od logoa.
-8. ~~Alt tekstovi galerije~~ – urađeni.
-9. Ključne reči koje vi smatrate najvažnijim (opciono; predlog je u delu 7).
+**2. Preporučeno za lokalni SEO** 4. ~~Teren van Beograda~~ – potvrđeno. Ostaje: koji gradovi najčešće (opciono, za `areaServed`). 5. ~~Mesto, jezik i termini kurseva~~ – potvrđeno (uživo u studiju, SR i EN, po dogovoru). Ostaje: cene tri Lidijina kursa, kada budu mogle da se objave, i potvrda za Master the Basics (dva termina godišnje ili po dogovoru?). 6. Iskustvo i kvalifikacije Lidije i Ane, sa godinama rada (samo ono što žele da objave). Zasad ništa nije dodato. 7. ~~Slika za deljenje~~ – urađena od logoa. 8. ~~Alt tekstovi galerije~~ – urađeni. 9. Ključne reči koje vi smatrate najvažnijim (opciono; predlog je u delu 7).
 
-**3. Opciono, za kasnije**
-10. Posebne stranice za usluge i za svaki kurs. Ovo daje najveći dobitak, jer jedna stranica teško rangira za mnogo različitih pretraga.
-11. Često postavljana pitanja (FAQ) kao vidljiv sadržaj.
-12. Fotografije enterijera studija; godina osnivanja.
+**3. Opciono, za kasnije** 10. Posebne stranice za usluge i za svaki kurs. Ovo daje najveći dobitak, jer jedna stranica teško rangira za mnogo različitih pretraga. 11. Često postavljana pitanja (FAQ) kao vidljiv sadržaj. 12. Fotografije enterijera studija; godina osnivanja.
 
 **Predlozi za tekst**
-- ~~Skriveni `h1`~~ – odobren i primenjen: „Bonaca by Lidija – profesionalno šminkanje i kursevi šminkanja u Novom Beogradu“ (EN: „Bonaca by Lidija – professional makeup and makeup courses in Belgrade“).
+
+- ~~Skriveni `h1`~~ – odobren i primenjen: „Bonaca by Lidija – profesionalno šminkanje i kursevi šminkanja na Novom Beogradu“ (EN: „Bonaca by Lidija – professional makeup and makeup courses in Belgrade“).
 - Nije primenjeno, čeka odobrenje: kod Lidijine usluge, uz „Mogućnost izlaska na teren“, dopuna „u Beogradu i van Beograda (dolazak na adresu)“ / EN „in Belgrade and beyond“.
 - Nije primenjeno, čeka odobrenje: u sekciji Edukacije jedna kratka rečenica „Sve edukacije se održavaju uživo u studiju, na srpskom ili engleskom jeziku, a termini se zakazuju po dogovoru.“ / EN „All courses are held in person at the studio, in Serbian or English, with dates arranged individually.“
 - Nije primenjeno, čeka odobrenje: u uvodu Lidijinih usluga mogao bi jednom prirodno da se pomene „Novi Beograd“.
