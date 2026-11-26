@@ -54,23 +54,118 @@ const ana = collect(anaFiles);
 /** Default framing: a little above centre, where faces usually are. */
 const DEFAULT_FOCUS = '15%';
 
-/** Per-photo framing for Lidija's portfolio (by photo number). */
-const lidijaFocus: Record<number, string> = {
-  1: '8%',
-  2: '0%',
-  3: '6%',
-  4: '0%',
-  6: '6%',
-  7: '6%',
-  8: '16%',
-  9: '8%',
-  10: '10%',
-  11: '4%',
-  12: '10%',
-  13: '10%',
-  14: '0%',
-  15: '0%',
-  16: '0%',
+type Localized = Record<Locale, string>;
+
+/**
+ * Lidija's portfolio, by photo number: framing and a short description of what
+ * each photograph shows (written from the photographs themselves).
+ */
+const lidijaPhotos: Record<number, { focusY: string; alt: Localized }> = {
+  1: {
+    focusY: '8%',
+    alt: {
+      sr: 'Glam šminka sa toplim braon senkama i nude usnama',
+      en: 'Glam makeup with warm brown eyeshadow and nude lips',
+    },
+  },
+  2: {
+    focusY: '0%',
+    alt: {
+      sr: 'Svadbena šminka, mlada u venčanici kraj prozora',
+      en: 'Bridal makeup, bride in a wedding dress by the window',
+    },
+  },
+  3: {
+    focusY: '6%',
+    alt: {
+      sr: 'Nežna šminka sa ružičastim senkama i rumenilom',
+      en: 'Soft makeup with pink eyeshadow and blush',
+    },
+  },
+  4: {
+    focusY: '0%',
+    alt: {
+      sr: 'Svadbena šminka sa tankim ajlajnerom, mlada sa cvetnom ogrlicom',
+      en: 'Bridal makeup with fine eyeliner, bride wearing a floral choker',
+    },
+  },
+  6: {
+    focusY: '6%',
+    alt: {
+      sr: 'Sjajna, osunčana šminka za fotografisanje',
+      en: 'Glowing, sun-kissed makeup for a photoshoot',
+    },
+  },
+  7: {
+    focusY: '6%',
+    alt: {
+      sr: 'Šminka sa ljubičastim akcentom ispod oka',
+      en: 'Makeup with a purple accent along the lower lash line',
+    },
+  },
+  8: {
+    focusY: '16%',
+    alt: {
+      sr: 'Svadbena šminka sa ružičastim senkama, mlada crvene kose',
+      en: 'Bridal makeup with pink eyeshadow on a red-haired bride',
+    },
+  },
+  9: {
+    focusY: '8%',
+    alt: {
+      sr: 'Bronzana šminka sa ajlajnerom i kosom skupljenom u punđu',
+      en: 'Bronze makeup with winged eyeliner and a sleek bun',
+    },
+  },
+  10: {
+    focusY: '10%',
+    alt: {
+      sr: 'Večernja šminka sa tamnim smokey očima',
+      en: 'Evening makeup with dark smokey eyes',
+    },
+  },
+  11: {
+    focusY: '4%',
+    alt: {
+      sr: 'Glam šminka sa naglašenim konturama lica',
+      en: 'Glam makeup with sculpted contour',
+    },
+  },
+  12: {
+    focusY: '10%',
+    alt: {
+      sr: 'Prirodna, sveža dnevna šminka',
+      en: 'Fresh, natural everyday makeup',
+    },
+  },
+  13: {
+    focusY: '10%',
+    alt: {
+      sr: 'Elegantna šminka sa naglašenim trepavicama',
+      en: 'Elegant makeup with defined lashes',
+    },
+  },
+  14: {
+    focusY: '0%',
+    alt: {
+      sr: 'Svadbena šminka sa ružičastim rumenilom, mlada talasaste kose',
+      en: 'Bridal makeup with rosy blush, bride with soft waves',
+    },
+  },
+  15: {
+    focusY: '0%',
+    alt: {
+      sr: 'Svadbena šminka sa ružičasto-bordo senkama',
+      en: 'Bridal makeup with pink and burgundy eyeshadow',
+    },
+  },
+  16: {
+    focusY: '0%',
+    alt: {
+      sr: 'Svadbena šminka sa svetlucavim senkama i ajlajnerom',
+      en: 'Bridal makeup with shimmering eyeshadow and eyeliner',
+    },
+  },
 };
 
 /**
@@ -78,33 +173,82 @@ const lidijaFocus: Record<number, string> = {
  * framed from the top (whole head in view); the before/after collages (2, 4, 5, 9
  * and the three-step 11) are framed from the centre, so every part stays in view.
  */
-const anaPhotos: Record<
-  number,
-  { focusY: string; kind: 'makeup' | 'brows' | 'lashes' | 'treatment' }
-> = {
-  1: { focusY: '10%', kind: 'makeup' },
-  2: { focusY: '50%', kind: 'treatment' },
-  3: { focusY: '18%', kind: 'makeup' },
-  4: { focusY: '50%', kind: 'treatment' },
-  5: { focusY: '50%', kind: 'treatment' },
-  6: { focusY: '20%', kind: 'makeup' },
-  7: { focusY: '10%', kind: 'brows' },
-  8: { focusY: '20%', kind: 'makeup' },
-  9: { focusY: '50%', kind: 'treatment' },
-  10: { focusY: '15%', kind: 'makeup' },
-  11: { focusY: '50%', kind: 'lashes' },
+const anaPhotos: Record<number, { focusY: string; alt: Localized }> = {
+  1: {
+    focusY: '10%',
+    alt: {
+      sr: 'Šminka sa izraženim ajlajnerom i nude usnama',
+      en: 'Makeup with bold winged eyeliner and nude lips',
+    },
+  },
+  2: {
+    focusY: '50%',
+    alt: {
+      sr: 'Lash lift i oblikovanje obrva, pre i posle',
+      en: 'Lash lift and brow shaping, before and after',
+    },
+  },
+  3: {
+    focusY: '18%',
+    alt: {
+      sr: 'Nežna šminka sa svetlucavim senkama',
+      en: 'Soft makeup with shimmering eyeshadow',
+    },
+  },
+  4: {
+    focusY: '50%',
+    alt: { sr: 'Brow lift, pre i posle', en: 'Brow lift, before and after' },
+  },
+  5: {
+    focusY: '50%',
+    alt: { sr: 'Lash lift, pre i posle', en: 'Lash lift, before and after' },
+  },
+  6: {
+    focusY: '20%',
+    alt: {
+      sr: 'Glam šminka sa bronzanim senkama',
+      en: 'Glam makeup with bronze eyeshadow',
+    },
+  },
+  7: {
+    focusY: '10%',
+    alt: { sr: 'Brow lift tokom tretmana', en: 'Brow lift treatment in progress' },
+  },
+  8: {
+    focusY: '20%',
+    alt: {
+      sr: 'Večernja šminka sa ajlajnerom i bronzanim tonovima',
+      en: 'Evening makeup with eyeliner and bronze tones',
+    },
+  },
+  9: {
+    focusY: '50%',
+    alt: {
+      sr: 'Brow lift i lash lift, pre i posle',
+      en: 'Brow lift and lash lift, before and after',
+    },
+  },
+  10: {
+    focusY: '15%',
+    alt: {
+      sr: 'Sveža šminka sa ružičastim usnama',
+      en: 'Fresh makeup with pink lips',
+    },
+  },
+  11: {
+    focusY: '50%',
+    alt: {
+      sr: 'Lash lift korak po korak, od tretmana do rezultata',
+      en: 'Lash lift step by step, from treatment to result',
+    },
+  },
 };
 
-const anaAlt = {
-  makeup: { sr: 'Profesionalno šminkanje, rad Ane Perić', en: 'Professional makeup by Ana Perić' },
-  brows: { sr: 'Tretman obrva, rad Ane Perić', en: 'Eyebrow treatment by Ana Perić' },
-  lashes: { sr: 'Tretman trepavica, rad Ane Perić', en: 'Eyelash treatment by Ana Perić' },
-  treatment: {
-    sr: 'Tretman obrva i trepavica, pre i posle, rad Ane Perić',
-    en: 'Brow and lash treatment, before and after, by Ana Perić',
-  },
-  other: { sr: 'Rad Ane Perić', en: 'Work by Ana Perić' },
-} satisfies Record<string, Record<Locale, string>>;
+/** Used only for a photo added later without its own description. */
+const fallbackAlt = (artist: string, index: number): Localized => ({
+  sr: `Profesionalno šminkanje, rad: ${artist} (${index + 1})`,
+  en: `Professional makeup by ${artist} (${index + 1})`,
+});
 
 export const lidijaPortrait: Omit<GalleryImage, 'focusY'> | undefined = lidija.portrait && {
   src: lidija.portrait,
@@ -116,20 +260,20 @@ export const anaPortrait: Omit<GalleryImage, 'focusY'> | undefined = ana.portrai
   alt: { sr: 'Portret: Ana Perić', en: 'Portrait of Ana Perić' },
 };
 
-export const lidijaGallery: GalleryImage[] = lidija.gallery.map(([name, src], index) => ({
-  src,
-  focusY: lidijaFocus[fileNumber(name)] ?? DEFAULT_FOCUS,
-  alt: {
-    sr: `Profesionalno šminkanje, rad Lidije Vukmirović (${index + 1})`,
-    en: `Professional makeup by Lidija Vukmirović (${index + 1})`,
-  },
-}));
+export const lidijaGallery: GalleryImage[] = lidija.gallery.map(([name, src], index) => {
+  const photo = lidijaPhotos[fileNumber(name)];
+  return {
+    src,
+    focusY: photo?.focusY ?? DEFAULT_FOCUS,
+    alt: photo?.alt ?? fallbackAlt('Lidija Vukmirović', index),
+  };
+});
 
-export const anaGallery: GalleryImage[] = ana.gallery.map(([name, src]) => {
+export const anaGallery: GalleryImage[] = ana.gallery.map(([name, src], index) => {
   const photo = anaPhotos[fileNumber(name)];
   return {
     src,
     focusY: photo?.focusY ?? DEFAULT_FOCUS,
-    alt: anaAlt[photo?.kind ?? 'other'],
+    alt: photo?.alt ?? fallbackAlt('Ana Perić', index),
   };
 });

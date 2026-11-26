@@ -2,7 +2,6 @@
 import { Image } from 'astro:assets';
 import ArrowIcon from '@/assets/icons/arrow.svg';
 import heroPhoto from '@/assets/images/home/home-page.png';
-import { site } from '@/config/site';
 import { getLocale } from '@/i18n/config';
 import { useTranslations } from '@/i18n/dictionaries';
 import { getSectionHref, sections } from '@/i18n/routes';
@@ -45,7 +44,7 @@ const actions = [
     The logo is shown in the header on every screen size, so the page heading is
     kept for assistive technology and search engines but not shown.
   -->
-  <h1 class="hero__title">{site.name}</h1>
+  <h1 class="hero__title">{t('home.hero.heading')}</h1>
 
   <!--
     The three services (phones and desktop) and the calls to action (desktop

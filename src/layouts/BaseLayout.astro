@@ -5,7 +5,7 @@ import '@/styles/global.css';
 
 import type { ImageMetadata } from 'astro';
 import { Font } from 'astro:assets';
-import heroPhoto from '@/assets/images/home/home-page.png';
+import shareImage from '@/assets/share/bonaca-share.jpg';
 import Footer from '@/components/layout/Footer.astro';
 import Header from '@/components/layout/Header.astro';
 import LanguageScrollRestore from '@/components/navigation/LanguageScrollRestore.astro';
@@ -17,7 +17,11 @@ import { useTranslations } from '@/i18n/dictionaries';
 import type { RouteKey } from '@/i18n/routes';
 
 interface Props {
-  routeKey: RouteKey;
+  /**
+   * The page in the route map. Left out for pages outside it (the 404 page):
+   * those get no canonical or language alternates and are never indexed.
+   */
+  routeKey?: RouteKey;
   /** Overrides the default page title (the navigation label). */
   title?: string;
   description?: string;
@@ -31,13 +35,17 @@ const { routeKey, title, description, image, imageAlt, noindex } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
-const pageTitle = title ?? (routeKey === 'home' ? undefined : t(`nav.${routeKey}`));
+const pageTitle = title ?? (routeKey && routeKey !== 'home' ? t(`nav.${routeKey}`) : undefined);
 // Home: "<what the studio offers> | Bonaca by Lidija" (search terms first, brand last).
 const documentTitle = `${pageTitle ?? t('meta.title')}${site.titleSeparator}${site.name}`;
-// Defaults for search results and link previews: the studio description and the hero photograph.
+/*
+ * Defaults for search results and link previews: the studio description and the
+ * 1200 × 630 share card with the logo (src/assets/share/bonaca-share.jpg, the
+ * format Facebook, LinkedIn, X and messaging apps show uncropped).
+ */
 const metaDescription = description ?? t('meta.description');
-const metaImage = image ?? heroPhoto;
-const metaImageAlt = image ? imageAlt : t('home.hero.imageAlt');
+const metaImage = image ?? shareImage;
+const metaImageAlt = image ? imageAlt : t('meta.imageAlt');
 ---
 
 <!doctype html>
@@ -54,7 +62,7 @@ const metaImageAlt = image ? imageAlt : t('home.hero.imageAlt');
       description={metaDescription}
       image={metaImage}
       imageAlt={metaImageAlt}
-      noindex={noindex}
+      noindex={noindex || !routeKey}
     />
     <Font cssVariable="--font-montserrat" preload={[{ subset: 'latin', weight: '400' }]} />
     <!-- Declared on every page; font files download only where they are used. -->
@@ -67,7 +75,8 @@ const metaImageAlt = image ? imageAlt : t('home.hero.imageAlt');
 
     <a class="skip-link" href="#main-content">{t('skipLink')}</a>
 
-    <Header locale={locale} currentRoute={routeKey} />
+    <!-- Pages outside the route map switch language to the other home page. -->
+    <Header locale={locale} currentRoute={routeKey ?? 'home'} />
 
     <main id="main-content" tabindex="-1">
       <slot />

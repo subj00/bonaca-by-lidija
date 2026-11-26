@@ -1,0 +1,12 @@
+---
+import NotFound from '@/components/sections/NotFound.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { useTranslations } from '@/i18n/dictionaries';
+
+// Built as dist/404.html, which Netlify serves (status 404) for unknown paths.
+const t = useTranslations('sr');
+---
+
+<BaseLayout title={t('notFound.title')} description={t('notFound.text')}>
+  <NotFound />
+</BaseLayout>

@@ -1,31 +1,38 @@
 ---
-import type { Locale } from '@/i18n/config';
+import { getImage } from 'astro:assets';
+import heroPhoto from '@/assets/images/home/home-page.png';
+import logo from '@/assets/logos/bonaca-logo.png';
+import { languageTags, locales, type Locale } from '@/i18n/config';
 import { site } from '@/config/site';
 import { contactPeople, studioMapUrl, studioSeoLocation as location } from '@/data/contact';
 import { educationArtists } from '@/data/educations';
 import { anaService, lidijaService } from '@/data/serviceDetails';
-import { getPath, sections } from '@/i18n/routes';
+import { getPath, serviceAnchors } from '@/i18n/routes';
 
 interface Props {
   locale: Locale;
+  /** Document title of the page (WebPage name). */
+  title: string;
   /** Page description, reused for the business. */
   description: string;
-  /** Absolute URL of the link-preview image, if any. */
-  imageUrl?: string | undefined;
 }
 
-const { locale, description, imageUrl } = Astro.props;
+type Localized = Record<Locale, string>;
+
+const { locale, title, description } = Astro.props;
 
 /*
  * JSON-LD (schema.org) for the home page, built only from content that is on
  * the page: the studio, its two artists, their services and the four courses.
  * The full postal address (data/contact.ts, studioSeoLocation) is used here
- * only, not on the page. Deliberately left out until the studio confirms them:
- * coordinates, opening hours, phone, prices (except the one shown, Ana's
- * 100 €), ratings.
- * Google's Course rich results also need prices and course instances for every
- * course, so these courses help Google understand the page but do not yet
- * qualify for that special result.
+ * only, not on the page. A few facts confirmed by the studio are added as well:
+ * on-location makeup is also available outside Belgrade, and every course is
+ * held in person at the studio, in Serbian or English, by arrangement.
+ * Deliberately left out: coordinates, opening hours, phone (never published),
+ * prices that are not on the page (only Ana's 100 € is), ratings, and any
+ * biography or qualification that is not on the page.
+ * The four courses are also listed in an ItemList, the markup Google reads for
+ * its course list (carousel) result.
  */
 const siteUrl = Astro.site ?? Astro.url;
 const pageUrl = new URL(getPath('home', locale), siteUrl).href;
@@ -33,6 +40,23 @@ const anchor = (id: string) => `${pageUrl}#${id}`;
 const rootUrl = new URL('/', siteUrl).href;
 
 const studioId = `${rootUrl}#studio`;
+const websiteId = `${rootUrl}#website`;
+const webPageId = `${pageUrl}#webpage`;
+
+// Brand logo for search results: the dark wordmark as a 600px-wide PNG.
+const logoImage = await getImage({ src: logo, format: 'png', width: 600 });
+const logoObject = {
+  '@type': 'ImageObject',
+  '@id': `${rootUrl}#logo`,
+  url: new URL(logoImage.src, siteUrl).href,
+  width: logoImage.attributes.width,
+  height: logoImage.attributes.height,
+  caption: site.name,
+};
+// The studio photograph (hero), for the business and the page.
+const heroImage = await getImage({ src: heroPhoto, format: 'jpg', width: 1200, quality: 85 });
+const heroImageUrl = new URL(heroImage.src, siteUrl).href;
+
 const cityId = `${rootUrl}#city`;
 const [lidijaContact, anaContact] = contactPeople;
 const people = [
@@ -42,58 +66,172 @@ const people = [
 const lidijaId = people[0].id;
 const anaId = people[1].id;
 
+/*
+ * On-location makeup (shown on the page as "Mogućnost izlaska na teren"). The
+ * studio confirmed it is available in Belgrade and in other cities as well, so
+ * no areaServed is set: listing only Belgrade would be wrong, and the other
+ * cities have not been named.
+ */
+const onLocation: { name: Localized; description: Localized } = {
+  name: { sr: 'Šminkanje na terenu', en: 'On-location makeup' },
+  description: {
+    sr: 'Šminkanje na terenu, u Beogradu i u drugim gradovima, po dogovoru.',
+    en: 'On-location makeup in Belgrade and in other cities, by arrangement.',
+  },
+};
+
 const services = [
   {
     name: lidijaService.title[locale],
     description: lidijaService.description[locale].join(' '),
     provider: lidijaId,
+    url: anchor(serviceAnchors.lidija),
+  },
+  {
+    name: onLocation.name[locale],
+    description: onLocation.description[locale],
+    provider: lidijaId,
+    url: anchor(serviceAnchors.lidija),
   },
   ...anaService.treatments.map((treatment) => ({
     name: treatment.title[locale],
     description: treatment.description[locale],
     provider: anaId,
+    url: anchor(treatment.id === 'makeup' ? serviceAnchors.ana : serviceAnchors.lashBrowLift),
   })),
 ];
 
 const providerByArtist: Record<string, string> = { lidija: lidijaId, ana: anaId };
 
+/*
+ * Course facts for search engines, taken from the course texts on the page
+ * (duration, who it is for, the certificate). Nothing is added that the page
+ * does not say.
+ */
+const certificateText: Localized = {
+  sr: 'Sertifikat o završenoj edukaciji',
+  en: 'Certificate of completion',
+};
+const beginner: Localized = { sr: 'Početni nivo', en: 'Beginner' };
+const courseFacts: Record<
+  string,
+  { duration?: string; level?: Localized; prerequisites?: Localized; certificate?: boolean }
+> = {
+  'master-the-basics': { duration: 'P2M', level: beginner, certificate: true },
+  'express-makeup-artistry': {
+    duration: 'P2W',
+    prerequisites: { sr: 'Predznanje iz šminkanja', en: 'Prior makeup experience' },
+    certificate: true,
+  },
+  'makeup-artist-upgrade': {
+    duration: 'P1D',
+    prerequisites: {
+      sr: 'Iskustvo u profesionalnom šminkanju',
+      en: 'Professional makeup experience',
+    },
+  },
+  'nasminkaj-se-sama': { level: beginner },
+};
+
+// Confirmed by the studio: the courses are taught in Serbian or English.
+const courseLanguages = [languageTags.sr, languageTags.en];
+
 const courses = educationArtists.flatMap((artist) =>
-  artist.courses.map((course) => ({
-    '@type': 'Course',
-    '@id': anchor(course.id),
-    url: anchor(course.id),
-    name: course.title[locale],
-    description: [course.subtitle[locale], ...course.description.map((p) => p[locale])].join(' '),
-    provider: { '@id': providerByArtist[artist.id] },
-    ...(course.price && {
-      offers: {
-        '@type': 'Offer',
-        price: course.price.value.replace(/[^\d.,]/g, '').replace(',', '.'),
-        priceCurrency: 'EUR',
-        url: anchor(course.id),
+  artist.courses.map((course) => {
+    const facts = courseFacts[course.id] ?? {};
+    const instructor = { '@id': providerByArtist[artist.id] };
+    return {
+      '@type': 'Course',
+      '@id': anchor(course.id),
+      url: anchor(course.id),
+      name: course.title[locale],
+      description: [course.subtitle[locale], ...course.description.map((p) => p[locale])].join(' '),
+      inLanguage: languageTags[locale],
+      availableLanguage: courseLanguages,
+      // Offered by the studio; the course is the artist's own program.
+      provider: { '@id': studioId, name: site.name, url: rootUrl },
+      creator: instructor,
+      ...(facts.level && { educationalLevel: facts.level[locale] }),
+      ...(facts.prerequisites && { coursePrerequisites: facts.prerequisites[locale] }),
+      ...(facts.certificate && { educationalCredentialAwarded: certificateText[locale] }),
+      // Held in person at the studio; dates are arranged with each student.
+      hasCourseInstance: {
+        '@type': 'CourseInstance',
+        courseMode: 'Onsite',
+        location: { '@id': studioId },
+        instructor,
+        ...(facts.duration && { duration: facts.duration }),
       },
-    }),
-  })),
+      ...(course.price && {
+        offers: {
+          '@type': 'Offer',
+          category: 'Paid',
+          price: course.price.value.replace(/[^\d.,]/g, '').replace(',', '.'),
+          priceCurrency: 'EUR',
+          url: anchor(course.id),
+        },
+      }),
+    };
+  }),
 );
+
+// Course list (carousel) markup: every course with its own URL (page anchor).
+const courseList = {
+  '@type': 'ItemList',
+  '@id': `${pageUrl}#kursevi`,
+  name: locale === 'sr' ? 'Kursevi šminkanja' : 'Makeup courses',
+  itemListElement: courses.map((course, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: course.url,
+    item: course,
+  })),
+};
+
+// Topics each artist works in, as named on the page.
+const knowsAbout: Record<string, string[]> = {
+  [lidijaId]: [
+    lidijaService.title[locale],
+    onLocation.name[locale],
+    locale === 'sr' ? 'Kursevi šminkanja' : 'Makeup courses',
+  ],
+  [anaId]: anaService.treatments.map((treatment) => treatment.title[locale]),
+};
 
 const graph = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'WebSite',
-      '@id': `${rootUrl}#website`,
+      '@id': websiteId,
       url: rootUrl,
       name: site.name,
-      inLanguage: ['sr-Latn', 'en'],
+      alternateName: site.businessName,
+      inLanguage: locales.map((item) => languageTags[item]),
       publisher: { '@id': studioId },
+    },
+    {
+      '@type': 'WebPage',
+      '@id': webPageId,
+      url: pageUrl,
+      name: title,
+      description,
+      inLanguage: languageTags[locale],
+      isPartOf: { '@id': websiteId },
+      about: { '@id': studioId },
+      primaryImageOfPage: { '@type': 'ImageObject', url: heroImageUrl },
+      mainEntity: { '@id': studioId },
     },
     {
       '@type': 'BeautySalon',
       '@id': studioId,
+      // Same name as on the Google Business Profile.
       name: site.name,
-      url: pageUrl,
+      alternateName: site.businessName,
+      url: rootUrl,
+      logo: logoObject,
       description,
-      ...(imageUrl && { image: imageUrl }),
+      image: heroImageUrl,
       address: {
         '@type': 'PostalAddress',
         streetAddress: `${location.street}, ${location.neighborhood}`,
@@ -128,7 +266,8 @@ const graph = {
           containedInPlace: { '@type': 'Country', name: 'Srbija', identifier: location.countryCode },
         },
       ],
-      sameAs: [...contactPeople.map((person) => person.instagram.url), studioMapUrl],
+      // The studio's Google Business Profile. The Instagram profiles belong to the artists (below).
+      sameAs: [studioMapUrl],
       employee: people.map((person) => ({ '@id': person.id })),
       makesOffer: services.map((service) => ({
         '@type': 'Offer',
@@ -136,7 +275,7 @@ const graph = {
           '@type': 'Service',
           name: service.name,
           description: service.description,
-          url: anchor(sections.services),
+          url: service.url,
           provider: { '@id': service.provider },
         },
       })),
@@ -145,11 +284,12 @@ const graph = {
       '@type': 'Person',
       '@id': id,
       name: contact.name,
-      email: `mailto:${contact.email}`,
+      email: contact.email,
       sameAs: [contact.instagram.url],
       worksFor: { '@id': studioId },
+      knowsAbout: knowsAbout[id],
     })),
-    ...courses,
+    courseList,
   ],
 };
 ---

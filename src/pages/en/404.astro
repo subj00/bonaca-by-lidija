@@ -1,0 +1,12 @@
+---
+import NotFound from '@/components/sections/NotFound.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { useTranslations } from '@/i18n/dictionaries';
+
+// English 404 page; netlify.toml serves it for unknown paths under /en/.
+const t = useTranslations('en');
+---
+
+<BaseLayout title={t('notFound.title')} description={t('notFound.text')}>
+  <NotFound />
+</BaseLayout>

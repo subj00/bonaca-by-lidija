@@ -1,0 +1,33 @@
+# Netlify build settings for the static Astro site.
+#
+# Domain redirects are intentionally not defined here. Netlify itself handles
+# them once the domain is connected:
+#   - HTTP → HTTPS (automatic with the Let's Encrypt certificate),
+#   - www.bonacabylidija.rs → bonacabylidija.rs (set the apex as the primary
+#     domain and add www as an alias),
+#   - the *.netlify.app address → the primary custom domain,
+#   - /en → /en/ (trailing slash, "Pretty URLs" in the asset optimization settings).
+# Deploy previews and branch deploys are built with CONTEXT other than
+# "production" and therefore get `noindex` (see src/config/site.ts).
+
+# Unknown paths: Netlify serves dist/404.html (Serbian) with status 404 on its
+# own. Under /en/ the English page is shown instead. The rule is not forced, so
+# it applies only when no file exists at the requested path.
+[[redirects]]
+  from = "/en/*"
+  to = "/en/404/index.html"
+  status = 404
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Fingerprinted build assets (CSS, JS, images, fonts) never change under the
+# same name, so browsers may keep them for a year.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

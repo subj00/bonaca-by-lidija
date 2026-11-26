@@ -7,7 +7,8 @@ import type { Locale } from './config';
 const sr = {
   'skipLink': 'Preskoči na sadržaj',
   'meta.title': 'Šminkanje i kursevi šminkanja, Novi Beograd',
-  'meta.description': 'Šminkanje za venčanja i proslave, lash lift i brow lift u Novom Beogradu (Blok 63, Beograd). Kursevi šminkanja za početnike, šminkere i samostalno šminkanje.',
+  'meta.description': 'Profesionalno šminkanje za venčanja i proslave u Novom Beogradu, na terenu i van Beograda. Kursevi šminkanja uživo, na srpskom i engleskom. Lash i brow lift.',
+  'meta.imageAlt': 'Logo studija Bonaca by Lidija',
   'nav.label': 'Glavna navigacija',
   'nav.home': 'Početna',
   'nav.about': 'O nama',
@@ -17,6 +18,7 @@ const sr = {
   'menu.open': 'Otvori meni',
   'menu.close': 'Zatvori meni',
   'languageSwitcher.label': 'Izbor jezika',
+  'home.hero.heading': 'Bonaca by Lidija – profesionalno šminkanje i kursevi šminkanja u Novom Beogradu',
   'home.hero.imageAlt': 'Dve žene sa četkicama za šminku u rukama',
   'home.hero.ctaServices': 'Istraži usluge',
   'home.hero.ctaEducation': 'Istraži edukacije',
@@ -57,6 +59,9 @@ const sr = {
   'lightbox.previous': 'Prethodna fotografija',
   'lightbox.next': 'Sledeća fotografija',
   'lightbox.of': 'od',
+  'notFound.title': 'Stranica nije pronađena',
+  'notFound.text': 'Stranica koju tražiš ne postoji ili je premeštena.',
+  'notFound.home': 'Nazad na početnu',
 } as const;
 
 export type TranslationKey = keyof typeof sr;
@@ -66,7 +71,8 @@ type Dictionary = Record<TranslationKey, string>;
 const en: Dictionary = {
   'skipLink': 'Skip to content',
   'meta.title': 'Makeup artist & makeup courses in Belgrade',
-  'meta.description': 'Makeup for weddings and celebrations, lash and brow lift in Novi Beograd, Belgrade. Makeup courses for beginners, makeup artists and doing your own makeup.',
+  'meta.description': 'Professional makeup for weddings and events in New Belgrade, on location and outside Belgrade. In-person makeup courses in Serbian & English. Lash & brow lift.',
+  'meta.imageAlt': 'Bonaca by Lidija studio logo',
   'nav.label': 'Main navigation',
   'nav.home': 'Home',
   'nav.about': 'About',
@@ -76,6 +82,7 @@ const en: Dictionary = {
   'menu.open': 'Open menu',
   'menu.close': 'Close menu',
   'languageSwitcher.label': 'Language selection',
+  'home.hero.heading': 'Bonaca by Lidija – professional makeup and makeup courses in Belgrade',
   'home.hero.imageAlt': 'Two women holding makeup brushes',
   'home.hero.ctaServices': 'Explore services',
   'home.hero.ctaEducation': 'Explore courses',
@@ -116,6 +123,9 @@ const en: Dictionary = {
   'lightbox.previous': 'Previous photo',
   'lightbox.next': 'Next photo',
   'lightbox.of': 'of',
+  'notFound.title': 'Page not found',
+  'notFound.text': 'The page you are looking for does not exist or has been moved.',
+  'notFound.home': 'Back to home',
 };
 
 const dictionaries: Record<Locale, Dictionary> = { sr, en };

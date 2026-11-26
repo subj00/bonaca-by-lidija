@@ -3,14 +3,14 @@ import sitemap from '@astrojs/sitemap';
 import { defaultLocale, locales } from './src/i18n/config';
 import { getAlternateLinks, getRouteKeyByPath } from './src/i18n/routes';
 
-// TODO: Replace with the production domain before deployment.
-const SITE_URL = 'https://example.com';
+// Canonical production origin (Netlify, apex domain, HTTPS).
+const SITE_URL = 'https://bonacabylidija.rs';
 
 export default defineConfig({
   site: SITE_URL,
   /*
    * Every page is built as `<path>/index.html` (e.g. `dist/en/index.html`), which
-   * any static host — including Vercel — serves at `/en/` without extra rewrite
+   * any static host — including Netlify — serves at `/en/` without extra rewrite
    * rules. URLs therefore always end with a slash.
    */
   trailingSlash: 'always',
@@ -72,6 +72,8 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
+      // Only pages in the route map (leaves out the English 404 page, /en/404/).
+      filter: (page) => getRouteKeyByPath(new URL(page).pathname) !== undefined,
       // Localized slugs differ per language, so alternates come from the route map.
       serialize(item) {
         const routeKey = getRouteKeyByPath(new URL(item.url).pathname);

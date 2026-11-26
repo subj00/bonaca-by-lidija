@@ -11,7 +11,7 @@ export const defaultLocale: Locale = 'sr';
 
 /** BCP 47 language tags used for `<html lang>` and `hreflang`. */
 export const languageTags: Record<Locale, string> = {
-  sr: 'sr-Latn',
+  sr: 'sr-Latn-RS',
   en: 'en',
 };
 
