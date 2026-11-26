@@ -33,7 +33,7 @@ const { idPrefix, items, openIndex = 0, headingLevel = 3 } = Astro.props;
         open={index === openIndex}
         headingLevel={headingLevel}
       >
-        <p class="text-justify">{item.description}</p>
+        <p>{item.description}</p>
       </AccordionItem>
     ))
   }

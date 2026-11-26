@@ -64,7 +64,7 @@ const portraitSizes = '(min-width: 64rem) 21.5rem, (min-width: 48rem) 30vw, 82vw
       <p class="artist__name">{lidija.name}</p>
       <h3 class="artist__service" id="services-lidija-title">{lidija.title[locale]}</h3>
       <p class="artist__highlight">{lidija.highlight[locale]}</p>
-      <div class="artist__text text-justify">
+      <div class="artist__text">
         {lidija.description[locale].map((paragraph) => <p>{paragraph}</p>)}
       </div>
       <ul class="artist__facts" role="list">

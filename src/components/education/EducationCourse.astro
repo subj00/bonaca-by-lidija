@@ -52,7 +52,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
     <h4 class="course__title" id={titleId}>{course.title[locale]}</h4>
     <p class="course__subtitle">{course.subtitle[locale]}</p>
 
-    <div class="course__text text-justify">
+    <div class="course__text">
       {course.description.map((paragraph) => <p>{paragraph[locale]}</p>)}
     </div>
 
@@ -83,7 +83,7 @@ const bookLabel = `${t('education.book')}: ${course.title[locale]}, Instagram ${
                 switch (block.type) {
                   case 'paragraphs':
                     return (
-                      <div class="detail__paragraphs text-justify">
+                      <div class="detail__paragraphs">
                         {block.items.map((item) => <p>{item[locale]}</p>)}
                       </div>
                     );
